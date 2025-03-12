@@ -1,7 +1,7 @@
 // components/layout/Layout.tsx
 import React from "react";
-import Navbar from "./Navbar";
 import Footer from "./Footer";
+import AuthSection from "../AuthSection";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,8 +10,11 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow">{children}</main>
+      <div className="mb-5">
+        <AuthSection />
+      </div>
+
       <Footer />
     </div>
   );
