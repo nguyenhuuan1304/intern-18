@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Lock, ArrowLeft ,Eye, EyeOff} from "lucide-react";
+import { User, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import loginBg from "@/assets/login-bg.svg";
 import loginTree from "@/assets/login-tree.svg";
 import { useState } from "react";
@@ -33,6 +33,7 @@ const formSchema = z.object({
 const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,9 +46,10 @@ const Login: React.FC = () => {
     console.log(values);
   };
   return (
-    <div className=" w-full  md:w-[50%] lg:w-[100%">
-      <div className="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col  md:flex-row ">
-        <div className="w-full md:w-1/2 p-8">
+    <div className="container w-full max-w-screen-lg mx-auto px-2 md:px-4 md:w-[1100px]">
+      <div className="w-full  overflow-hidden flex flex-col md:flex-row  ">
+        {/* Left Column - Form */}
+        <div className="w-full md:w-1/2 p-10 ">
           <div className="flex items-center mb-8">
             <Link
               to="/"
@@ -68,7 +70,7 @@ const Login: React.FC = () => {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
+                className="space-y-6 "
               >
                 <FormField
                   control={form.control}
@@ -82,7 +84,7 @@ const Login: React.FC = () => {
                           <Input
                             {...field}
                             placeholder="Nhập họ tên"
-                            className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                            className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
                             disabled={isLoading}
                           />
                         </FormControl>
@@ -96,24 +98,23 @@ const Login: React.FC = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex justify-between ">
-                        <FormLabel className="text-sm ">Mật khẩu</FormLabel>
+                      <div className="flex justify-between">
+                        <FormLabel className="text-sm">Mật khẩu</FormLabel>
                         <FormLabel
-                          className="text-sm text-blue-700"
+                          className="text-sm text-blue-700 cursor-pointer"
                           onClick={() => navigate("/forgot")}
                         >
                           Quên mật khẩu ?
                         </FormLabel>
                       </div>
-
-                      <div className="relative ">
+                      <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <FormControl>
                           <Input
                             {...field}
                             type={showPassword ? "text" : "password"}
                             placeholder="Nhập mật khẩu"
-                            className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                            className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
                             disabled={isLoading}
                           />
                         </FormControl>
@@ -133,7 +134,6 @@ const Login: React.FC = () => {
                     </FormItem>
                   )}
                 />
-
                 <button
                   type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors duration-200"
@@ -142,7 +142,6 @@ const Login: React.FC = () => {
                 </button>
               </form>
             </Form>
-
             <p className="text-center mt-6 text-gray-600">
               Chưa có tài khoản?{" "}
               <Link
@@ -155,26 +154,32 @@ const Login: React.FC = () => {
           </motion.div>
         </div>
 
-        <div className="flex md:flex md:w-1/2 bg-gradient-to-br p-12">
+        {/* Right Column - Image */}
+        <div className="flex w-full md:w-1/2 p-6 md:p-8 bg-gradient-to-br ">
           <motion.div
             className="flex w-1/2 items-center justify-center p-8"
             initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
+            animate={{ x: -10, opacity: 1 }}
             transition={{ duration: 2, ease: "easeInOut" }}
           >
             <img
               src={loginBg}
               alt="Login background"
-              className="max-w-sm h-auto"
+              className="max-w-52 md:max-w-96  h-auto"
             />
           </motion.div>
-          <div className="flex w-1/2 items-center justify-center p-8 ">
-            <img src={loginTree} alt="Login tree" className="max-w-sm h-auto" />
+          <div className="flex md:w-1/2 items-center justify-center p-2 md:p-4 lg:p-6">
+            <img
+              src={loginTree}
+              alt="Login tree"
+              className="max-w-32 md:max-w-96 h-auto"
+            />
           </div>
         </div>
       </div>
     </div>
   );
+
 };
 
 export default Login;
