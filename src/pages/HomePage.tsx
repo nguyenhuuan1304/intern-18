@@ -5,9 +5,12 @@ import ServiceMenu from "@/components/ServiceMenu";
 import SliderProduct from "@/components/SliderProduct";
 import FeatureSection from "@/components/FeatureSection";
 
+import Header from "@/components/header/Header";
+
 const HomePage: React.FC = () => {
   return (
     <Layout>
+        <Header/>
       <div className=" mx-7  py-8 ">
         <div className="hidden md:block">
           <ServiceMenu />
@@ -28,6 +31,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
     </Layout>
+
   );
 };
 
