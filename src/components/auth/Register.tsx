@@ -68,7 +68,7 @@ const Register: React.FC = () => {
     console.log(values);
   };
   return (
-    <div className=" w-[1100px]">
+    <div className=" container w-full md:w-[100%]">
       <div className="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row ">
         {/* Left Column - Form and extra content */}
         <div className="w-full md:w-1/2 p-8">
@@ -316,7 +316,7 @@ const Register: React.FC = () => {
             </p>
           </motion.div>
         </div>
-        <div className="hidden md:flex md:w-1/2 bg-gradient-to-brp-12 items-center justify-center">
+        <div className="flex  md:w-1/2 bg-gradient-to-brp-12 items-center justify-center">
           <motion.div
             className="flex w-1/2 items-center justify-center p-8"
             initial={{ x: -100, opacity: 0 }}
@@ -326,11 +326,11 @@ const Register: React.FC = () => {
             <img
               src={bgRegister}
               alt="Register background"
-              className=" max-w-lg  object-cover"
+              className="max-w-sm md:max-w-lg  object-cover"
             />
           </motion.div>
         </div>
-        v
+        
       </div>
     </div>
   );
