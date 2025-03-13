@@ -1,26 +1,38 @@
+import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
+import RegisterPage from "@/pages/auth/RegisterPage";
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 
 const HomePage = lazy(() => import("../pages/HomePage"));
+
 const Account = lazy(() => import("../pages/account/Account"));
 const Order = lazy(() => import("../pages/order/Order"));
-const Login = lazy(() => import("../pages/login/Login"));
+
 const Payment = lazy(() => import("../pages/payment/Payment"));
 const Product = lazy(() => import("../pages/product/Product"));
 const Contact = lazy(() => import("../pages/contact/Contact"));
 const CategoryMobile = lazy(() => import("../pages/categoryMoblie/categoryMobile"));
-
-
-
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 
 
 export const routes: RouteObject[] = [
   {
     path: "/",
-    element: (
-        <HomePage />
-    ),
+    element: <HomePage />,
   },
+  {
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    path: "/register",
+    element: <RegisterPage />,
+  },
+  {
+    path: "/forgot",
+    element: <ForgotPasswordPage />,
+  },
+
   {
     path: "/account",
     element: (
@@ -32,12 +44,6 @@ export const routes: RouteObject[] = [
         element: <Order />,
       },
     ],
-  },
-  {
-    path: "/login",
-    element: (
-        <Login />
-    ),
   },
   {
     path: "/thanh-toan",
@@ -63,6 +69,4 @@ export const routes: RouteObject[] = [
         <CategoryMobile/>
     ),
   },
-  
-  
 ];
