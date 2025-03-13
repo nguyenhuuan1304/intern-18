@@ -148,7 +148,7 @@ const Header = () => {
                         </button>
                     }
 
-                    {circle && 
+                    {value === '' || circle && 
                         <div className=' absolute top-[60px] z-[99] max-h-[336px] w-[420px] bg-white rounded-[5px] shadow-[0_4px_60px_0_rgba(0,0,0,0.2)]'>
                             <div className='bg-[#f5f5f5] h-[36px] flex items-center'>
                                 <span className='p-[10px] text-[13px] text-[#666]'>sản phẩm gợi ý</span>
