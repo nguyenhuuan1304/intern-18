@@ -4,7 +4,16 @@ import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 
 const HomePage = lazy(() => import("../pages/HomePage"));
+
+const Account = lazy(() => import("../pages/account/Account"));
+const Order = lazy(() => import("../pages/order/Order"));
+
+const Payment = lazy(() => import("../pages/payment/Payment"));
+const Product = lazy(() => import("../pages/product/Product"));
+const Contact = lazy(() => import("../pages/contact/Contact"));
+const CategoryMobile = lazy(() => import("../pages/categoryMoblie/categoryMobile"));
 const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+
 
 export const routes: RouteObject[] = [
   {
@@ -22,5 +31,42 @@ export const routes: RouteObject[] = [
   {
     path: "/forgot",
     element: <ForgotPasswordPage />,
+  },
+
+  {
+    path: "/account",
+    element: (
+        <Account />
+    ),
+    children: [
+      {
+        path: "order",
+        element: <Order />,
+      },
+    ],
+  },
+  {
+    path: "/thanh-toan",
+    element: (
+        <Payment />
+    ),
+  },
+  {
+    path: "/san-pham",
+    element: (
+        <Product />
+    ),
+  },
+  {
+    path: "/lien-he",
+    element: (
+        <Contact />
+    ),
+  },
+  {
+    path: "/danh-muc-san-pham",
+    element: (
+        <CategoryMobile/>
+    ),
   },
 ];
