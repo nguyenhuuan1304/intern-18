@@ -7,13 +7,12 @@ const HomePage = lazy(() => import("../pages/HomePage"));
 const Account = lazy(() => import("../pages/account/Account"));
 const Order = lazy(() => import("../pages/order/Order"));
 
-const Payment = lazy(() => import("../pages/payment/Payment"));
+const CartPage = lazy(() => import("../pages/cart/CartPage"));
 const Product = lazy(() => import("../pages/product/Product"));
 const Contact = lazy(() => import("../pages/contact/Contact"));
 const CategoryMobile = lazy(() => import("../pages/categoryMoblie/categoryMobile"));
 
 const ProductPage = lazy(() => import("../pages/ProductPage"));
-
 
 const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 
@@ -57,9 +56,9 @@ export const routes: RouteObject[] = [
     ],
   },
   {
-    path: "/thanh-toan",
+    path: "/cart",
     element: (
-        <Payment />
+        <CartPage />
     ),
   },
   {
@@ -69,7 +68,7 @@ export const routes: RouteObject[] = [
     ),
   },
   {
-    path: "/lien-he",
+    path: "/contact",
     element: (
         <Contact />
     ),

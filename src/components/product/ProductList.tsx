@@ -5,6 +5,8 @@ import { fetchProducts } from "./service/ProductService";
 import { Product } from "./types/ProductType";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const sortOptions = [
     { label: "Mới nhất", value: "latest" },
@@ -20,6 +22,8 @@ const ProductList: React.FC = () => {
     const [selectedImages, setSelectedImages] = useState<{ [key: number]: string }>({});
     const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
+    console.log("Render Parent - cartDrawerOpen:", cartDrawerOpen);
 
     const loadProducts = async () => {
         const data = await fetchProducts();
@@ -70,7 +74,7 @@ const ProductList: React.FC = () => {
     return (
         <>
             <div className="flex flex-col sm:flex-row items-center gap-4 px-5">
-                <Label>Sắp xếp theo</Label>
+                <Label className="hidden sm:inline">Sắp xếp theo</Label>
                 <div className="flex flex-wrap gap-2 sm:gap-4">
                     {sortOptions.map((option) => (
                         <Button
@@ -90,10 +94,14 @@ const ProductList: React.FC = () => {
 
             <div className="p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {products.map((product) => (
-                        <div
+                    {products.map((product, index) => (
+                        <motion.div
                             key={product.id}
                             className="bg-white shadow-md rounded-lg overflow-hidden p-2 flex space-x-5 group hover:shadow-lg transition-shadow duration-300"
+                            initial={{ opacity: 0, y: 50 }} 
+                            whileInView={{ opacity: 1, y: 0 }} 
+                            transition={{ duration: 0.6, delay: index * 0.1 }} 
+                            viewport={{ once: true }} 
                         >
                             <div className="w-3/4 flex flex-col space-y-2">
                                 <div className="overflow-hidden rounded-md">
@@ -158,14 +166,22 @@ const ProductList: React.FC = () => {
                                 ) : (
                                     <p>Hết hàng</p>
                                 )}
-                                <button
-                                    className="mt-auto flex cursor-pointer items-center justify-center w-full bg-blue-700 text-white py-2 rounded-md hover:bg-blue-600 transition"
-                                    onClick={() => handleCartClick(product)}
-                                >
-                                    <ShoppingCart className="w-5 h-5 ml-2" />
-                                </button>
+                                <div className="mt-auto">
+                                    <Link to="/product-detail" className="w-32 text-center text-blue-500">Xem chi tiết</Link>
+                                    <button
+                                        className="relative mt-2 flex cursor-pointer items-center justify-center w-full bg-blue-700 text-white py-2 rounded-md border border-transparent overflow-hidden
+                                            before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
+                                            hover:text-blue-700 hover:border-blue-700"
+                                        onClick={() => handleCartClick(product)}
+                                    >
+                                        <span className="relative z-10 flex items-center">
+                                            <ShoppingCart className="w-5 h-5 ml-2" />
+                                        </span>
+                                    </button>
+
+                                </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
                 {showForm && (
@@ -178,13 +194,21 @@ const ProductList: React.FC = () => {
                                 >
                                     ✖
                                 </button>
-                                {selectedProduct && <AddProduct product={selectedProduct} onClose={() => setShowForm(false)} />}
+
+                                {selectedProduct &&
+                                    <AddProduct
+                                        product={selectedProduct}
+                                        onClose={() => setShowForm(false)}
+                                        cartDrawerOpen={cartDrawerOpen}
+                                        setCartDrawerOpen={setCartDrawerOpen}
+
+                                    />}
                             </div>
                         </div>
                     </>
 
                 )}
-            </div>
+            </div >
         </>
     );
 };

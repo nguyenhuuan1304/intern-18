@@ -4,7 +4,7 @@ import { Search ,X , AlignJustify} from 'lucide-react'
 import {NavLink } from 'react-router-dom'
 import http from '@/hooks/useAxios'
 import useDebounce from '@/hooks/useDebounce'
-import NavbarMobile from '../navbarMobile/navbarMobile'
+import NavbarMobile from '../navbarMobile/NavbarMobile'
 
 interface typeImage {
     Image: string,
@@ -45,7 +45,7 @@ const Header = () => {
         http.get(`/products?query=${debounce}`)
             .then(res => res.data)
             .then(res => {
-                const configData : typeProduct[] = Object.values(res.reduce((acc: { [key: string]: typeProduct }, item: typeProduct) => {
+                const configData : typeProduct[] = Object.values(res.data.reduce((acc: { [key: string]: typeProduct }, item: typeProduct) => {
                     // console.log(acc)
                     acc[item.documentId] = item
                     return acc
@@ -210,7 +210,7 @@ const Header = () => {
                         </NavLink>
                     </div>
                     <div>
-                        <NavLink to={"/thanh-toan"} className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[10px] h-full items-center'>
+                        <NavLink to={"/cart"} className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[10px] h-full items-center'>
                             <div className='relative'>
                                 <img src="https://kawin.vn/uploads/source//icon/group.webp" alt="" />
                                 <span className='absolute top-[-10px] right-[-10px] w-[20px] h-[20px] rounded-full leading-[18px] text-center bg-[#ef4562] text-white'>
@@ -235,12 +235,12 @@ const Header = () => {
                         </NavLink>
                     </li>
                     <li className='border-r'>
-                        <NavLink to={'/san-pham'} className='pl-[20px] pr-[20px]'>
+                        <NavLink to={'/product'} className='pl-[20px] pr-[20px]'>
                             <span className='text-[14px] font-[500] leading-[25px]'>SẢN PHẨM</span>
                         </NavLink>
                     </li>
                     <li className='border-r'>
-                        <NavLink to={'/lien-he'} className='flex items-center h-full pl-[20px] pr-[20px]'>
+                        <NavLink to={'/contact'} className='flex items-center h-full pl-[20px] pr-[20px]'>
                             <div>
                                 <img src="https://kawin.vn/uploads/source//icon/headphones-1.webp" alt="" />
                             </div>
