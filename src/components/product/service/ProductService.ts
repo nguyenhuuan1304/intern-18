@@ -1,17 +1,19 @@
+import http from "@/hooks/useAxios";
 import { Product } from "../types/ProductType";
 
 export const fetchProducts = async (): Promise<Product[]> => {
     try {
         const [productsResponse, imagesResponse] = await Promise.all([
-            fetch("http://localhost:1337/api/products?populate=*"),
-            fetch("http://localhost:1337/api/product-images?populate=*")
+            http.get("/products?populate=*"),
+            http.get("/product-images?populate=*"),
         ]);
 
-        const productsData = await productsResponse.json();
-        const imagesData = await imagesResponse.json();
+        const productsData = productsResponse.data;
+        const imagesData = imagesResponse.data;
 
         // Tạo Map lưu danh sách ảnh theo documentId
-        const productImagesMap = new Map();
+        const productImagesMap = new Map<string, { id: number; documentId: string; color: string; img: { url: string | null }[] }>();
+
         imagesData.data.forEach((image: any) => {
             productImagesMap.set(image.documentId, {
                 id: image.id,
@@ -19,14 +21,14 @@ export const fetchProducts = async (): Promise<Product[]> => {
                 color: image.color,
                 img: image.img?.length
                     ? image.img.map((img: any) => ({
-                        url: img.url ? `http://localhost:1337${img.url}` : null
+                        url: img.url ? `http://localhost:1337${img.url}` : null,
                     }))
                     : [],
             });
         });
 
-        console.log(" Dữ liệu API sản phẩm:", productsData);
-        console.log(" Dữ liệu API ảnh sản phẩm:", imagesData);
+        console.log("Dữ liệu API sản phẩm:", productsData);
+        console.log("Dữ liệu API ảnh sản phẩm:", imagesData);
 
         return productsData.data.map((item: any) => ({
             id: item.id,
@@ -61,9 +63,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
                 documentId: img.documentId,
                 name: img.name,
                 url: img.url ? `http://localhost:1337${img.url}` : null,
-                formats: img.formats ? {
-                    thumbnail: img.formats.thumbnail,
-                } : undefined,
+                formats: img.formats ? { thumbnail: img.formats.thumbnail } : undefined,
             })),
             name_category: item.name_category
                 ? {
