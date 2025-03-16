@@ -126,7 +126,7 @@ const SliderProduct: React.FC = () => {
   }, [currentIndex, navStart]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl  px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main Slider */}
         <div className="lg:col-span-2">

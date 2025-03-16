@@ -4,7 +4,7 @@ import { Search ,X , AlignJustify} from 'lucide-react'
 import {NavLink } from 'react-router-dom'
 import http from '@/hooks/useAxios'
 import useDebounce from '@/hooks/useDebounce'
-import NavbarMobile from '../navbarMobile/navbarMobile'
+import NavbarMobile from '../navbarMobile/NavbarMobile'
 
 interface typeImage {
     Image: string,

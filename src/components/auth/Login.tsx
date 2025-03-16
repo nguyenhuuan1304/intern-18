@@ -17,6 +17,8 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import authApi from "../api/auth.api";
+import { toast } from "react-toastify";
 const formSchema = z.object({
   username: z.string().min(1, "Tên đăng nhập không được để trống!"),
   password: z
@@ -42,8 +44,26 @@ const Login: React.FC = () => {
       password: "",
     },
   });
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit =async (values: z.infer<typeof formSchema>) => {
     console.log(values);
+  try {
+      const loginPayload = {
+        identifier: values.username,
+        password: values.password,
+      };
+      const res = await authApi.login(loginPayload);
+     if(res.user) {
+         toast.success("Đăng nhập thành công");
+        navigate("/")
+        }
+      console.log(" res", res);
+  } catch (error) {
+      if (error instanceof Error) {
+         const errorMessage =
+           error.response?.data?.error?.message || "Đã xảy ra lỗi không xác định";
+         toast.error(errorMessage);
+      } 
+  }
   };
   return (
     <div className="container w-full max-w-screen-lg mx-auto px-2 md:px-4 md:w-[1100px]">

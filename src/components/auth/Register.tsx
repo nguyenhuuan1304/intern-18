@@ -1,9 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Lock, ArrowLeft ,Eye, EyeOff, CheckCircle, Phone, Mail, MapPin} from "lucide-react";
+import {
+  User,
+  Lock,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  Mail,
+} from "lucide-react";
 import bgRegister from "@/assets/bgRegister.webp";
-
 import { useState } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -17,6 +24,8 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import authApi from "../api/auth.api";
+ import { toast } from "react-toastify";
 
 const formSchema = z
   .object({
@@ -36,11 +45,10 @@ const formSchema = z
         /(?=.*[!@#$%^&*(),.?":{}|<>])/,
         "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt"
       ),
-    confirmPassword: z.string().min(1, "Mật khẩu không được để trống").min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
-    firstname: z.string().min(1, "Họ không được để trống"),
-    lastname: z.string().min(1, "Tên không được để trống"),
-    address: z.string().min(1, "Địa chỉ không được để trống"),
-    phone: z.string().regex(/^0\d{9}$/, "Số điện thoại phải có 10 chữ số"),
+    confirmPassword: z
+      .string()
+      .min(1, "Mật khẩu không được để trống")
+      .min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Mật khẩu không khớp",
@@ -48,24 +56,41 @@ const formSchema = z
   });
 
 const Register: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      email: "",
       username: "",
       password: "",
-      confirmPassword : "",
-      firstname : "",
-      lastname : "",
-      address : "",
-      phone : "",
+      confirmPassword: "",
     },
   });
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("onSubmit called", values);
+    try {
+      const registerPayload = {
+        email: values.email,
+        username: values.username,
+        password: values.password,
+      };
+      console.log("registerPayload", registerPayload);
+      const res = await authApi.register(registerPayload);
+      console.log("res", res);
+      if(res.user) {
+       toast.success("Đăng ký thành công");
+      navigate("/login")
+      }
+    } catch (error ) {
+     if (error instanceof Error) {
+     const errorMessage =
+       error.response?.data?.error?.message || "Đã xảy ra lỗi không xác định";
+     toast.error(errorMessage);
+  } 
+    }
   };
   return (
     <div className=" container w-full md:w-[100%]">
@@ -105,9 +130,28 @@ const Register: React.FC = () => {
                         <FormControl>
                           <Input
                             {...field}
-                            placeholder="Nhập họ tên"
+                            placeholder="Nhập tên đăng nhập"
                             className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                            disabled={isLoading}
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />{" "}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email liên hệ</FormLabel>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Nhập email liên hệ"
+                            className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
                           />
                         </FormControl>
                       </div>
@@ -130,7 +174,6 @@ const Register: React.FC = () => {
                               type={showPassword ? "text" : "password"}
                               placeholder="Nhập mật khẩu"
                               className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                              disabled={isLoading}
                             />
                           </FormControl>
                           <button
@@ -165,7 +208,6 @@ const Register: React.FC = () => {
                               type={showConfirmPassword ? "text" : "password"}
                               placeholder="Xác nhận mật khẩu"
                               className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                              disabled={isLoading}
                             />
                           </FormControl>
                           <button
@@ -187,115 +229,6 @@ const Register: React.FC = () => {
                     )}
                   />
                 </div>
-                <div className="flex flex-col md:flex-row gap-4">
-                  <FormField
-                    control={form.control}
-                    name="firstname"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Họ </FormLabel>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Nhập họ và chữ đệm"
-                              className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lastname"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tên</FormLabel>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Nhập tên của bạn"
-                              className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex flex-col md:flex-row gap-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email liên hệ</FormLabel>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Nhập email liên hệ"
-                              className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Số điện thoại </FormLabel>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Nhập số điện thoại"
-                              className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Địa chỉ </FormLabel>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Nhập địa chỉ của bạn"
-                            className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <button
                   type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors duration-200"
@@ -330,7 +263,6 @@ const Register: React.FC = () => {
             />
           </motion.div>
         </div>
-        
       </div>
     </div>
   );
