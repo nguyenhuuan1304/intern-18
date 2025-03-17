@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, ArrowLeft } from "lucide-react";
-import forgotPassword from "@/assets/forgot-password.jpg";
+import { User, ArrowLeft  } from "lucide-react";
+import forgotPassword from "@/assets/fg.jpg";
 import { useState } from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -16,6 +16,9 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import authApi from "../api/auth.api";
+ import { toast } from "react-toastify";
+
 const formSchema = z.object({
   email: z
       .string()
@@ -32,8 +35,20 @@ const ForgotPassword: React.FC = () => {
       email: "",
     },
   });
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+     try {
+       const res = await authApi.forgotPassword({
+         email: values.email,
+       });
+       console.log("res" , res)
+        toast.success("Nhấn vào link trong email để khôi phục mật khẩu!")
+     } catch (error) {
+      console.log("error" , error)
+       toast.error(
+         "Email không chính xác. Vui lòng kiểm tra lại!"
+       );
+
+     }
   };
  return (
    <div className="container mx-auto px-4 py-8">

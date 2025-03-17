@@ -55,8 +55,14 @@ const Login: React.FC = () => {
      if(res.user) {
          toast.success("Đăng nhập thành công");
         navigate("/")
+        const userData = {
+          jwt: res.jwt,
+          username: res.user.username,
+          email: res.user.email,
+        };
+        localStorage.setItem("user", JSON.stringify(userData));
+
         }
-      console.log(" res", res);
   } catch (error) {
       if (error instanceof Error) {
          const errorMessage =

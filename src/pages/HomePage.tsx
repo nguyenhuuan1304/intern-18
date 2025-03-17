@@ -8,7 +8,7 @@ import Header from "@/components/header/Header";
 const HomePage: React.FC = () => {
   return (
     <Layout>
-      <Header/>
+      <Header />
       <div className="mx-7 py-8 flex flex-col justify-centen items-center">
         <div className="hidden md:block">
           <ServiceMenu />
@@ -22,11 +22,13 @@ const HomePage: React.FC = () => {
             <SliderProduct />
           </div>
         </div>
+     
         <div className="mt-3">
           <FeatureSection />
         </div>
-        <div className="mt-3">
-        </div>
+
+        
+        <div className="mt-3"></div>
       </div>
     </Layout>
   );
