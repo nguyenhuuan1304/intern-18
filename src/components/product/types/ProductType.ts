@@ -19,6 +19,8 @@ export interface Category {
     id: number;
     documentId: string;
     name: string;
+    slug: string;
+    children?: Category[];
 }
 
 export interface ProductImage {
