@@ -19,8 +19,8 @@ import bongchuyenbenteyo from "@/assets/bongchuyenbenteyo.webp";
 import btsvalorcv from "@/assets/btsvalorcv.webp";
 import { useNavigate } from "react-router-dom";
 
-// Dữ liệu slider
-const bannerData = [
+// Dữ liệu slider 
+export const bannerData = [
   {
     id: 1,
     title: "GIÀY CẦU LÔNG KITTO",

@@ -2,9 +2,11 @@ import React, { useEffect } from 'react'
 import { useState, useRef } from 'react'
 import { Search ,X , AlignJustify} from 'lucide-react'
 import {NavLink } from 'react-router-dom'
-import http from '@/hooks/useAxios'
+import useAxios from '@/hooks/useAxios'
 import useDebounce from '@/hooks/useDebounce'
 import NavbarMobile from '../navbarMobile/NavbarMobile'
+
+
 
 interface typeImage {
     Image: string,
@@ -13,9 +15,10 @@ interface typeImage {
             url: string
         }
     },
+    url: string
 }
 
-interface typeProduct {
+export interface typeProduct {
     documentId:string,
     name:string,
     color: string,
@@ -31,7 +34,7 @@ const Header = () => {
     const [arrSearch, setArrSearch] = useState<typeProduct[]>([])
     const inputRef = useRef<HTMLInputElement>(null)
     const inputRefIpad = useRef<HTMLInputElement>(null)
-
+    const {api}  = useAxios()
 
 
     const debounce = useDebounce(value || valueIpad,500)
@@ -42,20 +45,34 @@ const Header = () => {
             return
         }
         
-        http.get(`/products?query=${debounce}`)
-            .then(res => res.data)
-            .then(res => {
-                const configData : typeProduct[] = Object.values(res.data.reduce((acc: { [key: string]: typeProduct }, item: typeProduct) => {
-                    // console.log(acc)
-                    acc[item.documentId] = item
-                    return acc
-                }, {}))
-                if(configData) {
-                    setArrSearch(configData)
-                } else {
-                    return
-                }
+        api.get(`/products?query=${debounce}&populate=*`)
+        .then(res => {
+            if (!res.data || !Array.isArray(res.data.data)) {
+                throw new Error("Dữ liệu API không hợp lệ");
+            }
+            console.log(res.data.data)
+            return res.data.data;
         })
+        .then((data: typeProduct[]) => {
+            console.log(data);
+            setArrSearch(data);
+            // // Chuyển đổi dữ liệu thành object với documentId làm key
+            // const configData: typeProduct[] = Object.values(
+            //     data.reduce((acc: { [key: string]: typeProduct }, item: typeProduct) => {
+            //         acc[item.documentId] = item;
+            //         return acc;
+            //     }, {})
+            // );
+            // console.log(configData)
+            // // Kiểm tra và cập nhật state
+            // if (configData.length > 0) {
+            //     setArrSearch(configData);
+            // }
+        })
+        .catch(error => {
+            console.error("Lỗi khi gọi API hoặc xử lý dữ liệu:", error);
+        });
+    
 
     },[debounce])
 
@@ -99,14 +116,13 @@ const Header = () => {
     const thumbnailUrls : {price:number ,name:string,thumbnailUrl:string}[] = arrSearch.map(product => ({
         price: product.prices ,
         name: product.name,
-        thumbnailUrl: product.Image?.formats?.thumbnail?.url || "Không có ảnh"
+        thumbnailUrl: product.Image?.formats?.thumbnail?.url  || "Không có ảnh"
     }));
-    // console.log(arrSearch)
 
   return (
     <div className='layout'>
-        <div className='custom-header custom-header-mobile headerSmall
-            xl:mr-[100px] xl:ml-[100px] lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5'>
+        <div className='custom-header custom-header-mobile 
+            2xl:mr-[6.5%] 2xl:ml-[6.5%] lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5'>
             <div className='lg:hidden text-[#fff]'>
                 <AlignJustify/>
             </div>
@@ -127,7 +143,7 @@ const Header = () => {
                 <div className=' custom-input 2xl:w-[420px] lg:h-[46px] lg:mr-[40px] lg:relative'>
                     <form action="" className='flex flex-row w-full h-full rounded-[20px] overflow-hidden border border-blue-600'>
                         <input
-                            className='lg:mr-[32px] lg:w-[350px] lg:py-2.5 lg:px-3.5 lg:text-base lg:font-normal lg:leading-[1.5] lg:outline-none ' 
+                            className=' lg:w-[350px] lg:py-2.5 lg:px-3.5 lg:text-base lg:font-normal lg:leading-[1.5] lg:outline-none ' 
                             type="text" 
                             value={value}
                             ref={inputRef}
@@ -139,7 +155,7 @@ const Header = () => {
                             <Search className='m-auto text-[#fff]'/>
                         </button>
                     </form>
-                    {circle &&
+                    {value === '' || circle &&
                         <button 
                             className='absolute top-[12px] right-[80px]'
                             onClick={handleCircle}
@@ -159,7 +175,7 @@ const Header = () => {
                                         {thumbnailUrls.map((item,index) => (
                                             <div key={index} className='flex p-[10px]'>
                                                 <div className='w-[75px] h-[75px] mr-[10px]'>
-                                                    <img className='object-cover h-full' src={`http://localhost:1337/${thumbnailUrls[0].thumbnailUrl}`} alt="" />
+                                                    <img className='object-cover h-full' src={`http://localhost:1337${thumbnailUrls[0].thumbnailUrl}`} alt="" />
                                                 </div>
                                                 <div>
                                                     <h3 className='mb-[10px] text-[14px] text-[#323c3f]'>{item.name}</h3>
@@ -178,9 +194,9 @@ const Header = () => {
                     }
                 </div>
 
-                <div className='flex grow justify-between'>
+                <div className='flex grow justify-between gap-[15px]'>
                     <div>
-                        <NavLink to="/account/order" className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[10px] h-full items-center'>
+                        <NavLink to="/account/order" className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center'>
                             <div>
                                 <img src="https://kawin.vn/uploads/source//icon/shopping-list-1.webp" alt="" />
                             </div>
@@ -190,17 +206,17 @@ const Header = () => {
                         </NavLink>
                     </div>
                     <div>
-                        <NavLink to={'/account'}   className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[10px] h-full items-center'>
+                        <NavLink to={'/account'}   className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center'>
                             <div>
                                 <img src="https://kawin.vn/uploads/source//icon/account-(1)-1.webp" alt="" />
                             </div>
-                            <div>
+                            <div className='max-w-[200px] truncate'>
                                 <p>Hi, Hữu An Sport Quy Nhơn</p>
                             </div>
                         </NavLink>
                     </div>
                     <div>
-                        <NavLink to="/login" className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[10px] h-full items-center'>
+                        <NavLink to="/login" className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center'>
                             <div>
                                 <img src="https://kawin.vn/uploads/source//icon/account-1.webp" alt="" />
                             </div>
@@ -209,8 +225,28 @@ const Header = () => {
                             </div>
                         </NavLink>
                     </div>
+                    {/* <div>
+                        <NavLink to={'/register'}   className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center'>
+                            <div>
+                                <img src="https://kawin.vn/uploads/source//icon/account-(1)-1.webp" alt="" />
+                            </div>
+                            <div>
+                                <p>Đăng ký</p>
+                            </div>
+                        </NavLink>
+                    </div>
                     <div>
-                        <NavLink to={"/cart"} className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[10px] h-full items-center'>
+                        <NavLink to="/login" className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center'>
+                            <div>
+                                <img src="https://kawin.vn/uploads/source//icon/account-1.webp" alt="" />
+                            </div>
+                            <div>
+                                <p>Đăng nhập</p>
+                            </div>
+                        </NavLink>
+                    </div> */}
+                    <div>
+                        <NavLink to={"/thanh-toan"} className='text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center'>
                             <div className='relative'>
                                 <img src="https://kawin.vn/uploads/source//icon/group.webp" alt="" />
                                 <span className='absolute top-[-10px] right-[-10px] w-[20px] h-[20px] rounded-full leading-[18px] text-center bg-[#ef4562] text-white'>
@@ -224,7 +260,7 @@ const Header = () => {
                     </div>
                 </div>
             </div>
-            <div className='custom-input-mobile bg-[#0f35c4] text-[#fff] mt-[20px]'>
+            <div className='custom-input-mobile bg-[#0f35c4] text-[#fff] mt-[20px] rounded-[4px]'>
                 <ul className='flex items-center h-[45px]'>
                     <li className='border-r'>
                         <NavLink to={"/"} className='flex items-center h-full pl-[20px] pr-[20px]'>
@@ -240,11 +276,19 @@ const Header = () => {
                         </NavLink>
                     </li>
                     <li className='border-r'>
-                        <NavLink to={'/contact'} className='flex items-center h-full pl-[20px] pr-[20px]'>
+                        <NavLink to={'/lien-he'} className='flex items-center h-full pl-[20px] pr-[20px]'>
                             <div>
                                 <img src="https://kawin.vn/uploads/source//icon/headphones-1.webp" alt="" />
                             </div>
                             <span className='text-[14px] font-[500] leading-[25px] ml-[10px]'>LIÊN HỆ</span>
+                        </NavLink>
+                    </li>
+                    <li className='border-r'>
+                        <NavLink to={'/tin-tuc'} className='flex items-center h-full pl-[20px] pr-[20px]'>
+                            <div>
+                                <img src="https://si-justplay.com/uploads/source//icon/menu/insurance-1.png" alt="" />
+                            </div>
+                            <span className='text-[14px] font-[500] leading-[25px] ml-[10px]'>Tin tức</span>
                         </NavLink>
                     </li>
                 </ul>
@@ -285,41 +329,6 @@ const Header = () => {
             </div>
         </div>
         <NavbarMobile/>
-        {/* <div id='navbar-Mobile' className='lg:hidden sm:hidden custom-navbar-mobile'>
-                <div>
-                    <NavLink to={'/'}>
-                        <House />
-                        <span>Trang chủ</span>
-                    </NavLink>
-                </div>
-                <div>
-                    <NavLink to={'/danh-muc-san-pham'}>
-                        <Columns4 />
-                        <span>Danh mục</span>
-                    </NavLink>
-                </div>
-                <div className='relative'>
-                    <a href="">
-                        <Store />
-                        <span>Giỏ hàng</span>
-                    </a>
-                    <div className='absolute top-0 -right-1 flex items-center justify-center text-[#fff] bg-[red] w-[20px] h-[20px] rounded-full  '>
-                        <span>0</span>
-                    </div>
-                </div>
-                <div>
-                    <a href="">
-                        <ShoppingBag/>
-                        <span>Đơn hàng</span>
-                    </a>
-                </div>
-                <div>
-                    <NavLink to={'/'}>
-                        <User />
-                        <span>tài khoản</span>
-                    </NavLink>
-                </div>
-        </div> */}
     </div>
   )
 }

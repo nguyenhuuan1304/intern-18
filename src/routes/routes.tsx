@@ -1,20 +1,18 @@
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
+import DetailProduct from "@/pages/detailProduct/DetailProduct";
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 
 const HomePage = lazy(() => import("../pages/HomePage"));
 const Account = lazy(() => import("../pages/account/Account"));
 const Order = lazy(() => import("../pages/order/Order"));
-
-const CartPage = lazy(() => import("../pages/cart/CartPage"));
-const Product = lazy(() => import("../pages/product/Product"));
+const Payment = lazy(() => import("../pages/payment/Payment"));
 const Contact = lazy(() => import("../pages/contact/Contact"));
 const CategoryMobile = lazy(() => import("../pages/categoryMoblie/categoryMobile"));
-
 const ProductPage = lazy(() => import("../pages/ProductPage"));
-
 const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+const News = lazy(() => import("../pages/news/News"));
 
 
 export const routes: RouteObject[] = [
@@ -56,19 +54,13 @@ export const routes: RouteObject[] = [
     ],
   },
   {
-    path: "/cart",
+    path: "/thanh-toan",
     element: (
-        <CartPage />
+        <Payment />
     ),
   },
   {
-    path: "/san-pham",
-    element: (
-        <Product />
-    ),
-  },
-  {
-    path: "/contact",
+    path: "/lien-he",
     element: (
         <Contact />
     ),
@@ -77,6 +69,21 @@ export const routes: RouteObject[] = [
     path: "/danh-muc-san-pham",
     element: (
         <CategoryMobile/>
+    ),
+  },
+  {
+    path: "/tin-tuc",
+    element: (
+        <News/>
+    )
+  }
+  ,
+  {
+    path: ":slug",
+    element: (
+        <DetailProduct
+          category = 'Tin Tức'
+        />
     ),
   },
 ];
