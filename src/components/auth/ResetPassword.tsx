@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle, User } from "lucide-react";
+import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle, User, Loader2, Check } from "lucide-react";
 import resetPassword from "@/assets/resetpassword3.jpg";
 import { useState } from "react";
 import * as z from "zod";
@@ -18,6 +18,9 @@ import {
 import { Input } from "../ui/input";
 import authApi from "../api/auth.api";
 import { toast } from "react-toastify";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { resetPasswordUser } from "@/store/auth.slice";
+import { Button } from "../ui/button";
 const formSchema = z
   .object({
     code: z.string().min(1, "Mã xác nhận không được để trống"),
@@ -45,6 +48,8 @@ const ResetPassword: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [searchParams] = useSearchParams();
+  const {loading} = useAppSelector((state) => state.auth)
+  const dispatch = useAppDispatch()
   const navigate = useNavigate();
   const code = searchParams.get("code") ?? undefined;
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,21 +62,17 @@ const ResetPassword: React.FC = () => {
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const res = await authApi.resetPassword({
+      const res = await dispatch(resetPasswordUser({
         code: values.code,
         password: values.password,
         passwordConfirmation: values.passwordConfirmation,
-      });
-      console.log("res", res);
+      })).unwrap();
+      console.log( ' res' , res)
       toast.success("Khôi phục mật khẩu thành công");
       navigate("/login");
     } catch (error) {
-      if (error instanceof Error) {
-        const errorMessage =
-          error.response?.data?.error?.message ||
-          "Đã xảy ra lỗi không xác định";
-        console.log(errorMessage);
-      }
+      toast.error("Mã xác nhận không đúng");
+    
     }
   };
   return (
@@ -119,7 +120,7 @@ const ResetPassword: React.FC = () => {
                             {...field}
                             placeholder="Nhập họ tên"
                             className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
-                            // disabled={isLoading}
+                            disabled={loading}
                           />
                         </FormControl>
                       </div>
@@ -141,6 +142,7 @@ const ResetPassword: React.FC = () => {
                             type={showPassword ? "text" : "password"}
                             placeholder="Nhập mật khẩu mới"
                             className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                            disabled={loading}
                           />
                         </FormControl>
                         <button
@@ -175,6 +177,7 @@ const ResetPassword: React.FC = () => {
                             type={showConfirmPassword ? "text" : "password"}
                             placeholder="Xác nhận mật khẩu"
                             className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                            disabled={loading}
                           />
                         </FormControl>
                         <button
@@ -196,12 +199,23 @@ const ResetPassword: React.FC = () => {
                   )}
                 />
 
-                <button
+                <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors duration-200"
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6 rounded-lg transition-colors duration-200"
                 >
-                  Xác nhận
-                </button>
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span className="text-[15px]">Đang xử lý...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={45} />
+                      <span className="text-[15px]">Xác nhận</span>
+                    </>
+                  )}
+                </Button>
               </form>
             </Form>
             <div className="mt-6 flex justify-start">

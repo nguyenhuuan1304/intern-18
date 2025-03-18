@@ -9,6 +9,8 @@ import {
   EyeOff,
   CheckCircle,
   Mail,
+  Loader2,
+  UserPlus2,
 } from "lucide-react";
 import bgRegister from "@/assets/bgRegister.webp";
 import { useState } from "react";
@@ -24,8 +26,10 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import authApi from "../api/auth.api";
  import { toast } from "react-toastify";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { registerUser } from "@/store/auth.slice";
+import { Button } from "../ui/button";
 
 const formSchema = z
   .object({
@@ -57,6 +61,8 @@ const formSchema = z
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
+  const {loading} = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -70,25 +76,20 @@ const Register: React.FC = () => {
     },
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("onSubmit called", values);
     try {
       const registerPayload = {
         email: values.email,
         username: values.username,
         password: values.password,
       };
-      console.log("registerPayload", registerPayload);
-      const res = await authApi.register(registerPayload);
-      console.log("res", res);
+      const res = await dispatch(registerUser(registerPayload)).unwrap();
       if(res.user) {
        toast.success("Đăng ký thành công");
       navigate("/login")
       }
     } catch (error ) {
      if (error instanceof Error) {
-     const errorMessage =
-       error.response?.data?.error?.message || "Đã xảy ra lỗi không xác định";
-     toast.error(errorMessage);
+     toast.error("Email hoặc tên đăng nhập đã tồn tại!");
   } 
     }
   };
@@ -132,6 +133,7 @@ const Register: React.FC = () => {
                             {...field}
                             placeholder="Nhập tên đăng nhập"
                             className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                            disabled={loading}
                           />
                         </FormControl>
                       </div>
@@ -152,6 +154,7 @@ const Register: React.FC = () => {
                             {...field}
                             placeholder="Nhập email liên hệ"
                             className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                            disabled={loading}
                           />
                         </FormControl>
                       </div>
@@ -174,6 +177,7 @@ const Register: React.FC = () => {
                               type={showPassword ? "text" : "password"}
                               placeholder="Nhập mật khẩu"
                               className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                              disabled={loading}
                             />
                           </FormControl>
                           <button
@@ -208,6 +212,7 @@ const Register: React.FC = () => {
                               type={showConfirmPassword ? "text" : "password"}
                               placeholder="Xác nhận mật khẩu"
                               className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                              disabled={loading}
                             />
                           </FormControl>
                           <button
@@ -229,12 +234,23 @@ const Register: React.FC = () => {
                     )}
                   />
                 </div>
-                <button
+                <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors duration-200"
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6 rounded-lg transition-colors duration-200"
                 >
-                  Đăng ký
-                </button>
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span className="text-[15px]">Đang xử lý...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus2 />
+                      <span className="text-[15px]">Đăng ký</span>
+                    </>
+                  )}
+                </Button>
               </form>
             </Form>
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { User, Lock, ArrowLeft, Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
 import loginBg from "@/assets/login-bg.svg";
 import loginTree from "@/assets/login-tree.svg";
 import { useState } from "react";
@@ -17,8 +17,10 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import authApi from "../api/auth.api";
 import { toast } from "react-toastify";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { loginUser } from "@/store/auth.slice";
+import { Button } from "../ui/button";
 const formSchema = z.object({
   username: z.string().min(1, "Tên đăng nhập không được để trống!"),
   password: z
@@ -33,9 +35,9 @@ const formSchema = z.object({
     ),
 });
 const Login: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
+  const dispatch = useAppDispatch()
+  const {loading} = useAppSelector((state) => state.auth)
+  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,7 +53,7 @@ const Login: React.FC = () => {
         identifier: values.username,
         password: values.password,
       };
-      const res = await authApi.login(loginPayload);
+      const res = await dispatch(loginUser(loginPayload)).unwrap()
      if(res.user) {
          toast.success("Đăng nhập thành công");
         navigate("/")
@@ -64,10 +66,8 @@ const Login: React.FC = () => {
 
         }
   } catch (error) {
-      if (error instanceof Error) {
-         const errorMessage =
-           error.response?.data?.error?.message || "Đã xảy ra lỗi không xác định";
-         toast.error(errorMessage);
+      if (error instanceof Error) {        
+         toast.error("Email, tên đăng nhập hoặc mật khẩu không chính xác!");
       } 
   }
   };
@@ -111,7 +111,7 @@ const Login: React.FC = () => {
                             {...field}
                             placeholder="Nhập họ tên"
                             className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
-                            disabled={isLoading}
+                            disabled={loading}
                           />
                         </FormControl>
                       </div>
@@ -141,7 +141,7 @@ const Login: React.FC = () => {
                             type={showPassword ? "text" : "password"}
                             placeholder="Nhập mật khẩu"
                             className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
-                            disabled={isLoading}
+                            disabled={loading}
                           />
                         </FormControl>
                         <button
@@ -160,12 +160,24 @@ const Login: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                <button
+               
+                <Button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors duration-200"
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6 rounded-lg transition-colors duration-200"
                 >
-                  Đăng nhập
-                </button>
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span className="text-[15px]">Đang xử lý...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn size={45} />
+                      <span className="text-[15px]">Đăng nhập</span>
+                    </>
+                  )}
+                </Button>
               </form>
             </Form>
             <p className="text-center mt-6 text-gray-600">
