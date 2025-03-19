@@ -1,15 +1,22 @@
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
+import { useMemo } from "react";
 
-class Axios {
-    instance: AxiosInstance
-    constructor() {
-        this.instance = axios.create({
+const useAxios = () => {
+    const api = useMemo(() => {
+        return axios.create({
             baseURL: 'http://localhost:1337/api',
-            timeout: 1000
+            headers: {"Content-Type": "application/json"}
         })
+    },[])
+
+    return {
+        api
     }
 }
+export const api = axios.create({
+    baseURL: 'http://localhost:1337/api',
+    headers: { "Content-Type": "application/json" }
+});
 
-const http = new Axios().instance
 
-export default http
+export default useAxios
