@@ -1,10 +1,14 @@
+
 import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import RegisterPage from "@/pages/auth/RegisterPage";
 import DetailProduct from "@/pages/detailProduct/DetailProduct";
-import { lazy } from "react";
+import  { lazy } from "react";
 import { RouteObject } from "react-router-dom";
+import PrivateRoute from "./PrivateRoutes";
+import PublicRoute from "./PublicRoutes";
 
 const HomePage = lazy(() => import("../pages/HomePage"));
+
 const Account = lazy(() => import("../pages/account/Account"));
 const Order = lazy(() => import("../pages/order/Order"));
 const Payment = lazy(() => import("../pages/payment/Payment"));
@@ -14,42 +18,61 @@ const ProductPage = lazy(() => import("../pages/ProductPage"));
 const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 const News = lazy(() => import("../pages/news/News"));
 
+const ProductPage = lazy(() => import("../pages/ProductPage"));
+const Product = lazy(() => import("../pages/product/Product"));
+const Contact = lazy(() => import("../pages/contact/Contact"));
+const CategoryMobile = lazy(
+  () => import("../pages/categoryMoblie/categoryMobile")
+);
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("../pages/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(
+  () => import("../pages/auth/ForgotPasswordPage")
+);
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
+
+
+const CartPage = lazy(() => import("../pages/cart/CartPage"));
 
 export const routes: RouteObject[] = [
   {
     path: "/",
-    element: (
-      <HomePage />
-    ),
+    element: <HomePage />,
   },
   {
     path: "/product",
-    element: (
-      <ProductPage />
-    ),
+    element: <ProductPage />,
   },
   {
-    path: "/login",
-    element: <LoginPage />,
+    path: "/san-pham",
+    element: <Product />,
   },
   {
-    path: "/register",
-    element: <RegisterPage />,
+    path: "/contact",
+    element: <Contact />,
   },
   {
-    path: "/forgot",
-    element: <ForgotPasswordPage />,
+    path: "/danh-muc-san-pham",
+    element: <CategoryMobile />,
   },
-
   {
-    path: "/account",
-    element: (
-        <Account />
-    ),
+    element: <PublicRoute />,
     children: [
       {
-        path: "order",
-        element: <Order />,
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />,
+      },
+      {
+        path: "/forgot",
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: "/reset",
+        element: <ResetPasswordPage />,
       },
     ],
   },
@@ -85,5 +108,24 @@ export const routes: RouteObject[] = [
           category = 'Tin Tức'
         />
     ),
+
+    element: <PrivateRoute />,
+    children: [
+      {
+        path: "/account",
+        element: <Account />,
+        children: [
+          {
+            path: "order",
+            element: <Order />,
+          },
+        ],
+      },
+      {
+        path: "/cart",
+        element: <CartPage />,
+      },
+    ],
+
   },
 ];

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Category } from "./CategorySidebar";
+import { Category } from "../product/types/ProductType";
 
 interface CategoryItemProps {
   category: Category;
@@ -32,7 +32,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     e.stopPropagation();
     // Mở submenu, đồng thời hiệu ứng trượt sẽ được thực hiện nhờ CSS chuyển đổi
     setSubmenuOpen(true);
-    onSubmenuOpen(category.id);
+    onSubmenuOpen(category.documentId);
   };
 
   const handleBackClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -60,11 +60,11 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     >
       <div className="flex items-center justify-between">
         <Link
-          to={category.path}
+          to={category.slug}
           className="block flex-1 p-3 hover:bg-gray-100"
           onClick={handleLinkClick}
         >
-          <span className="text-gray-700">{category.name}</span>
+          <span className="text-gray-700">{category.name.toUpperCase()}</span>
         </Link>
         {category.children && category.children.length > 0 && (
           <div className="p-3">
