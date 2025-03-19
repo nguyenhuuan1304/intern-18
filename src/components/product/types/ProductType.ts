@@ -51,6 +51,9 @@ export interface ShoeSize {
 }
 
 export interface Product {
+    ratings: any;
+    averageRating: number;
+    img: any;
     id: number;
     documentId: string;
     name: string;
@@ -60,6 +63,30 @@ export interface Product {
     product_images: ProductImage[];
     id_shirt_pant?: ShirtPantSize | null;
     id_shoe?: ShoeSize | null;
+    product_detail?: ProductDetail | null;
+    rating: number;
+    product_sale?: ProductSale | null;
+}
+
+export interface ProductDetail {
+    // id: number;
+    // documentId: string;
+    // description: string;
+    // productStatus: string;
+    // rating: number;
+    // createdAt: string;
+    // updatedAt: string;
+    // publishedAt: string;
+    // product: Product;
+        id: number;
+        documentId: string;
+        description: string;
+        productStatus: string;
+        createdAt: string;
+        updatedAt: string;
+        publishedAt: string;
+        product: Product;
+        averageRating?: number;
 }
 
 export interface ProductImage {
@@ -69,3 +96,11 @@ export interface ProductImage {
     img: string[];
 }
 
+export interface ProductSale {
+    id: number;
+    documentId: string;
+    percent_discount: number;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+}

@@ -149,4 +149,3 @@ const AddProduct: React.FC<AddProductProps> = ({ product, onClose, cartDrawerOpe
 };
 
 export default AddProduct;
-
