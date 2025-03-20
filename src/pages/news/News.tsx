@@ -7,49 +7,50 @@ import ServiceMenu from '@/components/ServiceMenu'
 import { motion } from "framer-motion";
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '../../redux/store'
-import { getPostList } from '@/redux/slice'
-import { api } from '@/hooks/useAxios'
-
-import { typeProduct } from '@/components/header/Header'
+import { getPostListNews } from '@/redux/slice'
+import CreatePostNews from '@/components/createPostNews/CreatePostNews'
 
 const News = () => {
-    // const listProduct = useSelector((state: RootState) => state.product.product) ?? [];
-    // const data:number[] = [1,2,3,4,5,6,7,7,7,7,7,7,7]
-    const [listNews,setListNews] = useState([])
+    const listProduct  = useSelector((state: RootState) => state.news.news) ?? [];
     const dispatch = useAppDispatch()
     useEffect(() => {
-        const promise = dispatch(getPostList())
+        const promise = dispatch(getPostListNews())
         return () => {
           promise.abort()
         }
     },[dispatch])
 
-    useEffect(() => {
-        api.get('news?populate=*')
-        .then(res => {
-            if (!res.data || !Array.isArray(res.data.data)) {
-                throw new Error("Dữ liệu API không hợp lệ");
-            }
-            console.log(res.data.data)
-            setListNews(res.data.data)
-        })
-    },[])
+    const handleShowAddNews = () => {
+        const element = document.getElementById('modal')
+        console.log(element)
+        if(element)
+        {
+            element.style.display = 'block'
+        }
+    }
 
-    console.log(listNews)
-  return (
+    return (
     <div className=''>
         <Header/>
-        {/* <ServiceMenu/> */}
+        <ServiceMenu/>
         <Title 
             title='Tin tức' 
             breadcrumb={[
                 { label: "Trang chủ", path: "/" },
-                { label: "Sản phẩm" }
+                { label: "Tin tức" }
             ]}
         />  
-        <div className='flex mx-[6%] layout ' >
+        <div className='flex justify-end'>
+            <button 
+                onClick={handleShowAddNews}
+                className='p-[10px] bg-[#007595] text-[#fff] cursor-pointer rounded-[4px] mt-[10px] mr-[13%]'
+            >
+                Create new postNews
+            </button>
+        </div>
+        <div className='flex mx-[6%] layout max-lg:flex-wrap' >
             <div className=' my-[4%] grid h-[100%] grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1 max-lg:basis-[100%] basis-[80%] gap-x-[10px] gap-y-[20px] '>
-            {listNews.map((product,id) => (
+            {listProduct.map((product,id) => (
                  <motion.div
                  key={id}
                  className="block w-[100%] h-[100%]  bg-white shadow-md rounded-lg overflow-visible p-2  space-x-5 group hover:shadow-lg transition-shadow duration-300"
@@ -63,17 +64,24 @@ const News = () => {
                     title='Bộ sưu tập quần áo cầu lông Flick nam nữ đẹp ấn tượng'
                     slug = {product.slug}
                     id = {product.documentId}
-                    img={`http://localhost:1337${product?.img?.[0]?.url}`}
+                    img={
+                        Array.isArray(product.img) && typeof product.img[0] === 'object' ?
+                        `http://localhost:1337${product.img[0].url}` :
+                        'default-image-url.jpg'
+                    }
                     description='Áo cầu lông FlickLấy cảm hứng từ những cú đánh nhẹ nhưng nhanh đến bất ngờ, họa tiết trên mẫu áo cầu lông Flick được thiết kế tựa như những mũi tên gió – nhẹ và bén.'
                 />
             </motion.div>
             ))}
                 
             </div>
-            <div className='basis-[20%] bg-white text-[#333] max-lg:hidden'>
+            <div className='basis-[20%] bg-white text-[#333] max-lg:basis-[100%]'>
                 <ContentSideBarNew title='Tin Tức Mới'/>
                 <ContentSideBarNew title='Tin Tức Nổi Bậc'/>
             </div>
+        </div>
+        <div id='modal' className=' modal'>
+            <CreatePostNews element = {document.getElementById('modal')}/>
         </div>
     </div>
   )

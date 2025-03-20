@@ -8,7 +8,7 @@ interface CategoryResponse {
 const categoryApi = {
   getAllCategories: async (): Promise<CategoryResponse> => {
     const response = await axios.get<CategoryResponse>(
-     "http://localhost:1337/api/categories?populate=children&pagination[limit]=1000"
+     "http://localhost:1337/api/categories?populate=children&pagination[limit]=3000"
     );
     return response.data;
   },
