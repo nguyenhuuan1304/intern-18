@@ -19,11 +19,11 @@ const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 const News = lazy(() => import("../pages/news/News"));
 
 const ProductPage = lazy(() => import("../pages/ProductPage"));
-const Product = lazy(() => import("../pages/product/Product"));
 const Contact = lazy(() => import("../pages/contact/Contact"));
 const CategoryMobile = lazy(
   () => import("../pages/categoryMoblie/categoryMobile")
 );
+const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
 const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("../pages/auth/RegisterPage"));
 const ForgotPasswordPage = lazy(
@@ -42,10 +42,6 @@ export const routes: RouteObject[] = [
   {
     path: "/product",
     element: <ProductPage />,
-  },
-  {
-    path: "/san-pham",
-    element: <Product />,
   },
   {
     path: "/contact",
@@ -126,6 +122,12 @@ export const routes: RouteObject[] = [
         element: <CartPage />,
       },
     ],
+
+  {
+    path: "/product-detail/:documentId",
+    element: (
+    <ProductDetailPage />
+    ),
 
   },
 ];

@@ -3,6 +3,7 @@ import Title from "@/components/product/Title";
 import ProductList from "@/components/product/ProductList";
 import Header from "@/components/header/Header";
 import ServiceMenu from "@/components/ServiceMenu";
+import Footer from "@/components/layout/Footer"
 
 const ProductPage: React.FC = () => {
 
@@ -18,6 +19,7 @@ const ProductPage: React.FC = () => {
                 ]}
             />
             <ProductList />
+            <Footer/>
         </>
     );
 };

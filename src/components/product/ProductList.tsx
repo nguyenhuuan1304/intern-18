@@ -23,7 +23,7 @@ const ProductList: React.FC = () => {
     const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
-    console.log("Render Parent - cartDrawerOpen:", cartDrawerOpen);
+    // console.log("Render Parent - cartDrawerOpen:", cartDrawerOpen);
 
     const loadProducts = async () => {
         const data = await fetchProducts();
@@ -45,7 +45,7 @@ const ProductList: React.FC = () => {
     const handleColorClick = (productId: number, imageUrl: string) => {
         setSelectedImages((prev) => ({
             ...prev,
-            [productId]: imageUrl, // Cập nhật ảnh chính của sản phẩm
+            [productId]: imageUrl,
         }));
     };
 
@@ -53,6 +53,7 @@ const ProductList: React.FC = () => {
         setSelectedProduct(product);
         setShowForm(true);
     };
+
     const handleCloseForm = () => setShowForm(false);
 
     const [selectedOption, setSelectedOption] = useState("best_selling");
@@ -98,18 +99,32 @@ const ProductList: React.FC = () => {
                         <motion.div
                             key={product.id}
                             className="bg-white shadow-md rounded-lg overflow-hidden p-2 flex space-x-5 group hover:shadow-lg transition-shadow duration-300"
-                            initial={{ opacity: 0, y: 50 }} 
-                            whileInView={{ opacity: 1, y: 0 }} 
-                            transition={{ duration: 0.6, delay: index * 0.1 }} 
-                            viewport={{ once: true }} 
+                            initial={{ opacity: 0, y: 50 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                            viewport={{ once: true }}
                         >
                             <div className="w-3/4 flex flex-col space-y-2">
                                 <div className="overflow-hidden rounded-md">
-                                    <img
-                                        src={selectedImages[product.id]}
-                                        className="w-full h-64 object-cover rounded-md transform transition-transform duration-6000 group-hover:scale-150"
-                                        alt={product.name}
-                                    />
+
+                                    {product?.product_sale?.percent_discount ? (
+                                        <div className="relative overflow-hidden">
+                                            <img
+                                                src={selectedImages[product.id]}
+                                                alt={product.name}
+                                                className="w-full h-64 object-cover rounded-md transform transition-transform duration-6000 group-hover:scale-150"
+                                            />
+                                            <div className="absolute top-2 left-[-30px] bg-orange-600 text-white px-8 py-1 text-sm font-bold rounded transform -rotate-45">
+                                                -{product.product_sale.percent_discount}%
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <img
+                                            src={product?.Image?.length ? selectedImages[product.id] : "https://via.placeholder.com/300"}
+                                            alt={product?.name}
+                                            className="w-full h-64 object-cover rounded-md transform transition-transform duration-6000 group-hover:scale-150"
+                                        />
+                                    )}
                                 </div>
 
                                 <div className="flex space-x-2 justify-center h-16">
@@ -135,12 +150,37 @@ const ProductList: React.FC = () => {
                                 </div>
 
                                 <h2 className="mt-2 text-lg font-semibold h-12">{product.name}</h2>
-                                <p className="text-red-500 text-base font-bold">{product.prices.toLocaleString()}đ</p>
-                                <div className="flex text-yellow-500 font-bold">
+
+                                {product?.product_sale?.percent_discount ? (
+                                    <div className="flex space-x-2">
+                                        {/* Giá gốc gạch ngang */}
+                                        <p className="text-gray-500 line-through">
+                                            {product.prices.toLocaleString()}đ
+                                        </p>
+                                        {/* Giá sau khi giảm */}
+                                        <p className="text-red-500 text-base font-bold">
+                                            {(
+                                                product.prices -
+                                                (product.prices * product.product_sale.percent_discount) / 100
+                                            ).toLocaleString()}đ
+                                        </p>
+                                    </div>
+                                ) : (
+                                    /* Hiển thị giá gốc nếu không có giảm giá */
+                                    <p className="text-red-500 text-base font-bold">
+                                        {product?.prices.toLocaleString()}đ
+                                    </p>
+                                )}
+
+                                <div className="flex items-center space-x-1 text-sm font-bold">
                                     {[...Array(5)].map((_, i) => (
-                                        <Star key={i} />
+                                        <Star
+                                            key={i}
+                                            className={`text-sm ${i < Math.round(product.rating || 0) ? "text-yellow-500" : "text-gray-300"}`}
+                                        />
                                     ))}
                                 </div>
+
                             </div>
 
                             <div className="w-1/4 flex flex-col items-start text-sm font-medium space-y-2">
@@ -167,7 +207,9 @@ const ProductList: React.FC = () => {
                                     <p>Hết hàng</p>
                                 )}
                                 <div className="mt-auto">
-                                    <Link to="/product-detail" className="w-32 text-center text-blue-500">Xem chi tiết</Link>
+                                    <Link to={`/product-detail/${product.documentId}`} className="w-32 text-center text-blue-500">
+                                        Xem chi tiết
+                                    </Link>
                                     <button
                                         className="relative mt-2 flex cursor-pointer items-center justify-center w-full bg-blue-700 text-white py-2 rounded-md border border-transparent overflow-hidden
                                             before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
