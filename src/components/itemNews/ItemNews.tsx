@@ -13,7 +13,6 @@ interface TypeItemNews {
 
 const ItemNews: React.FC<TypeItemNews> = ({img,title, description,slug,id}) => {
 const navigate = useNavigate()
-console.log(id)
   return (
     <>
         <div 

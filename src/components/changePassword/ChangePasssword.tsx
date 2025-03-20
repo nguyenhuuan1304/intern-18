@@ -16,7 +16,7 @@ const ChangePassword = () => {
     confirm: false,
   });
 
-
+  console.log(showPassword)
   const handleTogglePassWord = (type :'old' | 'new' | 'confirm') => {
     setShowPassword(pre => (
       {
@@ -60,7 +60,7 @@ const ChangePassword = () => {
               className="absolute top-[46%] inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-500 transition"
               onClick={() => handleTogglePassWord('old')}
             > 
-              {showPassword ? <EyeOff  size={20} /> : <Eye size={20} />}
+              {showPassword.old ? <EyeOff  size={20} /> : <Eye size={20} />}
             </button>
           </div>
           <div className="relative mb-4">
@@ -77,7 +77,7 @@ const ChangePassword = () => {
               className="absolute top-[46%] inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-500 transition"
               onClick={() => handleTogglePassWord('new')}
             >
-              {showPassword ? <EyeOff  size={20} /> : <Eye size={20} />}
+              {showPassword.new ? <EyeOff  size={20} /> : <Eye size={20} />}
             </button>
           </div>
           <div className="relative mb-4">
@@ -94,7 +94,7 @@ const ChangePassword = () => {
               className="absolute top-[46%] inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-500 transition"
               onClick={() => handleTogglePassWord('confirm')}
             >
-              {showPassword ? <EyeOff  size={20} /> : <Eye size={20} />}
+              {showPassword.confirm ? <EyeOff  size={20} /> : <Eye size={20} />}
             </button>
                   {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>

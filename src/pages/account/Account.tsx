@@ -45,7 +45,7 @@ const Account = () => {
           <Header/>
           <div className="flex-shrink-0  xl:mx-[4%] custom-content-account  max-md:mx-[6%]  py-8 max-sm:mx-0 max-md:pr-2 max-md:pl-2 max-xl:">
             <div className="hidden md:block ">
-              {/* <ServiceMenu />  */}
+              <ServiceMenu /> 
             </div>
             <div className='bg-white shadow-2xl my-[50px] flex gap-[5px] max-lg:mx-[10px]  max-md:flex-col max-md:max-w-[540px] max-sm:m-[auto]'>
               <div className=' w-[25%] max-sm:w-[100%] max-md:w-[100%]'>

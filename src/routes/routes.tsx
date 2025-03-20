@@ -1,7 +1,4 @@
-
-import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
-import RegisterPage from "@/pages/auth/RegisterPage";
-import DetailProduct from "@/pages/detailProduct/DetailProduct";
+import DetailProductNews from "@/pages/detailProductNews/DetailProductNews";
 import  { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 import PrivateRoute from "./PrivateRoutes";
@@ -12,10 +9,6 @@ const HomePage = lazy(() => import("../pages/HomePage"));
 const Account = lazy(() => import("../pages/account/Account"));
 const Order = lazy(() => import("../pages/order/Order"));
 const Payment = lazy(() => import("../pages/payment/Payment"));
-const Contact = lazy(() => import("../pages/contact/Contact"));
-const CategoryMobile = lazy(() => import("../pages/categoryMoblie/categoryMobile"));
-const ProductPage = lazy(() => import("../pages/ProductPage"));
-const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 const News = lazy(() => import("../pages/news/News"));
 
 const ProductPage = lazy(() => import("../pages/ProductPage"));
@@ -104,12 +97,12 @@ export const routes: RouteObject[] = [
   {
     path: ":slug",
     element: (
-        <DetailProduct
-          category = 'Tin Tức'
-        />
+        <DetailProductNews category="Tin Tức" />
     ),
+  },
+  {
 
-    element: <PrivateRoute />,
+    // element: <PrivateRoute />, 
     children: [
       {
         path: "/account",

@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 
 
 export const store = configureStore({
-  reducer: {product: productState},
+  reducer: {news: productState},
 })
 
 //lấy RootState và appdispatch từ store 
