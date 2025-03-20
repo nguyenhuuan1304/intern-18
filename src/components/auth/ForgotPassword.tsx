@@ -37,16 +37,15 @@ const ForgotPassword: React.FC = () => {
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const res = await dispatch(
+       await dispatch(
         forgotPasswordUser({
           email: values.email,
         })
       ).unwrap();
-      console.log("res", res);
       toast.success("Nhấn vào link trong email để khôi phục mật khẩu!");
-    } catch (error) {
-      console.log("error", error);
-      toast.error("Email không chính xác. Vui lòng kiểm tra lại!");
+    } catch (error : unknow) {
+       const erroMessage = error?.error.message;
+           toast.error(erroMessage);
     }
   };
   return (

@@ -88,10 +88,9 @@ const Register: React.FC = () => {
       navigate("/login")
       }
     } catch (error ) {
-     if (error instanceof Error) {
-     toast.error("Email hoặc tên đăng nhập đã tồn tại!");
+     const erroMessage = error?.error.message;
+     toast.error(erroMessage);
   } 
-    }
   };
   return (
     <div className=" container w-full md:w-[100%]">

@@ -11,7 +11,7 @@ import ChangePassword from '@/components/changePassword/ChangePasssword'
 interface TypeNavbarItem {
   id: string;
   label: string;
-  icon: ReactNode; // ReactNode để có thể chứa JSX như icon
+  icon: ReactNode;
 }
 
 const Account = () => {
@@ -31,7 +31,8 @@ const Account = () => {
   const handleSelectTab = (item: string) => {
     console.log(item)
     if(item === 'logout') {
-      navigate('/login')
+     localStorage.removeItem("user");
+     navigate("/login");
     } else {
       setSelectTab(item)
       localStorage.setItem("selectedTab", item);

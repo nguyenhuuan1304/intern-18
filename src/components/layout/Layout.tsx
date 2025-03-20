@@ -9,7 +9,6 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow">{children}</main>

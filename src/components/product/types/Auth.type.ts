@@ -1,3 +1,10 @@
+
+
+export interface User {
+  username: string;
+  jwt: string;
+  email: string;
+}
 export interface AuthUser {
   id: number;
   name?: string;
@@ -35,3 +42,8 @@ export interface ResetPasswordResponse {
   ok: boolean;
   message: string;
 }
+
+export interface ChangePasswordResponse {
+  user: User;
+}
+

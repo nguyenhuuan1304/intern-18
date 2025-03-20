@@ -1,13 +1,14 @@
 // src/features/auth/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import http from "../hooks/useAxios";
 import {
   AuthUser,
+  ChangePasswordResponse,
   ForgotPasswordResponse,
   LoginResponse,
   RegisterResponse,
 } from "@/components/product/types/Auth.type";
 import axios from "axios";
+import { User } from "@/components/header/Header";
 
 interface AuthState {
   token: string | null;
@@ -38,8 +39,8 @@ export const registerUser = createAsyncThunk<
   { rejectValue: ErrorResponse }
 >("auth/register", async (payload, thunkAPI) => {
   try {
-    const response = await http.post<RegisterResponse>(
-      "/auth/local/register",
+    const response = await axios.post<RegisterResponse>(
+      "http://localhost:1337/api/auth/local/register",
       payload
     );
     return response.data;
@@ -56,7 +57,10 @@ export const loginUser = createAsyncThunk<
   "auth/login",
   async (payload, thunkAPI) => {
     try {
-      const response = await http.post<LoginResponse>("/auth/local" , payload);
+      const response = await axios.post<LoginResponse>(
+        "http://localhost:1337/api/auth/local",
+        payload
+      );
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response.data);
@@ -92,13 +96,45 @@ export const resetPasswordUser = createAsyncThunk<
     thunkAPI
   ) => {
     try {
-      const response = await http.post("/auth/reset-password" , payload);
+      const response = await axios.post(
+        "http://localhost:1337/api/auth/reset-password",
+        payload
+      );
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
+
+
+export const changePasswordUser = createAsyncThunk<
+  { user: User },
+  {
+    changePasswordPayload: {
+      currentPassword: string;
+      password: string;
+      passwordConfirmation: string;
+    };
+    jwt: string;
+  },
+  { rejectValue: ErrorResponse }
+>("auth/changePassword", async ({ changePasswordPayload, jwt }, thunkAPI) => {
+  try {
+    const response = await axios.post<ChangePasswordResponse>(
+      "http://localhost:1337/api/auth/change-password",
+      changePasswordPayload,
+      {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue(error.response.data);
+  }
+});
 
 const authSlice = createSlice({
   name: "auth",
@@ -158,17 +194,20 @@ const authSlice = createSlice({
         state.error = action.payload?.message || "Quên mật khẩu thất bại";
       })
 
-      .addCase(resetPasswordUser.pending, (state) => {
+      .addCase(changePasswordUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(resetPasswordUser.fulfilled, (state) => {
+      .addCase(
+        changePasswordUser.fulfilled,(state)=> {
+          state.loading = false;
+        }
+      )
+      .addCase(changePasswordUser.rejected, (state) => {
         state.loading = false;
-      })
-      .addCase(resetPasswordUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload?.message || "Đặt lại mật khẩu thất bại";
       });
+
+      
   },
 });
 

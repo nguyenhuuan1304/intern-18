@@ -11,6 +11,7 @@ const categoryApi = {
      "http://localhost:1337/api/categories?populate=children&pagination[limit]=1000"
     );
     return response.data;
+    
   },
 };
 

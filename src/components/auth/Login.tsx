@@ -66,9 +66,8 @@ const Login: React.FC = () => {
 
         }
   } catch (error) {
-      if (error instanceof Error) {        
-         toast.error("Email, tên đăng nhập hoặc mật khẩu không chính xác!");
-      } 
+      const erroMessage = error?.error.message;
+      toast.error(erroMessage);
   }
   };
   return (

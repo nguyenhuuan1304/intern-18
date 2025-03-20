@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import authApi from "../api/auth.api";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { resetPasswordUser } from "@/store/auth.slice";
@@ -67,7 +66,6 @@ const ResetPassword: React.FC = () => {
         password: values.password,
         passwordConfirmation: values.passwordConfirmation,
       })).unwrap();
-      console.log( ' res' , res)
       toast.success("Khôi phục mật khẩu thành công");
       navigate("/login");
     } catch (error) {
@@ -107,27 +105,6 @@ const ResetPassword: React.FC = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
-                <FormField
-                  control={form.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mã xác nhận</FormLabel>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Nhập họ tên"
-                            className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
-                            disabled={loading}
-                          />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="password"
