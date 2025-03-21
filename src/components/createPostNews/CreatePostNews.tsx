@@ -1,13 +1,12 @@
 import React, { ReactNode, useRef, useState } from "react";
-// import {Editor, EditorState} from 'draft-js';
-import axios from "axios";
 import { api } from "@/hooks/useAxios";
 import { TypeDataNews } from "@/pages/news/typeNews";
-import { useAppDispatch } from "@/redux/store";
-import { createNews } from "@/redux/slice";
+import { useAppDispatch } from "@/store/store";
+import { createNews } from "@/store/news.slice"; 
 import { X } from "lucide-react";
+import { notification } from "antd";
 
-
+type NotificationType = 'success' | 'info' | 'warning' | 'error';
 interface TypeImg  {
   id: number;
   url: string;
@@ -28,7 +27,22 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
 
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [image, setImage] = useState<FileList | null>(null);
+  const [api1, contextHolder] = notification.useNotification();
   const dispatch = useAppDispatch();
+
+  const openNotificationUpdateImage = (type: NotificationType) => {
+    api1[type]({
+      message: 'Update Image success',
+      duration: 1.5
+    })
+  };
+
+  const openNotificationAddNews = (type: NotificationType) => {
+    api1[type]({
+      message: 'Add news success',
+      duration: 1.5
+    })
+  };
 
 
   const updateImg = async () => {
@@ -36,7 +50,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
         alert("Vui lòng chọn một ảnh!");
         return;
     }
-    console.log(image)
+    
     const formData = new FormData()
     for (let i = 0; i < image.length; i++) {
       formData.append("files", image[i]); 
@@ -50,7 +64,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
       const imgId : number[]  = arrImg.map((item )  => item.id)
       console.log(imgId)
       setPost((prev) => ({ ...prev, img: imgId }));
-      alert('upload thanh cong')
+      openNotificationUpdateImage('success')
     }
   }
 
@@ -83,6 +97,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
         if(element) {
           element.style.display='none'
         }
+        openNotificationAddNews('success')
       }
     } catch (error) {
       console.error("Lỗi khi tạo bài viết:", error);
@@ -99,6 +114,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
 
   return (
     <div className=" relative m-[auto] lg:top-[10%] max-w-2xl  w-[100%] bg-white p-6 shadow-lg rounded-lg">
+      {contextHolder}
       <h2 className="text-2xl font-bold mb-4">Tạo bài viết mới</h2>
       <div className="absolute top-[4px] right-[12px] ">
         <button 
