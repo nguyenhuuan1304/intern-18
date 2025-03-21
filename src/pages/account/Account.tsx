@@ -15,6 +15,7 @@ interface TypeNavbarItem {
 }
 
 const Account = () => {
+  const user = localStorage.getItem("user");
   const [selectTab, setSelectTab] = useState(() => {
     return localStorage.getItem("selectedTab") || "info";
   });
@@ -27,6 +28,13 @@ const Account = () => {
     { id: "logout", label: "Đăng xuất", icon: <LogOut /> },
   ];
 
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+    console.log(user);
+  }, []);
+
   const handleSelectTab = (item: string) => {
     console.log(item);
     if (item === "logout") {
@@ -37,19 +45,18 @@ const Account = () => {
       localStorage.setItem("selectedTab", item);
     }
   };
-  console.log(selectTab);
 
   return (
     <Layout>
       <div className="layout flex-col">
         <Header />
-        <div className="flex-shrink-0  xl:mx-[4%] custom-content-account  max-md:mx-[6%]  py-8 max-sm:mx-0 max-md:pr-2 max-md:pl-2 max-xl:">
-          <div className="hidden md:block ">{/* <ServiceMenu />  */}</div>
-          <div className="bg-white shadow-2xl my-[50px] flex gap-[5px] max-lg:mx-[10px]  max-md:flex-col max-md:max-w-[540px] max-sm:m-[auto]">
+        <div className="max-w-[1400px] xl:mx-[auto] flex-shrink-0  max-xl:mx-[4%] custom-content-account  max-md:mx-[6%]  py-8 max-sm:mx-0 max-md:pr-2 max-md:pl-2 max-xl:">
+          <div className="hidden md:block "><ServiceMenu /> </div>
+          <div className="bg-white shadow-2xl my-[50px] flex gap-[5px] mx-[10px] max-xl:mx-[10px]  max-md:flex-col max-md:max-w-[540px] max-sm:m-[auto]">
             <div className=" w-[25%] max-sm:w-[100%] max-md:w-[100%]">
               <div className="text-[#212529] text-[15px] flex flex-col items-center p-[10px] border-b border-[#F7F8FA]">
                 <p className="font-medium ">KH00094915970282</p>
-                <p>Hữu An Sport Quy Nhơn</p>
+                <p>{user.username}</p>
               </div>
               <ul className="text-[#4a4a4a]">
                 {dataNavbar.map((item) => (

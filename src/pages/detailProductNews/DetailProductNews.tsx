@@ -9,6 +9,8 @@ import { bannerData } from '@/components/SliderProduct'
 import { api } from '@/hooks/useAxios'
 import { useSearchParams } from "react-router-dom";
 import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
+import { useSelector } from 'react-redux'
+import { RootState } from '@/redux/store'
 
 interface DetailProductNewsProps {
   category: string; 
@@ -31,6 +33,8 @@ interface TypeNews {
 }
 
 const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
+  const listNews = useSelector((state: RootState) => state.news.news) || []
+  console.log(listNews)
   const [news,setNews] = useState<TypeNews>({name: '', description: '', img: []})
   const [navStart, setNavStart] = useState(0)
   const [data, setData] = useState<Typedata[]>(bannerData); // Lưu trữ bản sao của dữ liệu
@@ -40,7 +44,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const content: BlocksContent = Array.isArray(news?.description) ? news.description : [];
 
   useEffect(() => {
-    const id = searchParams.get("id");
+    const id = searchParams.get("id") || null;
     
     if (id) {
       setSavedId(id);
@@ -82,10 +86,15 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
 
 
   useEffect(() => {
-    api.get(`/news/${savedId}?populate=*`)
-    .then(res => {
-      setNews(res.data.data)
-    })
+    if(savedId === null) {
+      return
+    } else {
+      api.get(`/news/${savedId}?populate=*`)
+      .then(res => {
+        setNews(res.data.data)
+      })
+
+    }
   },[savedId])
  
 
@@ -93,7 +102,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
     <div className=''>
       <Header/>
       <ServiceMenu/>
-      <div className='h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
+      <div className='max-w-[1400px] mx-[auto] h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
         <div className='row text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
           <a href="">
             <span>Trang chủ</span>
@@ -110,7 +119,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
           </a>
         </div>
       </div>
-      <div className='flex max-lg:flex-wrap flex-col lg:flex-row mx-[5%] lg:mx-[9%] my-[4%] gap-6'>
+      <div className='max-w-[1400px] 2xl:mx-[auto]  flex max-lg:flex-wrap flex-col lg:flex-row  max-2xl:mx-[4%] my-[10px] gap-6'>
         <div className=' my-[4%] flex flex-col basis-[80%] gap-x-[10px] gap-y-[20px]'>
             <h3 className='text-[20px] font-[500]'>{news.name}</h3>
             <div className='flex flex-wrap'>
@@ -234,7 +243,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
               </div>
             </div>
         </div>
-        <div className=''>
+        <div className='basis-[20%] bg-white text-[#333] max-lg:basis-[100%]'>
           <ContentSideBarNew title='Tin Tức Mới'/>
           <ContentSideBarNew title='Tin Tức Nổi Bậc'/>
           <ContentSideBarNew title='Sản phẩm đã xem'/>
