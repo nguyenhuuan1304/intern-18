@@ -97,7 +97,6 @@ export const routes: RouteObject[] = [
     ),
   },
   {
-
     // element: <PrivateRoute />, 
     children: [
       {
@@ -115,7 +114,7 @@ export const routes: RouteObject[] = [
         element: <CartPage />,
       },
     ],
-
+  },
   {
     path: "/product-detail/:documentId",
     element: (

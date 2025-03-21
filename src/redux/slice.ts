@@ -13,12 +13,19 @@ const initialState: TypeList = {
     news: []
 }
 
+interface ApiResponse<T> {
+    data: T;
+}
+
+
 // First, create the thunk
 export const getPostListNews = createAsyncThunk('news/getPostListNews', 
     async(_, thunkAPI) => {
-    const response = await api.get<TypeDataNews[]>('news?populate=*', {
+    const response = await api.get<ApiResponse<TypeDataNews[]>>('news?populate=*', {
         signal: thunkAPI.signal
     });
+    console.log(response.data.data)
+    console.log(123)
     return response.data.data;   
 })
 
@@ -43,13 +50,13 @@ export const createNews = createAsyncThunk('news/postNews',
                 slug: post.slug,
               }
             };
-            const response = await api.post('news', formattedPost, {
+            const response = await api.post("news", formattedPost, {
               signal: thunkAPI.signal,
             });
-            return response.data;
-        } catch (error: any) {
-            console.error("Lỗi khi tạo bài viết:", error.response?.data);
-            return thunkAPI.rejectWithValue(error.response?.data || error.message);
+            return response.data.data;
+        } catch (error) {
+            console.log(error)
+            throw error
         }
 })
 
