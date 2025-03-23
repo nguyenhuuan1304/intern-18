@@ -4,8 +4,8 @@ import { Minus, Plus } from "lucide-react";
 import categoryApi from "../api/category.api";
 import { Category } from "../product/types/ProductType";
 
-const CategorySidebar: React.FC = () => {
- const [categories, setCategories] = useState<Category[]>([]);
+const CategorySidebar: React.FC<{ onCategorySelect: (slug: string) => void }> = ({ onCategorySelect }) => {
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [expanded, setExpanded] = useState(false);
   const displayedCategories = expanded ? categories : categories.slice(0, 13);
@@ -32,7 +32,7 @@ const CategorySidebar: React.FC = () => {
       <div>
         <div className="flex flex-col">
           {displayedCategories.map((category) => (
-            <CategoryItem key={category.id} category={category} />
+            <CategoryItem key={category.id} category={category} onCategorySelect={onCategorySelect} />
           ))}
           <div
             className="p-3 hover:bg-gray-100 cursor-pointer flex justify-between border-t"

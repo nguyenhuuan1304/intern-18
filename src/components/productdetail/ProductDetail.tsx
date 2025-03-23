@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import { fetchProducts } from "@/store/productSlice";
 import { Send, Star } from "lucide-react";
-import { fetchProducts } from "@/components/product/service/ProductService";
-import { Product } from "@/components/product/types/ProductType";
 import ReviewSection from "./ReviewSection";
+import SaleSection from "../product/SaleSession";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 50 },
@@ -13,38 +15,16 @@ const fadeIn = {
 
 const ProductDetail: React.FC = () => {
     const { documentId } = useParams<{ documentId: string }>();
-    const [productDetail, setProductDetail] = useState<Product | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [averageRating, setAverageRating] = useState(0);
-    const [ratingCount, setRatingCount] = useState(0);
+    const dispatch = useDispatch<AppDispatch>();
+
+    const { products, loading, error } = useSelector((state: RootState) => state.products);
+    const productDetail = products.find((p) => p.documentId === documentId);
 
     useEffect(() => {
-        const getProductData = async () => {
-            try {
-                const products = await fetchProducts();
-                const product = products.find((p) => p.documentId === documentId);
-
-                if (!product) {
-                    setError("Không tìm thấy sản phẩm.");
-                    return;
-                }
-
-                setProductDetail(product);
-
-                const ratingsArray = product.ratings || [];
-                setRatingCount(ratingsArray.length);
-                setAverageRating(product.rating || 0);
-
-            } catch (err) {
-                setError("Lỗi khi tải dữ liệu.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        getProductData();
-    }, [documentId]);
+        if (!products.length) {
+            dispatch(fetchProducts());
+        }
+    }, [dispatch, products.length]);
 
     const hasStock = () => {
         const hasShoeStock = productDetail?.id_shoe
@@ -64,6 +44,7 @@ const ProductDetail: React.FC = () => {
 
     if (loading) return <p>Đang tải...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
+    if (!productDetail) return <p className="text-gray-500">Không tìm thấy sản phẩm.</p>;
 
     return (
         <div className="p-6 min-h-screen">
@@ -96,20 +77,17 @@ const ProductDetail: React.FC = () => {
                     )}
                 </div>
 
-                {/* Chi tiết sản phẩm */}
+                {/* product detail */}
                 <div className="w-full md:w-1/2 p-6 space-y-5">
                     <h1 className="text-xl md:text-2xl font-bold text-cyan-800">
                         {productDetail?.name}
                     </h1>
 
                     <div className="flex items-center space-x-1 text-sm font-bold">
-                        {[...Array(5)].map((_, i) => (
-                            <Star
-                                key={i}
-                                className={`text-sm ${i < Math.round(averageRating) ? "text-yellow-500" : "text-gray-300"}`}
-                            />
+                        {[...Array(5)].map((_, index) => (
+                            <Star key={index} className={index < Math.round(productDetail.rating || 0) ? "text-yellow-500" : "text-gray-300"} />
                         ))}
-                        <p className="ml-2 text-gray-600">({ratingCount} đánh giá)</p>
+                        <p className="ml-2 text-gray-600">({productDetail.ratingCount} đánh giá)</p>
                     </div>
 
                     <p className="text-gray-700 text-sm md:text-base">
@@ -117,6 +95,13 @@ const ProductDetail: React.FC = () => {
                             <span key={index}>{line}<br /></span>
                         ))}
                     </p>
+
+                    <div className="flex space-x-2">
+                        <p>Tình trạng:</p>
+                        <p className={`text-sm px-2 rounded-lg ${hasStock() ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
+                            {hasStock() ? "Còn hàng" : "Hết hàng"}
+                        </p>
+                    </div>
 
                     {productDetail?.product_sale?.percent_discount ? (
                         <div className="flex space-x-2">
@@ -139,13 +124,6 @@ const ProductDetail: React.FC = () => {
                         </p>
                     )}
 
-                    <div className="flex space-x-2">
-                        <p>Tình trạng:</p>
-                        <p className={`text-sm px-2 rounded-lg ${hasStock() ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
-                            {hasStock() ? "Còn hàng" : "Hết hàng"}
-                        </p>
-                    </div>
-
                     <button className="bg-orange-600 text-white px-4 py-2 rounded-lg">
                         Mua ngay
                     </button>
@@ -160,6 +138,7 @@ const ProductDetail: React.FC = () => {
                 </div>
             </motion.div>
             <ReviewSection productDetail={productDetail} documentId={documentId ?? ''} />
+            <SaleSection/>
         </div>
     );
 };

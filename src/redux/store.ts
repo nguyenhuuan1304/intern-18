@@ -1,10 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit'
-import  productState  from './slice'
+import productState from './slice'
 import { useDispatch } from "react-redux";
-
+import productReducer from "../store/productSlice";
+import ratingReducer from "../store/ratingSlice";
 
 export const store = configureStore({
-  reducer: {product: productState},
+  reducer: {
+    product: productState,
+    products: productReducer,
+    rating: ratingReducer,
+  },
 })
 
 //lấy RootState và appdispatch từ store 

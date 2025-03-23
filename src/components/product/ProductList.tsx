@@ -1,12 +1,15 @@
-import { ShoppingCart, Star } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import AddProduct from "./AddProduct";
-import { useState, useEffect } from "react";
-import { fetchProducts } from "./service/ProductService";
-import { Product } from "./types/ProductType";
-import { Label } from "@/components/ui/label";
+import type { RootState, AppDispatch } from "@/redux/store";
+import { fetchProducts, sortProducts, filterByCategory } from "@/store/productSlice";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { ShoppingCart, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Product } from "./types/ProductType";
+import { Label } from "@radix-ui/react-label";
+import { useParams } from "react-router-dom";
 
 const sortOptions = [
     { label: "Mới nhất", value: "latest" },
@@ -17,37 +20,28 @@ const sortOptions = [
 ];
 
 const ProductList: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
+    const dispatch = useDispatch<AppDispatch>();
+    const { products, loading, error } = useSelector((state: RootState) => state.products);
+    const [selectedOption, setSelectedOption] = useState<string>("");
     const [showForm, setShowForm] = useState(false);
-    const [selectedImages, setSelectedImages] = useState<{ [key: number]: string }>({});
-    const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [mainImages, setMainImages] = useState<{ [key: string]: string }>({});
     const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
-    // console.log("Render Parent - cartDrawerOpen:", cartDrawerOpen);
-
-    const loadProducts = async () => {
-        const data = await fetchProducts();
-        setProducts(data);
-        setAllProducts(data);
-
-        setSelectedImages(
-            data.reduce((acc, product) => {
-                acc[product.id] = product.Image.length > 0 ? product.Image[0].url : "";
-                return acc;
-            }, {} as { [key: number]: string })
-        );
-    };
+    const { categorySlug } = useParams<{ categorySlug?: string }>();
+    const didFilter = useRef(false);
+    console.log("Category Slug:", categorySlug);
+    console.log("All Products:", products);
 
     useEffect(() => {
-        loadProducts();
-    }, []);
+        dispatch(fetchProducts());
+    }, [dispatch]);
 
-    const handleColorClick = (productId: number, imageUrl: string) => {
-        setSelectedImages((prev) => ({
-            ...prev,
-            [productId]: imageUrl,
-        }));
-    };
+    const filteredProducts = useMemo(() => {
+        if (!categorySlug) return products;
+        return products.filter((product) => product.slug === categorySlug);
+    }, [products, categorySlug]);    
+
+    console.log("Filtered Products:", filteredProducts);
 
     const handleCartClick = (product: Product) => {
         setSelectedProduct(product);
@@ -56,21 +50,17 @@ const ProductList: React.FC = () => {
 
     const handleCloseForm = () => setShowForm(false);
 
-    const [selectedOption, setSelectedOption] = useState("best_selling");
-
     const handleOptionClick = (value: string) => {
         setSelectedOption(value);
-
-        let sortedProducts = [...allProducts];
-
-        if (value === "low_price") {
-            sortedProducts.sort((a, b) => a.prices - b.prices); // Sắp xếp từ thấp đến cao
-        } else if (value === "high_price") {
-            sortedProducts.sort((a, b) => b.prices - a.prices); // Sắp xếp từ cao đến thấp
-        }
-
-        setProducts(sortedProducts);
+        dispatch(sortProducts(value));
     };
+
+    const handleImageClick = (productId: string, newImageUrl: string) => {
+        setMainImages((prev) => ({ ...prev, [productId]: newImageUrl }));
+    };
+
+    if (loading) return <p>Đang tải...</p>;
+    if (error) return <p>Lỗi: {error}</p>;
 
     return (
         <>
@@ -95,7 +85,7 @@ const ProductList: React.FC = () => {
 
             <div className="p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {products.map((product, index) => (
+                    {filteredProducts.map((product, index) => (
                         <motion.div
                             key={product.id}
                             className="bg-white shadow-md rounded-lg overflow-hidden p-2 flex space-x-5 group hover:shadow-lg transition-shadow duration-300"
@@ -105,37 +95,29 @@ const ProductList: React.FC = () => {
                             viewport={{ once: true }}
                         >
                             <div className="w-3/4 flex flex-col space-y-2">
-                                <div className="overflow-hidden rounded-md">
 
+                                <div className="relative overflow-hidden rounded-md">
+                                    <img
+                                        src={mainImages[product.id] || (product.Image?.length ? product.Image[0].url : "https://via.placeholder.com/300")}
+                                        alt={product.name}
+                                        className="w-full h-64 object-cover rounded-md transform transition-transform duration-6000 group-hover:scale-150"
+                                    />
                                     {product?.product_sale?.percent_discount ? (
-                                        <div className="relative overflow-hidden">
-                                            <img
-                                                src={selectedImages[product.id]}
-                                                alt={product.name}
-                                                className="w-full h-64 object-cover rounded-md transform transition-transform duration-6000 group-hover:scale-150"
-                                            />
-                                            <div className="absolute top-2 left-[-30px] bg-orange-600 text-white px-8 py-1 text-sm font-bold rounded transform -rotate-45">
-                                                -{product.product_sale.percent_discount}%
-                                            </div>
+                                        <div className="absolute top-2 left-[-30px] bg-orange-600 text-white px-8 py-1 text-sm font-bold rounded transform -rotate-45">
+                                            -{product.product_sale.percent_discount}%
                                         </div>
-                                    ) : (
-                                        <img
-                                            src={product?.Image?.length ? selectedImages[product.id] : "https://via.placeholder.com/300"}
-                                            alt={product?.name}
-                                            className="w-full h-64 object-cover rounded-md transform transition-transform duration-6000 group-hover:scale-150"
-                                        />
-                                    )}
+                                    ) : null}
                                 </div>
 
                                 <div className="flex space-x-2 justify-center h-16">
                                     {product.product_images?.map((image, index) => (
                                         <div key={index} className="flex space-x-2">
-                                            {(Array.isArray(image.img) ? image.img : []).map((imgObj: any, imgIndex: number) => (
-                                                imgObj.url && ( // Kiểm tra URL hợp lệ
+                                            {image.img.map((imgObj, imgIndex) => (
+                                                imgObj.url && (
                                                     <button
                                                         key={imgIndex}
                                                         className="w-16 h-full cursor-pointer"
-                                                        onClick={() => handleColorClick(product.id, imgObj.url)}
+                                                        onClick={() => handleImageClick(product.id.toString(), imgObj.url)}
                                                     >
                                                         <img
                                                             src={imgObj.url}
@@ -153,11 +135,9 @@ const ProductList: React.FC = () => {
 
                                 {product?.product_sale?.percent_discount ? (
                                     <div className="flex space-x-2">
-                                        {/* Giá gốc gạch ngang */}
                                         <p className="text-gray-500 line-through">
                                             {product.prices.toLocaleString()}đ
                                         </p>
-                                        {/* Giá sau khi giảm */}
                                         <p className="text-red-500 text-base font-bold">
                                             {(
                                                 product.prices -
@@ -166,7 +146,6 @@ const ProductList: React.FC = () => {
                                         </p>
                                     </div>
                                 ) : (
-                                    /* Hiển thị giá gốc nếu không có giảm giá */
                                     <p className="text-red-500 text-base font-bold">
                                         {product?.prices.toLocaleString()}đ
                                     </p>
@@ -180,14 +159,13 @@ const ProductList: React.FC = () => {
                                         />
                                     ))}
                                 </div>
-
                             </div>
 
                             <div className="w-1/4 flex flex-col items-start text-sm font-medium space-y-2">
                                 <p className="font-semibold">Tồn kho</p>
                                 {product.id_shirt_pant ? (
                                     Object.entries(product.id_shirt_pant)
-                                        .filter(([key]) => key !== "id" && key !== "documentId") // Bỏ qua id và documentId
+                                        .filter(([key]) => key !== "id" && key !== "documentId")
                                         .map(([size, quantity]) => (
                                             <div key={size} className="flex justify-between w-full">
                                                 <p>{size}</p>
@@ -196,7 +174,7 @@ const ProductList: React.FC = () => {
                                         ))
                                 ) : product.id_shoe ? (
                                     Object.entries(product.id_shoe)
-                                        .filter(([key]) => key !== "id" && key !== "documentId") // Bỏ qua id và documentId
+                                        .filter(([key]) => key !== "id" && key !== "documentId")
                                         .map(([size, quantity]) => (
                                             <div key={size} className="flex justify-between w-full">
                                                 <p>{size}</p>
@@ -243,16 +221,15 @@ const ProductList: React.FC = () => {
                                         onClose={() => setShowForm(false)}
                                         cartDrawerOpen={cartDrawerOpen}
                                         setCartDrawerOpen={setCartDrawerOpen}
-
                                     />}
                             </div>
                         </div>
                     </>
 
                 )}
-            </div >
+            </div>
         </>
     );
 };
 
-export default ProductList;
+export default ProductList

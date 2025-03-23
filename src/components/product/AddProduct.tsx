@@ -14,7 +14,7 @@ const AddProduct: React.FC<AddProductProps> = ({ product, onClose, cartDrawerOpe
 
     const [quantities, setQuantities] = useState<Record<string, number>>({});
     const [cartItems, setCartItems] = useState<any[]>([]);
-    const [error, setError] = useState<string>(""); // State để hiển thị lỗi
+    const [error, setError] = useState<string>("");
     const stockData = product.id_shirt_pant || product.id_shoe || {};
 
     const handleQuantityChange = (size: string, delta: number) => {

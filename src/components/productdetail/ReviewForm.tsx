@@ -1,19 +1,23 @@
 import { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Star } from "lucide-react";
-import { createRating } from "./service/RatingService";
+import { useDispatch, useSelector } from "react-redux";
+import { createRating } from "@/store/ratingSlice";
+import { AppDispatch, RootState } from "@/redux/store";
 
 interface ReviewFormProps {
     onClose: () => void;
-    documentId: string; 
+    documentId: string;
 }
 
 const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
+    const dispatch = useDispatch<AppDispatch>();
+    const loading = useSelector((state: RootState) => state.rating.loading);
+
     const [rating, setRating] = useState(0);
     const [description, setDescription] = useState("");
     const [images, setImages] = useState<File[]>([]);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
@@ -27,7 +31,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
             const fileArray = Array.from(event.target.files);
             setImages(fileArray);
 
-            const previewUrls = fileArray.map(file => URL.createObjectURL(file));
+            const previewUrls = fileArray.map((file) => URL.createObjectURL(file));
             setPreviewImages(previewUrls);
         }
     };
@@ -38,23 +42,16 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
             return;
         }
 
-        console.log("documentId:", documentId);
-        setLoading(true);
-
-        try {
-            await createRating({
+        await dispatch(
+            createRating({
                 rating,
                 description,
-                product: documentId, 
+                product: documentId,
                 images,
-            });
+            })
+        );
 
-            onClose();
-        } catch (error) {
-            console.error("Gửi đánh giá thất bại:", error);
-        } finally {
-            setLoading(false);
-        }
+        onClose();
     };
 
     return ReactDOM.createPortal(
@@ -67,7 +64,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
                 <h2 className="text-lg font-semibold text-gray-800 mb-3">Viết đánh giá của bạn</h2>
 
                 <div className="flex space-x-1 mb-3">
-                    {[1, 2, 3, 4, 5].map(star => (
+                    {[1, 2, 3, 4, 5].map((star) => (
                         <span
                             key={star}
                             className={`cursor-pointer text-2xl ${star <= rating ? "text-yellow-400" : "text-gray-300"}`}
