@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/redux/store";
+import { AppDispatch, RootState } from "@/store/store";
 import { fetchProducts } from "@/store/productSlice";
 import { Send, Star } from "lucide-react";
 import ReviewSection from "./ReviewSection";

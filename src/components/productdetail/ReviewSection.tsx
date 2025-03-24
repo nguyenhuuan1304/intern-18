@@ -95,7 +95,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productDetail, documentId
                                         style={{ width: `${percentage}%` }}
                                     ></div>
                                 </div>
-                                <span className="text-gray-600 w-18">{percentage.toFixed(1)}% | {count}</span>
+                                <span className="text-gray-600 w-24">{percentage.toFixed(1)}% | {count}</span>
                             </div>
                         );
                     })}
@@ -129,14 +129,24 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productDetail, documentId
                         <>
                             {filteredRatings.slice(0, visibleCount).map((review, index) => (
                                 <div key={index} className="bg-gray-100 p-4 rounded-lg shadow-md">
-                                    <div className="flex items-center space-x-1">
-                                        {Array.from({ length: review.rating }).map((_, i) => (
-                                            <span key={i} className="text-yellow-500 text-lg"><Star /></span>
-                                        ))}
+                                    <div className="flex items-center space-x-2">
+                                        <div className="flex">
+                                            {Array.from({ length: review.rating }).map((_, i) => (
+                                                <span key={i} className="text-yellow-500 text-lg"><Star /></span>
+                                            ))}
+                                        </div>
+
+                                        {/* Thêm nhận xét ngay bên cạnh các sao */}
+                                        {review.rating === 5 && <span className="text-green-600 font-semibold">Cực kì hài lòng!</span>}
+                                        {review.rating === 4 && <span className="text-blue-600 font-semibold">Hài lòng!</span>}
+                                        {review.rating === 3 && <span className="text-yellow-600 font-semibold">Bình thường!</span>}
+                                        {review.rating === 2 && <span className="text-orange-600 font-semibold">Chưa tốt lắm!</span>}
+                                        {review.rating === 1 && <span className="text-red-600 font-semibold">Không hài lòng!</span>}
                                     </div>
+
+                                    <p className="text-cyan-700 text-xl">{review.username}</p>
                                     <p className="text-gray-700">{review.description}</p>
 
-                                    {/* Hiển thị ảnh nếu có */}
                                     {review.img && review.img.length > 0 && (
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {review.img.map((image: any) => (

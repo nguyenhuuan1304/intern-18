@@ -30,7 +30,7 @@ export const fetchRatings = createAsyncThunk("rating/fetchRatings", async () => 
 // Async action để tạo đánh giá mới
 export const createRating = createAsyncThunk(
     "rating/createRating",
-    async ({ rating, description, product, images }: { rating: number; description: string; product: string; images?: File[] }) => {
+    async ({ username, rating, description, product, images }: { username: string; rating: number; description: string; product: string; images?: File[] }) => {
         let imageIds: number[] = [];
 
         if (images && images.length > 0) {
@@ -45,7 +45,7 @@ export const createRating = createAsyncThunk(
         }
 
         const payload = {
-            data: { rating, description, product, img: imageIds.length ? imageIds : undefined },
+            data: { username, rating, description, product, img: imageIds.length ? imageIds : undefined },
         };
 
         const response = await api.post("/ratings", payload);

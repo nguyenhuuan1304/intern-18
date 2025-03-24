@@ -49,6 +49,7 @@ export const fetchProducts = createAsyncThunk("products/fetchProducts", async (_
                 slug: item.slug,
                 rating: averageRating,
                 ratingCount,
+                usernameRating: item.ratings.username,
                 ratings: ratingsArray,
                 Image: item.Image?.map((img: any) => ({
                     id: img.id,
@@ -138,12 +139,7 @@ const productSlice = createSlice({
 
             state.products = sortedProducts;
         },
-        filterByCategory(state, action: PayloadAction<string>) {
-            const categorySlug = action.payload;
-            state.products = categorySlug === "all"
-                ? state.allProducts
-                : state.allProducts.filter((product) => product.name_category?.slug === categorySlug);
-        }        
+        
     },
     extraReducers: (builder) => {
         builder
@@ -163,5 +159,5 @@ const productSlice = createSlice({
     },
 });
 
-export const { sortProducts, filterByCategory } = productSlice.actions;
+export const { sortProducts } = productSlice.actions;
 export default productSlice.reducer;

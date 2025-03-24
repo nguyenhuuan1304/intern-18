@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddProduct from "./AddProduct";
-import type { RootState, AppDispatch } from "@/redux/store";
-import { fetchProducts, sortProducts, filterByCategory } from "@/store/productSlice";
+import type { RootState, AppDispatch } from "@/store/store";
+import { fetchProducts, sortProducts } from "@/store/productSlice";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Star } from "lucide-react";
 import { motion } from "framer-motion";
@@ -28,9 +28,6 @@ const ProductList: React.FC = () => {
     const [mainImages, setMainImages] = useState<{ [key: string]: string }>({});
     const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
     const { categorySlug } = useParams<{ categorySlug?: string }>();
-    const didFilter = useRef(false);
-    console.log("Category Slug:", categorySlug);
-    console.log("All Products:", products);
 
     useEffect(() => {
         dispatch(fetchProducts());
@@ -41,13 +38,16 @@ const ProductList: React.FC = () => {
         return products.filter((product) => product.slug === categorySlug);
     }, [products, categorySlug]);    
 
-    console.log("Filtered Products:", filteredProducts);
-
+    // const handleCartClick = (product: Product) => {
+    //     setSelectedProduct(product);
+    //     setShowForm(true);
+    // };
     const handleCartClick = (product: Product) => {
-        setSelectedProduct(product);
+        const imageUrl = mainImages[product.id] || (product.Image?.length ? product.Image[0].url : "");
+        setSelectedProduct({ ...product, imageUrl });
         setShowForm(true);
     };
-
+    
     const handleCloseForm = () => setShowForm(false);
 
     const handleOptionClick = (value: string) => {
@@ -98,7 +98,7 @@ const ProductList: React.FC = () => {
 
                                 <div className="relative overflow-hidden rounded-md">
                                     <img
-                                        src={mainImages[product.id] || (product.Image?.length ? product.Image[0].url : "https://via.placeholder.com/300")}
+                                        src={mainImages[product.id] || (product.Image?.length ? product.Image[0].url : "")}
                                         alt={product.name}
                                         className="w-full h-64 object-cover rounded-md transform transition-transform duration-6000 group-hover:scale-150"
                                     />
@@ -220,6 +220,7 @@ const ProductList: React.FC = () => {
                                         product={selectedProduct}
                                         onClose={() => setShowForm(false)}
                                         cartDrawerOpen={cartDrawerOpen}
+                                        imageUrl={selectedProduct.imageUrl}
                                         setCartDrawerOpen={setCartDrawerOpen}
                                     />}
                             </div>

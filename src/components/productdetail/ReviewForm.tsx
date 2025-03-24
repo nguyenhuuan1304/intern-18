@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { Star } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createRating } from "@/store/ratingSlice";
-import { AppDispatch, RootState } from "@/redux/store";
+import { AppDispatch, RootState } from "@/store/store";
 
 interface ReviewFormProps {
     onClose: () => void;
@@ -18,7 +18,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
     const [description, setDescription] = useState("");
     const [images, setImages] = useState<File[]>([]);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
-
+    const user = JSON.parse(localStorage.getItem("user") || "{}"); 
+    const username = user.username || "";
+    
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
@@ -44,6 +46,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
 
         await dispatch(
             createRating({
+                username,
                 rating,
                 description,
                 product: documentId,
