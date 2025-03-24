@@ -95,7 +95,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productDetail, documentId
                                         style={{ width: `${percentage}%` }}
                                     ></div>
                                 </div>
-                                <span className="text-gray-600 w-8">{percentage.toFixed(1)}%</span>
+                                <span className="text-gray-600 w-18">{percentage.toFixed(1)}% | {count}</span>
                             </div>
                         );
                     })}

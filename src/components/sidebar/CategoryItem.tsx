@@ -7,12 +7,14 @@ interface CategoryItemProps {
   category: Category;
   level?: number;
   onSubmenuOpen?: (id: string) => void;
+  onCategorySelect?: (slug: string) => void;
 }
 
 const CategoryItem: React.FC<CategoryItemProps> = ({
   category,
   level = 1,
   onSubmenuOpen = () => {},
+  onCategorySelect = () => {},
 }) => {
   const [submenuOpen, setSubmenuOpen] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -45,6 +47,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   const handleLinkClick = () => {
     if (isMobile) {
       setSubmenuOpen(false);
+      onCategorySelect(category.slug);
     }
   };
 
