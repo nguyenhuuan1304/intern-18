@@ -1,7 +1,15 @@
 import React from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle, User, Loader2, Check } from "lucide-react";
+import {
+  ArrowLeft,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  Loader2,
+  Check,
+} from "lucide-react";
 import resetPassword from "@/assets/resetpassword3.jpg";
 import { useState } from "react";
 import * as z from "zod";
@@ -16,7 +24,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import authApi from "../api/auth.api";
 import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { resetPasswordUser } from "@/store/auth.slice";
@@ -48,31 +55,31 @@ const ResetPassword: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [searchParams] = useSearchParams();
-  const {loading} = useAppSelector((state) => state.auth)
-  const dispatch = useAppDispatch()
+  const { loading } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const code = searchParams.get("code") ?? undefined;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      code :code ,
+      code: code,
       password: "",
       passwordConfirmation: "",
     },
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const res = await dispatch(resetPasswordUser({
-        code: values.code,
-        password: values.password,
-        passwordConfirmation: values.passwordConfirmation,
-      })).unwrap();
-      console.log( ' res' , res)
+      const res = await dispatch(
+        resetPasswordUser({
+          code: values.code,
+          password: values.password,
+          passwordConfirmation: values.passwordConfirmation,
+        })
+      ).unwrap();
       toast.success("Khôi phục mật khẩu thành công");
       navigate("/login");
     } catch (error) {
       toast.error("Mã xác nhận không đúng");
-    
     }
   };
   return (
@@ -107,27 +114,6 @@ const ResetPassword: React.FC = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
-                <FormField
-                  control={form.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mã xác nhận</FormLabel>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Nhập họ tên"
-                            className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
-                            disabled={loading}
-                          />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="password"

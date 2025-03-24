@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { useState, useRef } from "react";
+
+import React, { useEffect, useState, useRef } from "react";
 import { Search, X, AlignJustify } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import http from "@/hooks/useAxios";
@@ -15,7 +15,8 @@ interface typeImage {
   };
 }
 
-interface typeProduct {
+export interface typeProduct {
+
   documentId: string;
   name: string;
   color: string;
@@ -27,18 +28,24 @@ export interface User {
   username: string;
   jwt: string;
   email: string;
-  // Các thuộc tính khác nếu có
+
 }
+import CategorySidebar from "@/components/sidebar/CategorySidebar";
+
 const Header = () => {
   const user: User = JSON.parse(localStorage.getItem("user"));
   const [value, setValue] = useState("");
-  const [valueIpad, setvalueIpad] = useState("");
+  const [valueIpad, setValueIpad] = useState("");
+
   const [circle, setCircle] = useState(false);
   const [arrSearch, setArrSearch] = useState<typeProduct[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputRefIpad = useRef<HTMLInputElement>(null);
   const debounce = useDebounce(value || valueIpad, 500);
   const navigate = useNavigate();
+  const [showSidebarMobile, setShowSidebarMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
   useEffect(() => {
     if (!debounce.trim()) {
       setArrSearch([]);
@@ -53,7 +60,6 @@ const Header = () => {
         const configData: typeProduct[] = Object.values(
           res.data.reduce(
             (acc: { [key: string]: typeProduct }, item: typeProduct) => {
-              // console.log(acc)
               acc[item.documentId] = item;
               return acc;
             },
@@ -62,11 +68,23 @@ const Header = () => {
         );
         if (configData) {
           setArrSearch(configData);
-        } else {
-          return;
         }
       });
   }, [debounce]);
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+
+      // Tự động đóng sidebar khi chuyển sang desktop
+      if (!mobile && showSidebarMobile) {
+        setShowSidebarMobile(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [showSidebarMobile]);
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -76,6 +94,7 @@ const Header = () => {
   const handleCircle = () => {
     setValue("");
     setCircle(false);
+
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -96,6 +115,20 @@ const Header = () => {
       inputRefIpad.current.focus();
     }
 
+    inputRef.current?.focus();
+  };
+
+  const showSearchMobile = () => {
+    const search = document.getElementById("search-Mobile");
+    if (search) {
+      search.classList.add("show");
+    }
+  };
+
+  const handleCircleIpad = () => {
+    setValueIpad("");
+    inputRefIpad.current?.focus();
+
     const search = document.getElementById("search-Mobile");
     if (search) {
       search.classList.remove("show");
@@ -108,6 +141,7 @@ const Header = () => {
       name: product.name,
       thumbnailUrl: product.Image?.formats?.thumbnail?.url || "Không có ảnh",
     }));
+
   const handleLogout = (): void => {
     localStorage.removeItem("user");
     navigate("/login");
@@ -116,14 +150,19 @@ const Header = () => {
   return (
     <div className="layout">
       <div
-        className="custom-header custom-header-mobile 
-            2xl:mr-[6.5%] 2xl:ml-[6.5%] lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5"
+        className="custom-header custom-header-mobile   z-50 relative
+          2xl:mr-[6.5%] 2xl:ml-[6.5%] lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5"
+
       >
-        <div className="lg:hidden text-[#fff]">
+        {/* Menu Mobile: khi nhấn vào thì hiển thị sidebar category */}
+        <div
+          className="lg:hidden text-[#fff] cursor-pointer"
+          onClick={() => setShowSidebarMobile(!showSidebarMobile)}
+        >
           <AlignJustify />
         </div>
         <div className="row-span-2 md:w-[150px]">
-          <NavLink to={"/"} className="">
+          <NavLink to={"/"}>
             <img
               className="md:w-[150px]"
               src="https://kawin.vn/uploads/source//logo/z4795324951181-8df678a6cf3f0283a5b110357eb0c396.webp"
@@ -131,18 +170,19 @@ const Header = () => {
             />
           </NavLink>
         </div>
-        <button className="lg:hidden " onClick={showSearchMobile}>
+        <button className="lg:hidden" onClick={showSearchMobile}>
           <Search className="to text-[#fff]" />
         </button>
 
-        <div className="custom-input-mobile  lg:flex lg:h-[46px] lg:relative">
-          <div className=" custom-input 2xl:w-[420px] lg:h-[46px] lg:mr-[40px] lg:relative">
+        <div className="custom-input-mobile lg:flex lg:h-[46px] lg:relative">
+          <div className="custom-input 2xl:w-[420px] lg:h-[46px] lg:mr-[40px] lg:relative">
             <form
               action=""
               className="flex flex-row w-full h-full rounded-[20px] overflow-hidden border border-blue-600"
             >
               <input
-                className=" lg:w-[350px] lg:py-2.5 lg:px-3.5 lg:text-base lg:font-normal lg:leading-[1.5] lg:outline-none "
+
+                className="lg:w-[350px] lg:py-2.5 lg:px-3.5 lg:text-base lg:font-normal lg:leading-[1.5] lg:outline-none"
                 type="text"
                 value={value}
                 ref={inputRef}
@@ -154,6 +194,7 @@ const Header = () => {
                 <Search className="m-auto text-[#fff]" />
               </button>
             </form>
+
             {value === "" ||
               (circle && (
                 <button
@@ -168,10 +209,49 @@ const Header = () => {
               (circle && (
                 <div className=" absolute top-[60px] z-[99] max-h-[336px] w-[420px] bg-white rounded-[5px] shadow-[0_4px_60px_0_rgba(0,0,0,0.2)]">
                   <div className="bg-[#f5f5f5] h-[36px] flex items-center">
+
+            {(value !== "" || circle) && (
+              <button
+                className="absolute top-[12px] right-[80px]"
+                onClick={handleCircle}
+              >
+                <X size={22} strokeWidth={0.5} />
+              </button>
+            )}
+            {(value !== "" || circle) && (
+              <div className="absolute top-[60px] z-[99] max-h-[336px] w-[420px] bg-white rounded-[5px] shadow-[0_4px_60px_0_rgba(0,0,0,0.2)]">
+                <div className="bg-[#f5f5f5] h-[36px] flex items-center">
+                  <span className="p-[10px] text-[13px] text-[#666]">
+                    sản phẩm gợi ý
+                  </span>
+                </div>
+                {arrSearch.length !== 0 ? (
+                  <div className="product-slider-vertical scroll-area">
+                    {thumbnailUrls.map((item, index) => (
+                      <div key={index} className="flex p-[10px]">
+                        <div className="w-[75px] h-[75px] mr-[10px]">
+                          <img
+                            className="object-cover h-full"
+                            src={`http://localhost:1337${thumbnailUrls[0].thumbnailUrl}`}
+                            alt=""
+                          />
+                        </div>
+                        <div>
+                          <h3 className="mb-[10px] text-[14px] text-[#323c3f]">
+                            {item.name}
+                          </h3>
+                          <span className="text-[#ff5c5f]">{item.price}đ</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-[#fff] h-[36px] flex items-center">
                     <span className="p-[10px] text-[13px] text-[#666]">
-                      sản phẩm gợi ý
+                      Không có kết quả tìm kiếm
                     </span>
                   </div>
+
                   {(arrSearch.length != 0 && (
                     <div className="">
                       <div className="product-slider-vertical scroll-area">
@@ -205,6 +285,11 @@ const Header = () => {
                   )}
                 </div>
               ))}
+
+                )}
+              </div>
+            )}
+
           </div>
 
           <div className="flex grow justify-between gap-[15px]">
@@ -244,8 +329,8 @@ const Header = () => {
                 </div>
                 <div>
                   <NavLink
-                    to="/login" // Thay đổi đường dẫn phù hợp với ứng dụng của bạn
-                    onClick={() => handleLogout()}
+                    to="/login"
+                    onClick={handleLogout}
                     className="text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center"
                   >
                     <div>
@@ -384,11 +469,12 @@ const Header = () => {
             <input
               type="text"
               value={valueIpad}
-              onChange={(e) => setvalueIpad(e.target.value)}
+              onChange={(e) => setValueIpad(e.target.value)}
               className="w-[85%] bg-[#fff] p-[10px] text-[#000]"
               placeholder="tìm kiếm"
+              ref={inputRefIpad}
             />
-            <div className="grow-[1] ml-[10px] flex justify-evenly cursor-pointer">
+            <div className="grow ml-[10px] flex justify-evenly cursor-pointer">
               <button>
                 <Search className="to text-[#fff]" />
               </button>
@@ -402,11 +488,11 @@ const Header = () => {
           {thumbnailUrls.map((item, index) => (
             <div
               key={index}
-              className="h-[auto] mb-[10px] border-b border-gray-300"
+              className="h-auto mb-[10px] border-b border-gray-300"
             >
               <a href="" className="flex h-[75px] p-[4px]">
                 <img
-                  className="obj"
+                  className="object-cover h-full"
                   src={`http://localhost:1337/${thumbnailUrls[0].thumbnailUrl}`}
                   alt=""
                 />
@@ -416,9 +502,24 @@ const Header = () => {
           ))}
         </div>
       </div>
+
+      {/* Overlay sidebar category trên mobile */}
+      {showSidebarMobile && (
+        <div className="fixed top-[60px] left-0 right-0 bottom-0 z-40 bg-white overflow-y-auto">
+          <button
+            className="absolute top-0 right-0 m-4"
+            onClick={() => setShowSidebarMobile(false)}
+          >
+            <X size={24} strokeWidth={2} color="black" />
+          </button>
+          <CategorySidebar />
+        </div>
+      )}
+
+
       <NavbarMobile />
     </div>
   );
 };
-
 export default Header;
+

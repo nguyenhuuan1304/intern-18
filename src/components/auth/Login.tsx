@@ -1,7 +1,15 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Lock, ArrowLeft, Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
+import {
+  User,
+  Lock,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  LogIn,
+  Loader2,
+} from "lucide-react";
 import loginBg from "@/assets/login-bg.svg";
 import loginTree from "@/assets/login-tree.svg";
 import { useState } from "react";
@@ -35,9 +43,9 @@ const formSchema = z.object({
     ),
 });
 const Login: React.FC = () => {
-  const dispatch = useAppDispatch()
-  const {loading} = useAppSelector((state) => state.auth)
-  const [showPassword, setShowPassword] = useState(false)
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.auth);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,30 +54,28 @@ const Login: React.FC = () => {
       password: "",
     },
   });
-  const onSubmit =async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values);
-  try {
+    try {
       const loginPayload = {
         identifier: values.username,
         password: values.password,
       };
-      const res = await dispatch(loginUser(loginPayload)).unwrap()
-     if(res.user) {
-         toast.success("Đăng nhập thành công");
-        navigate("/")
+      const res = await dispatch(loginUser(loginPayload)).unwrap();
+      if (res.user) {
+        toast.success("Đăng nhập thành công");
+        navigate("/");
         const userData = {
           jwt: res.jwt,
           username: res.user.username,
           email: res.user.email,
         };
         localStorage.setItem("user", JSON.stringify(userData));
-
-        }
-  } catch (error) {
-      if (error instanceof Error) {        
-         toast.error("Email, tên đăng nhập hoặc mật khẩu không chính xác!");
-      } 
-  }
+      }
+    } catch (error) {
+      const erroMessage = error?.error.message;
+      toast.error(erroMessage);
+    }
   };
   return (
     <div className="container w-full max-w-screen-lg mx-auto px-2 md:px-4 md:w-[1100px]">
@@ -160,7 +166,7 @@ const Login: React.FC = () => {
                     </FormItem>
                   )}
                 />
-               
+
                 <Button
                   type="submit"
                   disabled={loading}
@@ -217,7 +223,6 @@ const Login: React.FC = () => {
       </div>
     </div>
   );
-
 };
 
 export default Login;

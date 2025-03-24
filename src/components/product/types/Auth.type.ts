@@ -1,3 +1,8 @@
+export interface User {
+  username: string;
+  jwt: string;
+  email: string;
+}
 export interface AuthUser {
   id: number;
   name?: string;
@@ -5,7 +10,6 @@ export interface AuthUser {
   email: string;
   documentId?: string;
 }
-
 
 export interface RegisterResponse {
   token: string;
@@ -34,4 +38,8 @@ export interface ForgotPasswordResponse {
 export interface ResetPasswordResponse {
   ok: boolean;
   message: string;
+}
+
+export interface ChangePasswordResponse {
+  user: User;
 }

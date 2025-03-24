@@ -88,11 +88,11 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         (isMobile ? (
           // Với mobile: luôn render submenu, nhưng điều chỉnh vị trí qua CSS transform để tạo hiệu ứng trượt
           <div
-            className={`fixed inset-0 bg-white z-50 transform transition-transform duration-500 ${
+            className={`fixed top-[60px] left-0 right-0 bottom-0 bg-white z-40 transform transition-transform duration-500 ${
               submenuOpen ? "translate-x-0" : "translate-x-full"
             }`}
           >
-            <div className="flex items-center p-3 border-b bg-gray-50">
+            <div className="flex items-center p-3 border-b bg-gray-50 h-[60px]">
               <button onClick={handleBackClick} className="mr-2">
                 <ChevronLeft className="h-5 w-5 text-gray-500" />
               </button>

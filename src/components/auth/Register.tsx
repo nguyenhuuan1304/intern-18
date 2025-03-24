@@ -26,7 +26,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
- import { toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { registerUser } from "@/store/auth.slice";
 import { Button } from "../ui/button";
@@ -61,7 +61,7 @@ const formSchema = z
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const {loading} = useAppSelector((state) => state.auth);
+  const { loading } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -83,14 +83,13 @@ const Register: React.FC = () => {
         password: values.password,
       };
       const res = await dispatch(registerUser(registerPayload)).unwrap();
-      if(res.user) {
-       toast.success("Đăng ký thành công");
-      navigate("/login")
+      if (res.user) {
+        toast.success("Đăng ký thành công");
+        navigate("/login");
       }
-    } catch (error ) {
-     if (error instanceof Error) {
-     toast.error("Email hoặc tên đăng nhập đã tồn tại!");
-  } 
+    } catch (error) {
+      const erroMessage = error?.error.message;
+      toast.error(erroMessage);
     }
   };
   return (

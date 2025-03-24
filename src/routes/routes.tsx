@@ -1,30 +1,28 @@
 
-import DetailProduct from "@/pages/detailProduct/DetailProduct";
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
-import PrivateRoute from "./PrivateRoutes";
-import PublicRoute from "./PublicRoutes";
-
+const NotFound = lazy(() => import( "@/components/Notfound")) ;
+const PrivateRoute = lazy(() => import("./PrivateRoutes"));
+const PublicRoute = lazy(() => import("./PublicRoutes"));
 const HomePage = lazy(() => import("../pages/HomePage"));
-
 const Account = lazy(() => import("../pages/account/Account"));
 const Order = lazy(() => import("../pages/order/Order"));
 const Payment = lazy(() => import("../pages/payment/Payment"));
-const Contact = lazy(() => import("../pages/contact/Contact"));
-const CategoryMobile = lazy(() => import("../pages/categoryMoblie/categoryMobile"));
-const ProductPage = lazy(() => import("../pages/ProductPage"));
-const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 const News = lazy(() => import("../pages/news/News"));
 const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
+const ProductPage = lazy(() => import("../pages/ProductPage"));
+const Contact = lazy(() => import("../pages/contact/Contact"));
+const CategoryMobile = lazy(
+  () => import("../pages/categoryMoblie/categoryMobile")
+);
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+
 const RegisterPage = lazy(() => import("../pages/auth/RegisterPage"));
 const ForgotPasswordPage = lazy(
   () => import("../pages/auth/ForgotPasswordPage")
 );
 const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
-
-
 const CartPage = lazy(() => import("../pages/cart/CartPage"));
-
 export const routes: RouteObject[] = [
   {
     path: "/",
@@ -70,6 +68,7 @@ export const routes: RouteObject[] = [
   },
   {
     path: "/thanh-toan",
+
     element: (
       <Payment />
     ),
@@ -124,6 +123,40 @@ export const routes: RouteObject[] = [
     element: (
       <ProductDetailPage />
     ),
+
+
+    element: <Payment />,
+  },
+  {
+    path: "/lien-he",
+    element: <Contact />,
+  },
+  {
+    path: "/tin-tuc",
+    element: <News />,
+  },
+  {
+    element: <PrivateRoute />,
+    children: [
+      {
+        path: "/account",
+        element: <Account />,
+        children: [
+          {
+            path: "order",
+            element: <Order />,
+          },
+        ],
+      },
+      {
+        path: "/cart",
+        element: <CartPage />,
+      },
+    ],
+  },
+  {
+    path: "/notfound",
+    element: <NotFound />,
 
   },
 ];

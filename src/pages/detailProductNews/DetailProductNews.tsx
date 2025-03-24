@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ContentSideBarNew from '@/components/contentSideBarNew/ContentSideBarNew'
 import Header from '@/components/header/Header'
 import ServiceMenu from '@/components/ServiceMenu'
@@ -8,9 +8,13 @@ import { motion ,AnimatePresence} from "framer-motion";
 import { bannerData } from '@/components/SliderProduct'
 import { api } from '@/hooks/useAxios'
 import { useSearchParams } from "react-router-dom";
-import ReactMarkdown from "react-markdown"
 import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
+import { useSelector } from 'react-redux'
+import { RootState } from '@/redux/store'
 
+interface DetailProductNewsProps {
+  category: string; 
+}
 interface Typedata {
     id: number;
     title: string;
@@ -18,26 +22,41 @@ interface Typedata {
     path: string;
 }
 
-const DetailProduct = (props: string) => {
-  const [news,setNews] = useState([])
-  const [currentIndex, setCurrentIndex] = useState(0);
+interface TypeImg {
+  url : string
+}
+
+interface TypeNews {
+  name: string;
+  description: string;
+  img: TypeImg[];
+}
+
+const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
+  const listNews = useSelector((state: RootState) => state.news.news) || []
+  console.log(listNews)
+  const [news,setNews] = useState<TypeNews>({name: '', description: '', img: []})
   const [navStart, setNavStart] = useState(0)
   const [data, setData] = useState<Typedata[]>(bannerData); // Lưu trữ bản sao của dữ liệu
   const [searchParams, setSearchParams] = useSearchParams();
-  const id = searchParams.get("id") || null;
-  const listImg = news.img || []
-  console.log(listImg)
-    console.log(news)
-  const content: BlocksContent = news?.description || []
-
-  console.log(content)
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const listImg : TypeImg[] = news.img || []
+  const content: BlocksContent = Array.isArray(news?.description) ? news.description : [];
 
   useEffect(() => {
+    const id = searchParams.get("id") || null;
+    
     if (id) {
-      // Ẩn ID khỏi URL sau khi đã lấy nó
+      setSavedId(id);
+      localStorage.setItem("savedId", id); // Lưu vào localStorage
       window.history.replaceState({}, "", window.location.pathname);
+    } else {
+      const storedId = localStorage.getItem("savedId");
+      if (storedId) {
+        setSavedId(storedId);
+      }
     }
-  }, [id]); 
+  }, [searchParams]);
   
   const nextSlide = () => {
     setData((prev) => {
@@ -67,39 +86,43 @@ const DetailProduct = (props: string) => {
 
 
   useEffect(() => {
-    api.get(`/news/${id}?populate=*`)
-    .then(res => {
-      setNews(res.data.data)
-    })
-  },[id])
+    if(savedId === null) {
+      return
+    } else {
+      api.get(`/news/${savedId}?populate=*`)
+      .then(res => {
+        setNews(res.data.data)
+      })
+
+    }
+  },[savedId])
  
 
   return (
     <div className=''>
       <Header/>
-      {/* <ServiceMenu/> */}
-      <div className='h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
+      <ServiceMenu/>
+      <div className='max-w-[1400px] mx-[auto] h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
         <div className='row text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
           <a href="">
             <span>Trang chủ</span>
           </a>
           <span className='mx-[5px]'>/</span>
           <NavLink to="/tin-tuc">
-            <span>Tin Tức</span>
+            <span>{category}</span>
           </NavLink>
           <a href="">
             <span className='mx-[5px]'>/</span>
           </a>
           <a href="" className='  '>
-            <span>bst-quan-ao-bong-da-thiet-ke-jsx-chat-vai-csm</span>
+            <span>{news.name}</span>
           </a>
         </div>
       </div>
-      <BlocksRenderer  content={content}/>
-      <div className='flex flex-col lg:flex-row mx-[5%] lg:mx-[9%] my-[4%] gap-6'>
+      <div className='max-w-[1400px] 2xl:mx-[auto]  flex max-lg:flex-wrap flex-col lg:flex-row  max-2xl:mx-[4%] my-[10px] gap-6'>
         <div className=' my-[4%] flex flex-col basis-[80%] gap-x-[10px] gap-y-[20px]'>
-            <h3 className='text-[20px] font-[500]'>BST quần áo bóng đá thiết kế JSX - chất vải CSM</h3>
-            <div className='flex'>
+            <h3 className='text-[20px] font-[500]'>{news.name}</h3>
+            <div className='flex flex-wrap'>
               <div className='flex items-center px-[12px] mr-[20px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]'>
                 <div>
                   <CalendarMinus2 className='block h-[18px] mr-[5px]'/>
@@ -122,7 +145,9 @@ const DetailProduct = (props: string) => {
              
             </div>
             <div className='flex flex-col text-[#333333] text-[14px] leading-[25px]'>
-              <span className=''>BST bóng đá : CRX - JUSTPLAY</span>
+              <BlocksRenderer  content={content}/>
+
+              {/* <span className=''>BST bóng đá : CRX - JUSTPLAY</span>
               <span>Bộ trang phục siêu đẹp CRX sẽ giúp bạn tự tin, phấn khởi khi ra sân bóng, cùng bạn đồng hành chiến thắng, giành lấy vinh quang.Bộ trang phục siêu đẹp CRX sẽ giúp bạn tự tin, phấn khởi khi ra sân bóng, cùng bạn đồng hành chiến thắng, giành lấy vinh quang.Bộ trang phục siêu đẹp CRX sẽ giúp bạn tự tin, phấn khởi khi ra sân bóng, cùng bạn đồng hành chiến thắng, giành lấy vinh quang.</span>
               <span>? BST CRX mang đến những dấu ấn riêng biệt để tạo sự nổi bật :</span>
               <span>- Họa tiết trên áo và tay áo rất độc đáo, đẹp và bắt mắt.</span>
@@ -131,11 +156,11 @@ const DetailProduct = (props: string) => {
               <span>? Chất vải thun CR3 cao cấp chuyên thấm hút mồ hôi tốt, thoát nhiệt nhanh, độ co giãn tuyệt đối yên tâm vận động khi thi đấu, tập luyện với cường độ cao.</span>
               <span>? Màu sắc rực rỡ, tươi sáng: Trắng xanh - Trắng tím - Đỏ - Vàng - Xanh Ngọc - Xanh da</span>
               <span>? Kích cỡ: S - M - L - XL – XXL- XXXL</span>
-              <span>? Giá niêm yết: 165.000 VNĐ</span>
+              <span>? Giá niêm yết: 165.000 VNĐ</span> */}
             </div>
             <div className='flex flex-wrap lg:basis-[48%]  max-md:flex-1 max-md:flex-shrink max-md:flex-basis-full gap-[10px]'>
-              {listImg.map((item) => (
-                <div  className='w-[350px] '>
+              {listImg.map((item, id) => (
+                <div key={id} className='w-[350px] '>
                   <img className='h-[466px] object-cover' src={`http://localhost:1337${item?.url}`} alt="" />
                 </div>
               ))}
@@ -218,7 +243,7 @@ const DetailProduct = (props: string) => {
               </div>
             </div>
         </div>
-        <div className='max-lg:hidden'>
+        <div className='basis-[20%] bg-white text-[#333] max-lg:basis-[100%]'>
           <ContentSideBarNew title='Tin Tức Mới'/>
           <ContentSideBarNew title='Tin Tức Nổi Bậc'/>
           <ContentSideBarNew title='Sản phẩm đã xem'/>
@@ -284,4 +309,4 @@ const DetailProduct = (props: string) => {
   )
 }
 
-export default DetailProduct
+export default DetailProductNews
