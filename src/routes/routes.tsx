@@ -33,7 +33,7 @@ export const routes: RouteObject[] = [
     element: <ProductPage />,
   },
   {
-    path: "/:categorySlug",
+    path: "product/:categorySlug",
     element: <ProductPage />,
   },
   
@@ -125,7 +125,7 @@ export const routes: RouteObject[] = [
     ),
 
 
-    element: <Payment />,
+    // element: <Payment />,
   },
   {
     path: "/lien-he",

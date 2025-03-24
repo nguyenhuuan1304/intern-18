@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "@/store/productSlice";
-import { RootState, AppDispatch } from "@/redux/store";
+import { RootState, AppDispatch } from "@/store/store";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 50 },

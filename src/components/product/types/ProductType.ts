@@ -68,6 +68,7 @@ export interface Product {
     rating: number;
     slug: string;
     product_sale?: ProductSale | null;
+    imageUrl?: string;
 }
 
 export interface ProductDetail {

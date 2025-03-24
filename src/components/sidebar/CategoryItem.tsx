@@ -13,8 +13,8 @@ interface CategoryItemProps {
 const CategoryItem: React.FC<CategoryItemProps> = ({
   category,
   level = 1,
-  onSubmenuOpen = () => {},
-  onCategorySelect = () => {},
+  onSubmenuOpen = () => { },
+  onCategorySelect = () => { },
 }) => {
   const [submenuOpen, setSubmenuOpen] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -63,7 +63,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     >
       <div className="flex items-center justify-between">
         <Link
-          to={category.slug}
+          to={`/product/${category.slug}`}
           className="block flex-1 p-3 hover:bg-gray-100"
           onClick={handleLinkClick}
         >
@@ -88,9 +88,8 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         (isMobile ? (
           // Với mobile: luôn render submenu, nhưng điều chỉnh vị trí qua CSS transform để tạo hiệu ứng trượt
           <div
-            className={`fixed top-[60px] left-0 right-0 bottom-0 bg-white z-40 transform transition-transform duration-500 ${
-              submenuOpen ? "translate-x-0" : "translate-x-full"
-            }`}
+            className={`fixed top-[60px] left-0 right-0 bottom-0 bg-white z-40 transform transition-transform duration-500 ${submenuOpen ? "translate-x-0" : "translate-x-full"
+              }`}
           >
             <div className="flex items-center p-3 border-b bg-gray-50 h-[60px]">
               <button onClick={handleBackClick} className="mr-2">
@@ -112,11 +111,10 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         ) : (
           // Với desktop: hiển thị submenu theo hover với hiệu ứng opacity
           <div
-            className={`absolute left-full top-0 transition-opacity duration-300 border shadow-md z-10 min-w-[200px] ${
-              submenuOpen
+            className={`absolute left-full top-0 transition-opacity duration-300 border shadow-md z-10 min-w-[200px] ${submenuOpen
                 ? "opacity-100 pointer-events-auto"
                 : "opacity-0 pointer-events-none"
-            }`}
+              }`}
           >
             {category.children.map((child) => (
               <CategoryItem
