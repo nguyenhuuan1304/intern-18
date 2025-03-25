@@ -12,10 +12,10 @@ const HomePage: React.FC = () => {
         <Header />
       </div>
 
-      <div className="mx-7 py-8 flex flex-col justify-centen items-center">
         <div className="hidden md:block ">
           <ServiceMenu />
         </div>
+      <div className="mx-7 py-8 flex flex-col justify-center items-center">
 
         <div className="flex flex-col md:flex-row gap-6 mt-4">
           <div className="w-full ml-5 md:w-64 flex-shrink-0 hidden md:block">

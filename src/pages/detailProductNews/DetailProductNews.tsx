@@ -10,7 +10,7 @@ import { api } from '@/hooks/useAxios'
 import { useSearchParams } from "react-router-dom";
 import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
 import { useSelector } from 'react-redux'
-import { RootState } from '@/redux/store'
+import { RootState } from '@/store/store'
 
 interface DetailProductNewsProps {
   category: string; 

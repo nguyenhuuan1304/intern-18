@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ReactNode } from "react";
-import Header from "@/components/header/Header";
+import Header, { User as TypeUser} from "@/components/header/Header";
 import ServiceMenu from "@/components/ServiceMenu";
 import Layout from "@/components/layout/Layout";
 import InfoUsers from "@/components/infoUsers/InfoUsers";
@@ -8,6 +8,7 @@ import { LockKeyholeOpen, LogOut, ShoppingCart, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ChangePassword from "@/components/changePassword/ChangePasssword";
 
+
 interface TypeNavbarItem {
   id: string;
   label: string;
@@ -15,7 +16,7 @@ interface TypeNavbarItem {
 }
 
 const Account = () => {
-  const user = localStorage.getItem("user");
+  const user:  TypeUser = JSON.parse(localStorage.getItem("user") || "null");
   const [selectTab, setSelectTab] = useState(() => {
     return localStorage.getItem("selectedTab") || "info";
   });
@@ -27,13 +28,6 @@ const Account = () => {
     { id: "orders", label: "Đơn hàng", icon: <ShoppingCart /> },
     { id: "logout", label: "Đăng xuất", icon: <LogOut /> },
   ];
-
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-    console.log(user);
-  }, []);
 
   const handleSelectTab = (item: string) => {
     console.log(item);
@@ -81,7 +75,7 @@ const Account = () => {
               </ul>
             </div>
             <div className="flex-[1] max-md:w-[100%]">
-              {selectTab === "info" && <InfoUsers />}
+              {selectTab === "info" && <InfoUsers user={user}/>}
               {selectTab === "password" && <ChangePassword />}
               {selectTab === "orders" && <InfoShoppingCard />}
             </div>
