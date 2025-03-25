@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Search, X, AlignJustify } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
-// import  from "@/hooks/useAxios";
-import useAxios from "@/hooks/useAxios";
+import http from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
 import NavbarMobile from "../navbarMobile/NavbarMobile";
 
@@ -35,7 +34,7 @@ export interface User {
 import CategorySidebar from "@/components/sidebar/CategorySidebar";
 
 const Header = () => {
-  const user:  User = JSON.parse(localStorage.getItem("user") || "null");
+  const user: User = JSON.parse(localStorage.getItem("user"));
   const [value, setValue] = useState("");
   const [valueIpad, setValueIpad] = useState("");
   const [circle, setCircle] = useState(false);
@@ -48,24 +47,30 @@ const Header = () => {
   // State để quản lý hiển thị sidebar category trên mobile
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
   useEffect(() => {
-    const fetchData = async () => {
-      if (!debounce.trim()) {
-        setArrSearch([]);
-        return;
-      }
-  
-      try {
-        const response = await api.get(`/products?query=${debounce}&populate=*`);
-        setArrSearch(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setArrSearch([]);
-      }
-    };
-  
-    fetchData();
+    if (!debounce.trim()) {
+      setArrSearch([]);
+      return;
+    }
+
+    http
+      .get(`/products?query=${debounce}&populate=*`)
+      .then((res) => res.data)
+      .then((res) => {
+        console.log(res);
+        const configData: typeProduct[] = Object.values(
+          res.data.reduce(
+            (acc: { [key: string]: typeProduct }, item: typeProduct) => {
+              acc[item.documentId] = item;
+              return acc;
+            },
+            {}
+          )
+        );
+        if (configData) {
+          setArrSearch(configData);
+        }
+      });
   }, [debounce]);
   
 
@@ -305,7 +310,7 @@ const Header = () => {
 
             <div>
               <NavLink
-                to={"/thanh-toan"}
+                to={"/cart"}
                 className="text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center"
               >
                 <div className="relative">
@@ -433,7 +438,9 @@ const Header = () => {
           >
             <X size={24} strokeWidth={2} color="black" />
           </button>
-          <CategorySidebar />
+          <CategorySidebar onCategorySelect={function (slug: string): void {
+            throw new Error("Function not implemented.");
+          } } />
         </div>
       )}
 

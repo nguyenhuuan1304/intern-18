@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import CategoryItem from "./CategoryItem";
 import { Loader2, Minus, Plus } from "lucide-react";
-// import { Category } from "../product/types/ProductType";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { fetchCategories } from "@/store/category.slice";
 
-const CategorySidebar: React.FC = () => {
-  const  { categories , loading} = useAppSelector((state) => state.category)
+const CategorySidebar: React.FC<{ onCategorySelect: (slug: string) => void }> = ({ onCategorySelect }) => {  const  { categories , loading} = useAppSelector((state) => state.category)
   const dispatch = useAppDispatch();
  
   const [expanded, setExpanded] = useState(false);
@@ -38,7 +36,7 @@ if(loading)
       <div>
         <div className="flex flex-col">
           {displayedCategories.map((category) => (
-            <CategoryItem key={category.id} category={category} />
+            <CategoryItem key={category.id} category={category} onCategorySelect={onCategorySelect}/>
           ))}
           <div
             className="p-3 hover:bg-gray-100 cursor-pointer flex justify-between border-t"

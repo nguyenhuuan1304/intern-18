@@ -3,16 +3,22 @@ import authReducer from "./auth.slice";
 import { useDispatch } from "react-redux";
 import categoryReducer from "./category.slice";
 import newsReducer from "./news.slice"
+import productReducer from "./productSlice";
+import ratingReducer from "../store/ratingSlice";
+import cartReducer from "./cartSlice";
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    products: productReducer,
+    rating: ratingReducer,
     category: categoryReducer,
-    news: newsReducer
+    news: newsReducer,
+    cart: cartReducer,
   },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
 export const useAppDispatch = () => useDispatch<AppDispatch>()
 export default store;
