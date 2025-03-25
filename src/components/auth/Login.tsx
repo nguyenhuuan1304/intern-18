@@ -62,6 +62,7 @@ const Login: React.FC = () => {
         password: values.password,
       };
       const res = await dispatch(loginUser(loginPayload)).unwrap();
+      console.log(res.user)
       if (res.user) {
         toast.success("Đăng nhập thành công");
         navigate("/");
@@ -69,12 +70,17 @@ const Login: React.FC = () => {
           jwt: res.jwt,
           username: res.user.username,
           email: res.user.email,
+          id : res.user.id,
+          phone: res.user.phone,
+          birthday: res.user.birthday,
+          address: res.user.address,
+          firstName: res.user.firstName,
         };
         localStorage.setItem("user", JSON.stringify(userData));
       }
     } catch (error) {
-      const erroMessage = error?.error.message;
-      toast.error(erroMessage);
+      const errorMessage = error?.error.message;
+      toast.error(errorMessage);
     }
   };
   return (

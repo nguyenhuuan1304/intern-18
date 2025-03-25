@@ -6,7 +6,7 @@ interface TypeItemNews {
     img?: string;
     title?: string;
     description?: string;
-    slug: string;
+    slug?: string;
     id: string
 }
 

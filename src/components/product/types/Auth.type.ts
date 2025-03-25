@@ -9,6 +9,10 @@ export interface AuthUser {
   username?: string;
   email: string;
   documentId?: string;
+  phone?: number;
+  birthday?: string;
+  address?: string;
+  firstName?: string
 }
 
 export interface RegisterResponse {
