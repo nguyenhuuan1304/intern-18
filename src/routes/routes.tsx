@@ -1,7 +1,6 @@
-
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
-const NotFound = lazy(() => import( "@/components/Notfound")) ;
+const NotFound = lazy(() => import("@/components/Notfound"));
 const PrivateRoute = lazy(() => import("./PrivateRoutes"));
 const PublicRoute = lazy(() => import("./PublicRoutes"));
 const HomePage = lazy(() => import("../pages/HomePage"));
@@ -36,7 +35,7 @@ export const routes: RouteObject[] = [
     path: "/:categorySlug",
     element: <ProductPage />,
   },
-  
+
   {
     path: "/contact",
     element: <Contact />,
@@ -69,29 +68,20 @@ export const routes: RouteObject[] = [
   {
     path: "/thanh-toan",
 
-    element: (
-      <Payment />
-    ),
+    element: <Payment />,
   },
   {
     path: "/lien-he",
-    element: (
-      <Contact />
-    ),
+    element: <Contact />,
   },
   {
     path: "/danh-muc-san-pham",
-    element: (
-      <CategoryMobile />
-    ),
+    element: <CategoryMobile />,
   },
   {
     path: "/tin-tuc",
-    element: (
-      <News />
-    )
-  }
-  ,
+    element: <News />,
+  },
   // {
   //   path: ":slug",
   //   element: (
@@ -120,12 +110,9 @@ export const routes: RouteObject[] = [
   // },
   {
     path: "/product-detail/:documentId",
-    element: (
-      <ProductDetailPage />
-    ),
+    element: <ProductDetailPage />,
 
-
-    element: <Payment />,
+    // element: <Payment />,
   },
   {
     path: "/lien-he",
@@ -157,6 +144,5 @@ export const routes: RouteObject[] = [
   {
     path: "/notfound",
     element: <NotFound />,
-
   },
 ];
