@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { api } from "@/hooks/useAxios";
-
+import { RootState } from "./store";
 interface CartItem {
   documentId: string;
   name: string;
@@ -132,6 +133,9 @@ export const addToCartApi = createAsyncThunk(
     }
   }
 );
+
+export const selectTotalItems = (state: RootState) =>
+  state.cart.items.reduce((total, item) => total + item.quantity, 0);
 
 const cartSlice = createSlice({
   name: "cart",
