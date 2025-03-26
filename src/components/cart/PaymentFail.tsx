@@ -1,4 +1,4 @@
-import { X, RefreshCw, ChevronLeft, AlertCircle } from "lucide-react";
+import { X, ChevronLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
