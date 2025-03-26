@@ -1,29 +1,49 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {User} from "@/components/header/Header"
+import { toast } from "react-toastify";
+import useAxios from "@/hooks/useAxios";
 
 
-const InfoUsers = () => {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [date, setDate] = useState('')
-  const [address, setAddress] = useState('')
+interface typeInfo {
+  user: User & { id: string };
+}
 
+const initialValue : User = {
+  username: '',
+  email: '',
+  phone: '',
+  birthday: '',
+  address: '',
+  firstName: '',
+}
 
+const InfoUsers: React.FC<typeInfo>= ({user} ) => {
+  const [form, setForm] = useState<User>(initialValue)
+  const {api} = useAxios()
 
+  useEffect(() => {
+    if(user) {
+      setForm(user)
+    }
+  },[user])
 
-  const handleSubmit = (e:React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log('firstName',firstName)
-    console.log('lastName',lastName)
-    console.log('email',email)
-    console.log('phone',phone)
-    console.log('date',date)
-    console.log('address',address)
+    try {
+      const res = await api.put(`users/${user.id}`,form)
+      if(res) {
+          toast.success('Update success',{ autoClose: 1500 })
+      } else {
+        toast.error('Update fail',{ autoClose: 1500 })
 
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    console.log(form)
   }
 
   return (
@@ -37,9 +57,9 @@ const InfoUsers = () => {
               <Input 
                 className="mt-[14px]" 
                 id="firstName" 
-                value={firstName}
+                value={form.firstName}
                 placeholder="Nhập họ và chữ đệm" 
-                onChange={(e) => setFirstName(e.target.value)}
+                onChange={(e) => setForm((pre) => ({...pre, firstName: e.target.value}))}
               />
             </div>
             <div>
@@ -47,8 +67,8 @@ const InfoUsers = () => {
               <Input 
                 className="mt-[14px]" 
                 id="lastName" 
-                value={lastName} 
-                onChange={(e) => setLastName(e.target.value)}
+                value={form.username} 
+                onChange={(e) => setForm((pre) => ({...pre, username: e.target.value}))}
               />
             </div>
           </div>
@@ -57,8 +77,8 @@ const InfoUsers = () => {
             <Input 
               className="mt-[14px]" 
               id="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={form.email}
+              onChange={(e) => setForm((pre) => ({...pre, email: e.target.value}))}
               placeholder="Nhập Email liên hệ" />
           </div>
           <div className="mb-4">
@@ -66,8 +86,8 @@ const InfoUsers = () => {
             <Input 
               className="mt-[14px]" 
               id="phone" 
-              value={phone} 
-              onChange={(e) => setPhone(e.target.value)}
+              value={form.phone} 
+              onChange={(e) => setForm((pre) => ({...pre, phone: e.target.value}))}
             />
           </div>
           <div className="mb-4">
@@ -76,8 +96,8 @@ const InfoUsers = () => {
             <input
               type="date"
               placeholder="dd/mm/yyyy"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              value={form.birthday}
+              onChange={(e) => setForm((pre) => ({...pre, birthday: e.target.value}))}
               className="mt-[14px] w-full px-3 py-2 border rounded-md outline-none"
             />
           </div>
@@ -87,8 +107,8 @@ const InfoUsers = () => {
             <Input 
               className="mt-[14px]" 
               id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              value={form.address}
+              onChange={(e) => setForm((pre) => ({...pre, address: e.target.value}))}
               placeholder="Nhập địa chỉ của bạn" 
             />
           </div>

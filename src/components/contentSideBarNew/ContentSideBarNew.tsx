@@ -9,23 +9,20 @@ interface TypeContentSideBarNew {
 
 const ContentSideBarNew:React.FC<TypeContentSideBarNew> = ({title}) => {
     const list = useSelector((state: RootState) => state.news.news) ;
-    const newList = [...list]
-    console.log(newList)
-    console.log(list)
     return (
     <div className='mt-[10px] mb-[6px] rounded-[6px] overflow-y-auto bg-white shadow-[0_15px_35px_rgba(0,0,0,0.1)]'>
         
         <h2 className='pl-[10px] text-[15px] font-bold uppercase py-[15px] '>{title}</h2>
         <div className='pl-[10px] max-h-[370px] scroll-area flex flex-col  overflow-y-auto bg-white shadow-[0_15px_35px_rgba(0,0,0,0.1)]'>
-            {newList.map((item) => (
+            {list.map((item,id) => (
                 <ItemSideBarNews 
-                    key={item.documentId}
+                    key={id}
                     img={
-                        Array.isArray(item.img) && typeof item.img[0] === 'object' 
-                        ? `http://localhost:1337${item.img[0].url}`
-                        : ''
+                        Array.isArray(item?.img) && typeof item?.img[0] === 'object' 
+                        ? `http://localhost:1337${item?.img[0].url}`
+                        : "/default-image.jpg"
                     }
-                    name={item.name}
+                    name={item?.name}
                 />
             ))}
             {/* {data.map((id) => (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Search, X, AlignJustify } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
-import useAxios from "@/hooks/useAxios";
+import http from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
 import NavbarMobile from "../navbarMobile/NavbarMobile";
 
@@ -24,34 +24,36 @@ export interface typeProduct {
 
 export interface User {
   username: string;
-  jwt: string;
   email: string;
+  phone: string;
+  birthday: string;
+  address: string;
+  firstName: string;
 }
 
 import CategorySidebar from "@/components/sidebar/CategorySidebar";
 
 const Header = () => {
-  const user: User = JSON.parse(localStorage.getItem("user") ?? "{}");
+  const user: User = JSON.parse(localStorage.getItem("user"));
   const [value, setValue] = useState("");
   const [valueIpad, setValueIpad] = useState("");
   const [circle, setCircle] = useState(false);
   const [arrSearch, setArrSearch] = useState<typeProduct[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputRefIpad = useRef<HTMLInputElement>(null);
-  const debounce = useDebounce(value || valueIpad, 500);
+  const debounce = useDebounce(value || valueIpad, 500) as string;
   const navigate = useNavigate();
-
+  const {api} = useAxios();
   // State để quản lý hiển thị sidebar category trên mobile
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const { api } = useAxios();
   useEffect(() => {
     if (!debounce.trim()) {
       setArrSearch([]);
       return;
     }
 
-    api
+    http
       .get(`/products?query=${debounce}&populate=*`)
       .then((res) => res.data)
       .then((res) => {
@@ -70,6 +72,9 @@ const Header = () => {
         }
       });
   }, [debounce]);
+  
+
+
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
@@ -128,8 +133,8 @@ const Header = () => {
   return (
     <div className="layout">
       <div
-        className="custom-header custom-header-mobile   z-50 relative
-          2xl:mr-[6.5%] 2xl:ml-[6.5%] lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5"
+        className="custom-header custom-header-mobile  z-50 relative mb-7
+          max-2xl:mr-[6.5%] lg:max-2xl:ml-[6.5%]  lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5"
       >
         {/* Menu Mobile: khi nhấn vào thì hiển thị sidebar category */}
         <div
@@ -138,7 +143,7 @@ const Header = () => {
         >
           <AlignJustify />
         </div>
-        <div className="row-span-2 md:w-[150px]">
+        <div className="row-span-2 md:w-[250px]">
           <NavLink to={"/"}>
             <img
               className="md:w-[150px]"
@@ -187,7 +192,7 @@ const Header = () => {
                 {arrSearch.length !== 0 ? (
                   <div className="product-slider-vertical scroll-area">
                     {thumbnailUrls.map((item, index) => (
-                      <div key={index} className="flex p-[10px]">
+                      <div key={index} className="flex p-[10px] cursor-pointer">
                         <div className="w-[75px] h-[75px] mr-[10px]">
                           <img
                             className="object-cover h-full"
@@ -218,7 +223,7 @@ const Header = () => {
           <div className="flex grow justify-between gap-[15px]">
             <div>
               <NavLink
-                to="/account/order"
+                to={user && "/account/order" || "/login"}
                 className="text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center"
               >
                 <div>
@@ -407,16 +412,16 @@ const Header = () => {
             </div>
           </div>
         </form>
-        <div className="text-[#000] m-[40px]">
+        <div className="text-[#000] m-[10px] z-50 bg-white">
           {thumbnailUrls.map((item, index) => (
             <div
               key={index}
-              className="h-auto mb-[10px] border-b border-gray-300"
+              className="h-auto mb-[10px] border-b border-gray-300 cursor-pointer"
             >
               <a href="" className="flex h-[75px] p-[4px]">
                 <img
                   className="object-cover h-full"
-                  src={`http://localhost:1337/${thumbnailUrls[0].thumbnailUrl}`}
+                  src={`http://localhost:1337${thumbnailUrls[0].thumbnailUrl}`}
                   alt=""
                 />
                 <h3 className="ml-[10px]">{item.name}</h3>

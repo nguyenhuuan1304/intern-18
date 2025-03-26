@@ -1,6 +1,6 @@
-
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
+import DetailProductNews from "@/pages/detailProductNews/DetailProductNews";
 const NotFound = lazy(() => import( "@/components/Notfound")) ;
 const PrivateRoute = lazy(() => import("./PrivateRoutes"));
 const PublicRoute = lazy(() => import("./PublicRoutes"));
@@ -136,7 +136,11 @@ export const routes: RouteObject[] = [
     element: <News />,
   },
   {
-    element: <PrivateRoute />,
+    path: ":slug",
+    element: <DetailProductNews category="tin-tuc"/>,
+  },
+  {
+    // element: <PrivateRoute />,
     children: [
       {
         path: "/account",

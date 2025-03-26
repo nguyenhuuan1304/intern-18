@@ -2,9 +2,11 @@ import React, { ReactNode, useRef, useState } from "react";
 import { api } from "@/hooks/useAxios";
 import { TypeDataNews } from "@/pages/news/typeNews";
 import { useAppDispatch } from "@/store/store";
-import { createNews } from "@/redux/slice";
 import { X } from "lucide-react";
 import { notification } from "antd";
+import { createNews } from "@/store/news.slice";
+import {Editor}  from "@tinymce/tinymce-react"; 
+import { convertTinyMCEToStrapiJSON } from "./until";
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
 interface TypeImg  {
@@ -28,7 +30,16 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [image, setImage] = useState<FileList | null>(null);
   const [api1, contextHolder] = notification.useNotification();
-  const dispatch = useAppDispatch();
+  const [description , setDescription] = useState('')
+  console.log(description)
+  const dispatch = useAppDispatch();  
+  const editorRef = useRef(null);
+  
+  const handleEditorChange = (content: string) => {
+    const jsonDescription = convertTinyMCEToStrapiJSON(content);
+    console.log(jsonDescription)
+    setPost((prev) => ({ ...prev, description: jsonDescription })); // Lưu vào post
+  };
 
   const openNotificationUpdateImage = (type: NotificationType) => {
     api1[type]({
@@ -93,7 +104,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
     console.log(post)
     try {
       const response = await dispatch(createNews(post))
-      if(response) {
+      if(response.meta.requestStatus === 'fulfilled') {
         if(element) {
           element.style.display='none'
         }
@@ -113,7 +124,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
   }
 
   return (
-    <div className=" relative m-[auto] lg:top-[10%] max-w-2xl  w-[100%] bg-white p-6 shadow-lg rounded-lg">
+    <div className="overflow-auto  relative m-[auto] lg:top-[10%] max-w-2xl h-[770px] w-[100%] bg-white p-6 shadow-lg rounded-lg">
       {contextHolder}
       <h2 className="text-2xl font-bold mb-4">Tạo bài viết mới</h2>
       <div className="absolute top-[4px] right-[12px] ">
@@ -168,20 +179,29 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
         {/* Mô tả */}
         <div>
           <label className="block font-medium">Mô tả</label>
-          <textarea
+          {/* <textarea
             name="description"
             onChange={handleChange}
             rows={4}
             className="w-full mt-2 px-3 py-2 border rounded-md focus:outline-blue-500"
             placeholder="Nhập mô tả bài viết"
+          /> */}
+          <Editor
+            apiKey="gmanld62a10sjioflew1n31uj2s53kqfjddiizzcwr7a0f7k"
+            onInit={(e, editor) => editorRef.current = editor}
+            initialValue="<p>Hello Word </p>"
+            onChange={(e, editor) => handleEditorChange(editor.getContent())}
+            init={{ 
+              height: 300,
+              menubar: true,
+              plugins: [
+                
+              ],
+              toolbar:
+                'undo redo | image | preview | casechange blocks | bold italic  | alignleft aligncenter alignright alignjustify  ',
+                placeholder: "Start typing here...",
+             }}
           />
-          {/* <div className="custom-editor" onClick={focus}> 
-           <Editor     
-                // ref={editorRef}            
-                editorState={editorState}
-                onChange={setEditorState}
-            />
-            </div> */}
         </div>
 
         {/* Slug */}

@@ -1,9 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./auth.slice";
-import productReducer from "./productSlice";
-import ratingReducer from "../store/ratingSlice";
 import { useDispatch } from "react-redux";
 import categoryReducer from "./category.slice";
+import newsReducer from "./news.slice"
+import productReducer from "./productSlice";
+import ratingReducer from "../store/ratingSlice";
 import cartReducer from "./cartSlice";
 
 export const store = configureStore({
@@ -12,6 +13,7 @@ export const store = configureStore({
     products: productReducer,
     rating: ratingReducer,
     category: categoryReducer,
+    news: newsReducer,
     cart: cartReducer,
   },
 });
