@@ -7,14 +7,25 @@ import { fetchCartItems, removeCartItem, updateCartItemQuantity } from "@/store/
 import Select from "react-select";
 import { getProvinces, getDistricts, getWards } from "./service/addressService";
 import { selectTotalItems } from "@/store/cartSlice";
-
+import { loadStripe } from "@stripe/stripe-js";
+import axios from "axios";
+import { PaymentSuccess } from "./PaymentSuccess";
+import { PaymentFail } from "./PaymentFail";
 const CartPage: React.FC = () => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch<AppDispatch>();
-    const { items: cartItems, loading, error } = useSelector((state: RootState) => state.cart);
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const email = user.email || "";
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const {
+    items: cartItems,
+    error,
+    loading,
+  } = useSelector((state: RootState) => state.cart);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const email = user.email || "";
+ 
 
+  const searchParams = new URLSearchParams(location.search);
+  const success = searchParams.get("success");
+  const cancel = searchParams.get("cancel");
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
@@ -23,8 +34,7 @@ const CartPage: React.FC = () => {
     const [selectedProvince, setSelectedProvince] = useState<any>(null);
     const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
     const [selectedWard, setSelectedWard] = useState<any>(null);
-
-    useEffect(() => {
+       useEffect(() => {
         getProvinces().then(setProvinces);
     }, []);
 
@@ -42,38 +52,85 @@ const CartPage: React.FC = () => {
             setSelectedWard(null);
         }
     }, [selectedDistrict]);
+  useEffect(() => {
+    dispatch(fetchCartItems());
+  }, [dispatch]);
+ 
+  
+  const handleIncrease = (documentId: string, currentQuantity: number) => {
+    dispatch(
+      updateCartItemQuantity({ documentId, quantity: currentQuantity + 1 })
+    );
+  };
 
-    useEffect(() => {
-        dispatch(fetchCartItems());
-    }, [dispatch]);
+  const handleDecrease = (documentId: string, currentQuantity: number) => {
+    if (currentQuantity > 1) {
+      dispatch(
+        updateCartItemQuantity({ documentId, quantity: currentQuantity - 1 })
+      );
+    }
+  };
 
-    const handleIncrease = (documentId: string, currentQuantity: number) => {
-        dispatch(updateCartItemQuantity({ documentId, quantity: currentQuantity + 1 }));
-    };
+  const handleRemove = (documentId: string) => {
+    dispatch(removeCartItem(documentId));
+  };
 
-    const handleDecrease = (documentId: string, currentQuantity: number) => {
-        if (currentQuantity > 1) {
-            dispatch(updateCartItemQuantity({ documentId, quantity: currentQuantity - 1 }));
-        }
-    };
-
-    const handleRemove = (documentId: string) => {
-        dispatch(removeCartItem(documentId));
-    };
-
-    // Lấy dữ liệu giỏ hàng từ Redux
-    const cart = useSelector((state: RootState) => state.cart.items);
-
-    // Tính tổng tiền
-    const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-    // đếm tổng sản phẩm trong giỏ hàng
-    const totalItems = useSelector(selectTotalItems);
+  const cart = useSelector((state: RootState) => state.cart.items);
+  const totalPrice = cart.reduce(
+    (sum, item) => sum + Number(item.price) * item.quantity,
+    0
+  );
+   const totalItems = useSelector(selectTotalItems);
     useEffect(() => {
         localStorage.setItem("cartTotalItems", totalItems.toString());
     }, [totalItems]);
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+    try {
+      const stripe = await loadStripe(
+        "pk_test_51R66O0DftvJgslwBKdVOWz4UJ7sdpk6W9ALddQgPs3XBYQCV46xaDSgSqYpWAFZevhLYKgFyPAmp4wLm7THP3r0400LXhtMelk"
+      );
+      const response = await axios.post(
+        "http://localhost:1337/api/orders",
+        {
+          orders: cart.map((item) => ({
+            productId: item.documentId,
+            quantity: item.quantity,
+          })),
+          email,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
-    return (
+      const data = response.data;
+
+      if (data.error) throw new Error(data.error);
+      if (!data.stripeSession?.id)
+        throw new Error("Failed to create Stripe session");
+
+      // Chuyển hướng đến trang thanh toán của Stripe
+      await stripe?.redirectToCheckout({
+        sessionId: data.stripeSession.id,
+      });
+    } catch (err) {
+      console.error("Thanh toán lỗi:", err);
+    }
+  };
+
+  if (success === "true") {
+    return <PaymentSuccess />;
+  }
+  if (cancel === "true") {
+    return <PaymentFail />;
+  }
+
+
+  
+   
+
+   return (
         <>
             <div className="m-5 flex items-center justify-between">
                 <NavLink to={"/"}>
@@ -258,9 +315,7 @@ const CartPage: React.FC = () => {
                             before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
                             hover:text-red-500 hover:border-red-500"
                             onClick={() => {
-                                cartItems.forEach((item) => {
-                                    handleRemove(item.documentId);
-                                });
+                              handleCheckout();
                             }}
                         >
                             <span className="relative z-10 b-5">Đặt Hàng</span>
@@ -271,5 +326,4 @@ const CartPage: React.FC = () => {
         </>
     );
 };
-
 export default CartPage;

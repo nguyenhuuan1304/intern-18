@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Search, X, AlignJustify } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
-import http from "@/hooks/useAxios";
+import useAxios from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
 import NavbarMobile from "../navbarMobile/NavbarMobile";
-
 interface typeImage {
   Image: string;
   formats: {
@@ -34,7 +33,7 @@ export interface User {
 import CategorySidebar from "@/components/sidebar/CategorySidebar";
 
 const Header = () => {
-  const user: User = JSON.parse(localStorage.getItem("user"));
+  const user: User = JSON.parse(localStorage.getItem("user") || "null");
   const [value, setValue] = useState("");
   const [valueIpad, setValueIpad] = useState("");
   const [circle, setCircle] = useState(false);
@@ -43,7 +42,7 @@ const Header = () => {
   const inputRefIpad = useRef<HTMLInputElement>(null);
   const debounce = useDebounce(value || valueIpad, 500) as string;
   const navigate = useNavigate();
-  const {api} = useAxios();
+  const { api } = useAxios();
   // State để quản lý hiển thị sidebar category trên mobile
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -53,27 +52,25 @@ const Header = () => {
       return;
     }
 
-    http
-      .get(`/products?query=${debounce}&populate=*`)
-      .then((res) => res.data)
-      .then((res) => {
-        console.log(res);
-        const configData: typeProduct[] = Object.values(
-          res.data.reduce(
-            (acc: { [key: string]: typeProduct }, item: typeProduct) => {
-              acc[item.documentId] = item;
-              return acc;
-            },
-            {}
-          )
-        );
-        if (configData) {
-          setArrSearch(configData);
-        }
-      });
-  }, [debounce]);
-  
+    const fetchData = async () => {
+      if (!debounce.trim()) {
+        setArrSearch([]);
+        return;
+      }
 
+      try {
+        const response = await api.get(
+          `/products?query=${debounce}&populate=*`
+        );
+        setArrSearch(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setArrSearch([]);
+      }
+    };
+
+    fetchData();
+  }, [debounce]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -136,7 +133,6 @@ const Header = () => {
         className="custom-header custom-header-mobile  z-50 relative mb-7
           max-2xl:mr-[6.5%] lg:max-2xl:ml-[6.5%]  lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5"
       >
-        {/* Menu Mobile: khi nhấn vào thì hiển thị sidebar category */}
         <div
           className="lg:hidden text-[#fff] cursor-pointer"
           onClick={() => setShowSidebarMobile(!showSidebarMobile)}
@@ -223,7 +219,7 @@ const Header = () => {
           <div className="flex grow justify-between gap-[15px]">
             <div>
               <NavLink
-                to={user && "/account/order" || "/login"}
+                to={(user && "/account") || "/login"}
                 className="text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center"
               >
                 <div>
@@ -431,7 +427,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Overlay sidebar category trên mobile */}
       {showSidebarMobile && (
         <div className="fixed top-[60px] left-0 right-0 bottom-0 z-40 bg-white overflow-y-auto">
           <button
@@ -440,9 +435,11 @@ const Header = () => {
           >
             <X size={24} strokeWidth={2} color="black" />
           </button>
+
           <CategorySidebar onCategorySelect={function (slug: string): void {
             throw new Error("Function not implemented.");
           }} />
+
         </div>
       )}
 
