@@ -4,7 +4,7 @@ import AddProduct from "./AddProduct";
 import type { RootState, AppDispatch } from "@/store/store";
 import { fetchProducts, sortProducts } from "@/store/productSlice";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Product } from "./types/ProductType";
@@ -38,10 +38,6 @@ const ProductList: React.FC = () => {
         return products.filter((product) => product.slug === categorySlug);
     }, [products, categorySlug]);    
 
-    // const handleCartClick = (product: Product) => {
-    //     setSelectedProduct(product);
-    //     setShowForm(true);
-    // };
     const handleCartClick = (product: Product) => {
         const imageUrl = mainImages[product.id] || (product.Image?.length ? product.Image[0].url : "");
         setSelectedProduct({ ...product, imageUrl });
@@ -103,8 +99,8 @@ const ProductList: React.FC = () => {
                                         className="w-full h-64 object-cover rounded-md transform transition-transform duration-6000 group-hover:scale-150"
                                     />
                                     {product?.product_sale?.percent_discount ? (
-                                        <div className="absolute top-2 left-[-30px] bg-orange-600 text-white px-8 py-1 text-sm font-bold rounded transform -rotate-45">
-                                            -{product.product_sale.percent_discount}%
+                                        <div className="absolute top-4 left-[-40px] bg-orange-600 text-white px-10 py-1 text-sm font-bold rounded transform -rotate-45">
+                                            SALE -{product.product_sale.percent_discount}%
                                         </div>
                                     ) : null}
                                 </div>
@@ -210,9 +206,9 @@ const ProductList: React.FC = () => {
                             <div className="relative bg-white rounded-lg p-4">
                                 <button
                                     onClick={handleCloseForm}
-                                    className="absolute cursor-pointer top-2 right-2"
+                                    className="absolute cursor-pointer top-2 right-2 text-red-500 hover:text-red-600"
                                 >
-                                    ✖
+                                    <X/>
                                 </button>
 
                                 {selectedProduct &&
