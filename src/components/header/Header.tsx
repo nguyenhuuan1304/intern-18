@@ -125,6 +125,8 @@ const Header = () => {
     navigate("/login");
   };
 
+  const totalItems = localStorage.getItem("cartTotalItems") || "0";
+
   return (
     <div className="layout">
       <div
@@ -315,7 +317,7 @@ const Header = () => {
                     alt=""
                   />
                   <span className="absolute top-[-10px] right-[-10px] w-[20px] h-[20px] rounded-full leading-[18px] text-center bg-[#ef4562] text-white">
-                    0
+                    {totalItems}
                   </span>
                 </div>
                 <div>
@@ -433,11 +435,11 @@ const Header = () => {
           >
             <X size={24} strokeWidth={2} color="black" />
           </button>
-          <CategorySidebar
-            onCategorySelect={function (slug: string): void {
-              throw new Error("Function not implemented.");
-            }}
-          />
+
+          <CategorySidebar onCategorySelect={function (slug: string): void {
+            throw new Error("Function not implemented.");
+          }} />
+
         </div>
       )}
 
