@@ -18,7 +18,7 @@ const SaleSession: React.FC = () => {
     const saleProducts = products.filter(
         (product) => product.product_sale && product.product_sale.percent_discount !== undefined && product.product_sale.percent_discount > 0
     );
-    
+
     useEffect(() => {
         if (products.length === 0) {
             dispatch(fetchProducts());
@@ -39,7 +39,7 @@ const SaleSession: React.FC = () => {
     return (
         <div className="border-t p-6 mt-4">
             <motion.div
-                className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6"
+                className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-6"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
@@ -67,8 +67,8 @@ const SaleSession: React.FC = () => {
                                         alt={currentProduct.name}
                                         className="w-full h-full object-cover"
                                     />
-                                    <div className="absolute top-2 left-[-30px] bg-orange-600 text-white px-8 py-1 text-sm font-bold rounded transform -rotate-45">
-                                        -{currentProduct.product_sale?.percent_discount}%
+                                    <div className="absolute top-4 left-[-40px] bg-orange-600 text-white px-10 py-1 text-sm font-bold rounded transform -rotate-45">
+                                        SALE -{currentProduct.product_sale?.percent_discount}%
                                     </div>
                                 </motion.div>
                             </AnimatePresence>

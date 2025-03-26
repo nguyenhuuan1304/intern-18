@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import { useSelector } from "react-redux";
+import { useAppDispatch, RootState } from "@/store/store";
 import { fetchProducts } from "@/store/productSlice";
-import { Send, Star } from "lucide-react";
+import { Send, Star, X } from "lucide-react";
 import ReviewSection from "./ReviewSection";
 import SaleSection from "../product/SaleSession";
+import { addToCartApi } from "@/store/cartSlice";
+import { useNavigate } from "react-router-dom";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 50 },
@@ -15,10 +17,15 @@ const fadeIn = {
 
 const ProductDetail: React.FC = () => {
     const { documentId } = useParams<{ documentId: string }>();
-    const dispatch = useDispatch<AppDispatch>();
-
     const { products, loading, error } = useSelector((state: RootState) => state.products);
     const productDetail = products.find((p) => p.documentId === documentId);
+    const [showSizeForm, setShowSizeForm] = useState(false);
+    const [selectedSize, setSelectedSize] = useState("");
+    const [quantity, setQuantity] = useState(1);
+    const discountPercent = productDetail?.product_sale?.percent_discount ?? 0;
+    const finalPrice = (productDetail?.prices ?? 0) - ((productDetail?.prices ?? 0) * discountPercent) / 100;
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         if (!products.length) {
@@ -42,6 +49,60 @@ const ProductDetail: React.FC = () => {
         return hasShoeStock || hasShirtPantStock;
     };
 
+    const availableSizes = () => {
+        const shoeSizes = productDetail?.id_shoe
+            ? Object.entries(productDetail.id_shoe)
+                .filter(([key, value]) => key.startsWith("S") && typeof value === "number" && value > 0)
+                .map(([key]) => key)
+            : [];
+
+        const shirtPantSizes = productDetail?.id_shirt_pant
+            ? Object.entries(productDetail.id_shirt_pant)
+                .filter(([key, value]) => ["S", "M", "L", "XL", "XXL"].includes(key) && typeof value === "number" && value > 0)
+                .map(([key]) => key)
+            : [];
+
+        return [...shoeSizes, ...shirtPantSizes];
+    };
+
+    const handleBuyNowClick = () => {
+        setShowSizeForm(true);
+    };
+
+    const closeModal = () => {
+        setShowSizeForm(false);
+    };
+
+    const productImageUrl = productDetail?.Image?.length
+        ? productDetail.Image[0].url
+        : "";
+
+    const handleConfirmBuyNow = () => {
+        if (!selectedSize) {
+            alert("Vui lòng chọn kích thước sản phẩm.");
+            return;
+        }
+
+        const cartItem = {
+            documentId: productDetail?.documentId ?? "",
+            name: productDetail?.name ?? "",
+            size: selectedSize,
+            quantity: quantity,
+            price: finalPrice,
+            image: productImageUrl,
+            products: [{ documentId: productDetail?.documentId }],
+        };
+
+        dispatch(addToCartApi(cartItem))
+            .unwrap()
+            .then(() => {
+                navigate("/cart");
+            })
+            .catch((error) => {
+                console.error("Lỗi khi thêm vào giỏ hàng:", error);
+            });
+    };
+
     if (loading) return <p>Đang tải...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
     if (!productDetail) return <p className="text-gray-500">Không tìm thấy sản phẩm.</p>;
@@ -50,7 +111,7 @@ const ProductDetail: React.FC = () => {
         <div className="p-6 min-h-screen">
             {/* Product Section */}
             <motion.div
-                className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg flex flex-wrap"
+                className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg flex flex-wrap"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
@@ -60,12 +121,12 @@ const ProductDetail: React.FC = () => {
                     {productDetail?.product_sale?.percent_discount ? (
                         <div className="relative overflow-hidden">
                             <img
-                                src={productDetail.Image[0]?.url}
+                                src={productImageUrl}
                                 alt={productDetail.name}
                                 className="w-full h-full object-cover"
                             />
-                            <div className="absolute top-2 left-[-30px] bg-orange-600 text-white px-8 py-1 text-sm font-bold rounded transform -rotate-45">
-                                -{productDetail.product_sale.percent_discount}%
+                            <div className="absolute top-4 left-[-40px] bg-orange-600 text-white px-10 py-1 text-sm font-bold rounded transform -rotate-45">
+                                SALE -{productDetail.product_sale.percent_discount}%
                             </div>
                         </div>
                     ) : (
@@ -124,9 +185,13 @@ const ProductDetail: React.FC = () => {
                         </p>
                     )}
 
-                    <button className="bg-orange-600 text-white px-4 py-2 rounded-lg">
+                    <button
+                        onClick={handleBuyNowClick}
+                        className="bg-orange-600 text-white px-4 py-2 rounded-lg"
+                    >
                         Mua ngay
                     </button>
+
                     <div className="relative w-full">
                         <input
                             type="number"
@@ -135,10 +200,61 @@ const ProductDetail: React.FC = () => {
                         />
                         <Send className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 cursor-pointer hover:text-blue-500" />
                     </div>
+
+                    {/* Form chọn size và số lượng */}
+                    {showSizeForm && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                            <div className="bg-white p-6 rounded-lg shadow-lg w-[500px] relative">
+                                <button onClick={closeModal} className="absolute top-2 right-2 text-red-500 hover:text-red-600">
+                                    <X/>
+                                </button>
+                                <h2 className="text-2xl text-cyan-800 font-bold mb-4 text-center">Chọn kích thước và số lượng</h2>
+                                <p className="text-lg text-cyan-800 text-center">
+                                    {productDetail?.name}
+                                </p>
+                                <img
+                                    src={productImageUrl}
+                                    alt={productDetail.name}
+                                    className="w-[50%] h-[50%] object-cover"
+                                />
+                                <p className="font-bold text-red-500">
+                                    {finalPrice.toLocaleString()}đ
+                                </p>
+                                <label className="block mb-2">Kích thước:</label>
+                                <select
+                                    className="w-full border rounded p-2"
+                                    value={selectedSize}
+                                    onChange={(e) => setSelectedSize(e.target.value)}
+                                >
+                                    <option value="">Chọn kích thước</option>
+                                    {availableSizes().map((size) => (
+                                        <option key={size} value={size}>
+                                            {size}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <label className="block mt-2">Số lượng:</label>
+                                <input
+                                    type="number"
+                                    className="w-full border rounded p-2"
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(Number(e.target.value))}
+                                    min={1}
+                                />
+
+                                <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg w-full"
+                                    onClick={handleConfirmBuyNow}
+                                >
+                                    Xác nhận mua ngay
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </motion.div>
-            <ReviewSection productDetail={productDetail} documentId={documentId ?? ''} />
-            <SaleSection/>
+            <ReviewSection/>
+            <SaleSection />
         </div>
     );
 };
