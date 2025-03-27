@@ -15,6 +15,7 @@ import { Product } from '@/components/product/types/ProductType'
 //   };
 // }
 
+
 // export interface typeProduct {
 //   documentId: string;
 //   name: string;
@@ -44,7 +45,7 @@ const Header = () => {
   const inputRefIpad = useRef<HTMLInputElement>(null);
   const debounce = useDebounce(value || valueIpad, 500) as string;
   const navigate = useNavigate();
-  const {api} = useAxios();
+  const { api } = useAxios();
   // State để quản lý hiển thị sidebar category trên mobile
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -72,8 +73,6 @@ const Header = () => {
   
     fetchData();
   }, [debounce]);
-  
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -129,13 +128,14 @@ const Header = () => {
     navigate("/login");
   };
 
+  const totalItems = localStorage.getItem("cartTotalItems") || "0";
+
   return (
     <div className="layout">
       <div
         className="custom-header custom-header-mobile  z-50 relative mb-7
           max-2xl:mr-[6.5%] lg:max-2xl:ml-[6.5%]  lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5"
       >
-        {/* Menu Mobile: khi nhấn vào thì hiển thị sidebar category */}
         <div
           className="lg:hidden text-[#fff] cursor-pointer"
           onClick={() => setShowSidebarMobile(!showSidebarMobile)}
@@ -320,7 +320,7 @@ const Header = () => {
                     alt=""
                   />
                   <span className="absolute top-[-10px] right-[-10px] w-[20px] h-[20px] rounded-full leading-[18px] text-center bg-[#ef4562] text-white">
-                    0
+                    {totalItems}
                   </span>
                 </div>
                 <div>
@@ -430,7 +430,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Overlay sidebar category trên mobile */}
       {showSidebarMobile && (
         <div className="fixed top-[60px] left-0 right-0 bottom-0 z-40 bg-white overflow-y-auto">
           <button
@@ -439,9 +438,11 @@ const Header = () => {
           >
             <X size={24} strokeWidth={2} color="black" />
           </button>
+
           <CategorySidebar onCategorySelect={function (slug: string): void {
             throw new Error("Function not implemented.");
-          } } />
+          }} />
+
         </div>
       )}
 

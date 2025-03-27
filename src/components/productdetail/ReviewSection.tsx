@@ -1,76 +1,64 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState, useAppDispatch } from "@/store/store";
+import { fetchRatings } from "@/store/ratingSlice";
 import ReviewForm from "./ReviewForm";
-import { Product } from "@/components/product/types/ProductType";
+import { useParams } from "react-router-dom";
+import avata from "@/assets/anh-banner-1.webp";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-interface ReviewSectionProps {
-    productDetail: Product | null;
-    documentId: string;
-}
-
-const ReviewSection: React.FC<ReviewSectionProps> = ({ productDetail, documentId }) => {
-    const [averageRating, setAverageRating] = useState(0);
-    const [ratingCount, setRatingCount] = useState(0);
-    const [ratingDistribution, setRatingDistribution] = useState<{ [key: number]: number }>({});
+const ReviewSection: React.FC = () => {
+    const { ratings } = useSelector((state: RootState) => state.rating);
     const [selectedRating, setSelectedRating] = useState<number | null>(null);
-    const [filteredRatings, setFilteredRatings] = useState<any[]>([]);
-    const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
     const [visibleCount, setVisibleCount] = useState(3);
+    const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
+    const dispatch = useAppDispatch();
+    const { documentId } = useParams<{ documentId: string }>();
 
     useEffect(() => {
-        if (productDetail) {
-            const ratingsArray = productDetail.ratings || [];
-            setRatingCount(ratingsArray.length);
-            setAverageRating(productDetail.rating || 0);
+        dispatch(fetchRatings());
+    }, [dispatch]);
 
-            const distribution = ratingsArray.reduce(
-                (acc: { [key: number]: number }, rating: { rating: number }) => {
-                    acc[rating.rating] = (acc[rating.rating] || 0) + 1;
-                    return acc;
-                },
-                {}
-            );
+    // Lọc đánh giá theo documentId của sản phẩm
+    const productRatings = ratings.filter((rating) => rating.product?.documentId === documentId);
 
-            setRatingDistribution(distribution);
-            setFilteredRatings(ratingsArray);
-        }
-    }, [productDetail]);
+    // Thống kê đánh giá
+    const ratingCount = productRatings.length;
+    const averageRating = ratingCount > 0
+        ? productRatings.reduce((sum, r) => sum + r.rating, 0) / ratingCount
+        : 0;
 
-    useEffect(() => {
-        if (selectedRating === null) {
-            setFilteredRatings(productDetail?.ratings || []);
-        } else {
-            setFilteredRatings(productDetail?.ratings?.filter((r: any) => r.rating === selectedRating) || []);
-        }
-    }, [selectedRating, productDetail]);
+    // Phân phối số sao
+    const ratingDistribution = productRatings.reduce((acc, { rating }) => {
+        acc[rating] = (acc[rating] || 0) + 1;
+        return acc;
+    }, {} as { [key: number]: number });
 
-    const handleShowMore = () => {
-        setVisibleCount((prev) => prev + 3);
-    };
-
-    const handleShowLess = () => {
-        setVisibleCount(3);
-    };
+    // Lọc theo số sao được chọn
+    const filteredRatings = selectedRating !== null
+        ? productRatings.filter((r) => r.rating === selectedRating)
+        : productRatings;
 
     return (
         <div className="border-t p-6 mt-4">
             <motion.div
-                className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6"
+                className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-6"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeIn}
             >
-                {/* Overall Rating */}
-                <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-6">
                     <div className="text-center sm:text-left">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{averageRating.toFixed(1)}</h1>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+                            {averageRating.toFixed(1)}
+                        </h1>
                         <p className="text-gray-600">({ratingCount} đánh giá)</p>
                     </div>
                     <button
@@ -81,7 +69,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productDetail, documentId
                     </button>
                 </div>
 
-                {/* Detailed Ratings */}
+                {/* Thanh đánh giá */}
                 <div className="space-y-3 mb-6">
                     {[5, 4, 3, 2, 1].map((star) => {
                         const count = ratingDistribution[star] || 0;
@@ -90,10 +78,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productDetail, documentId
                             <div className="flex items-center" key={star}>
                                 <span className="w-12 text-gray-600">{star} sao</span>
                                 <div className="flex-1 h-4 bg-gray-200 rounded-lg mx-4">
-                                    <div
-                                        className="h-4 bg-yellow-500 rounded-lg"
-                                        style={{ width: `${percentage}%` }}
-                                    ></div>
+                                    <div className="h-4 bg-yellow-500 rounded-lg" style={{ width: `${percentage}%` }}></div>
                                 </div>
                                 <span className="text-gray-600 w-24">{percentage.toFixed(1)}% | {count}</span>
                             </div>
@@ -101,7 +86,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productDetail, documentId
                     })}
                 </div>
 
-                {/* Filter Section */}
+                {/* Bộ lọc */}
                 <div>
                     <h2 className="text-lg font-semibold text-gray-800 mb-3">Lọc theo:</h2>
                     <div className="flex flex-wrap gap-2">
@@ -123,69 +108,76 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productDetail, documentId
                     </div>
                 </div>
 
-                {/* Danh sách đánh giá đã lọc */}
+                {/* Danh sách đánh giá */}
                 <div className="mt-6 space-y-4">
                     {filteredRatings.length > 0 ? (
                         <>
-                            {filteredRatings.slice(0, visibleCount).map((review, index) => (
-                                <div key={index} className="bg-gray-100 p-4 rounded-lg shadow-md">
-                                    <div className="flex items-center space-x-2">
-                                        <div className="flex">
-                                            {Array.from({ length: review.rating }).map((_, i) => (
-                                                <span key={i} className="text-yellow-500 text-lg"><Star /></span>
-                                            ))}
-                                        </div>
-
-                                        {/* Thêm nhận xét ngay bên cạnh các sao */}
-                                        {review.rating === 5 && <span className="text-green-600 font-semibold">Cực kì hài lòng!</span>}
-                                        {review.rating === 4 && <span className="text-blue-600 font-semibold">Hài lòng!</span>}
-                                        {review.rating === 3 && <span className="text-yellow-600 font-semibold">Bình thường!</span>}
-                                        {review.rating === 2 && <span className="text-orange-600 font-semibold">Chưa tốt lắm!</span>}
-                                        {review.rating === 1 && <span className="text-red-600 font-semibold">Không hài lòng!</span>}
+                            {filteredRatings.slice(0, visibleCount).map((review) => (
+                                <div key={review.id} className="flex bg-gray-100 p-4 rounded-lg shadow-md">
+                                    <div className="w-1/4 flex space-x-2">
+                                        <img
+                                            className="w-10 h-10 rounded-full"
+                                            src={avata}
+                                            alt="avata"
+                                        />
+                                        <p className="text-cyan-700">{review.username || "Người dùng ẩn danh"}</p>
                                     </div>
 
-                                    <p className="text-cyan-700 text-xl">{review.username}</p>
-                                    <p className="text-gray-700">{review.description}</p>
+                                    <div className="w-3/4">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="flex">
+                                                {Array.from({ length: review.rating }).map((_, i) => (
+                                                    <span key={i} className="text-yellow-500 text-lg"><Star /></span>
+                                                ))}
+                                            </div>
 
-                                    {review.img && review.img.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            {review.img.map((image: any) => (
-                                                <img
-                                                    key={image.id}
-                                                    src={image.url}
-                                                    alt="Review"
-                                                    className="w-24 h-24 object-cover rounded-md"
-                                                />
-                                            ))}
+                                            {review.rating === 5 && <span className="text-green-600">Cực kì hài lòng!</span>}
+                                            {review.rating === 4 && <span className="text-blue-600">Hài lòng!</span>}
+                                            {review.rating === 3 && <span className="text-yellow-600">Bình thường!</span>}
+                                            {review.rating === 2 && <span className="text-orange-600">Chưa tốt lắm!</span>}
+                                            {review.rating === 1 && <span className="text-red-600">Không hài lòng!</span>}
                                         </div>
-                                    )}
+
+                                        <p className="text-gray-700">{review.description}</p>
+
+                                        {/* Kiểm tra dữ liệu ảnh */}
+                                        {review.img && review.img.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {review.img.map((image: { id: number; name: string; url: string; }) => {
+                                                    let imageUrl = image.url;
+                                                    imageUrl = imageUrl.replace("/api/", "/");
+
+                                                    return (
+                                                        <img
+                                                            key={image.id}
+                                                            src={imageUrl}
+                                                            alt={image.name || "Review Image"}
+                                                            className="w-24 h-24 object-cover rounded-md"
+                                                            onError={(e) => {
+                                                                e.currentTarget.src = "/fallback-image.jpg"; // Ảnh mặc định nếu lỗi
+                                                            }} />
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
 
-                            {/* Nút "Xem thêm" hoặc "Ẩn bớt" */}
-                            <div className="flex justify-center mt-4">
-                                {visibleCount < filteredRatings.length ? (
-                                    <button
-                                        onClick={handleShowMore}
-                                        className="px-4 py-2 text-blue-500 rounded hover:text-blue-600"
-                                    >
-                                        Xem thêm
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={handleShowLess}
-                                        className="px-4 py-2 text-red-500 rounded hover:text-red-600"
-                                    >
-                                        Ẩn bớt
-                                    </button>
-                                )}
-                            </div>
+                            {filteredRatings.length > visibleCount ? (
+                                <button onClick={() => setVisibleCount((prev) => prev + 3)} className="text-blue-500 mt-2">
+                                    Xem thêm
+                                </button>
+                            ) : (
+                                <button onClick={() => setVisibleCount(3)} className="text-red-500 mt-2">
+                                    Thu gọn
+                                </button>
+                            )}
                         </>
                     ) : (
-                        <p className="text-gray-500">Không có đánh giá nào.</p>
+                        <p className="text-gray-600 text-center mt-4">Chưa có đánh giá nào.</p>
                     )}
                 </div>
-
                 {/* Form đánh giá */}
                 {isReviewFormOpen && documentId && (
                     <ReviewForm onClose={() => setIsReviewFormOpen(false)} documentId={documentId} />

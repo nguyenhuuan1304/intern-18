@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
-import { Star } from "lucide-react";
+import { Star, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createRating } from "@/store/ratingSlice";
 import { AppDispatch, RootState } from "@/store/store";
@@ -13,14 +13,20 @@ interface ReviewFormProps {
 const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
     const dispatch = useDispatch<AppDispatch>();
     const loading = useSelector((state: RootState) => state.rating.loading);
-
-    const [rating, setRating] = useState(0);
+    const [rating, setRating] = useState(5);
     const [description, setDescription] = useState("");
     const [images, setImages] = useState<File[]>([]);
     const [previewImages, setPreviewImages] = useState<string[]>([]);
-    const user = JSON.parse(localStorage.getItem("user") || "{}"); 
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const username = user.username || "";
-    
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleButtonClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
@@ -60,8 +66,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
     return ReactDOM.createPortal(
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-1/2 relative animate-fadeIn">
-                <button className="absolute top-2 right-2 text-gray-600 hover:text-gray-800" onClick={onClose}>
-                    ✖
+                <button className="absolute top-2 right-2 text-red-500 hover:text-red-600" onClick={onClose}>
+                    <X/>
                 </button>
 
                 <h2 className="text-lg font-semibold text-gray-800 mb-3">Viết đánh giá của bạn</h2>
@@ -85,7 +91,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
                     onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
 
-                <input type="file" multiple accept="image/*" onChange={handleImageChange} className="mb-3" />
+                <input type="file" multiple ref={fileInputRef} accept="image/*" onChange={handleImageChange} className="mb-3 hidden" />
+                <button
+                    type="button"
+                    onClick={handleButtonClick}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-2"
+                >
+                    Đính kèm ảnh
+                </button>
 
                 <div className="flex space-x-2 overflow-x-auto">
                     {previewImages.map((src, index) => (

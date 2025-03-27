@@ -15,7 +15,7 @@ const initialState: RatingState = {
 
 // Async action để fetch đánh giá
 export const fetchRatings = createAsyncThunk("rating/fetchRatings", async () => {
-    const response = await api.get("/ratings?populate=*");
+    const response = await api.get("/ratings?populate=*&pagination[limit]=1000");
     return response.data.data.map((rating: any) => ({
         ...rating,
         img: rating.img
