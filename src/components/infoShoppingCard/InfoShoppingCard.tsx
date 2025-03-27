@@ -13,7 +13,6 @@ const orders: Order[] = [
   { id: "DH003", total: 750000, date: "2024-03-14", status: "Đang giao" },
 ];
 const InfoShoppingCard = () => {
-
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-hidden border ">

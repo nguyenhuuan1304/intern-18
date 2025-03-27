@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { api } from '@/hooks/useAxios'
 import { TypeDataNews } from '@/pages/news/typeNews'
 import { parseDocument } from "htmlparser2";
+import { create } from 'node:domain';
 
 
 interface TypeList {
@@ -29,6 +30,14 @@ export const getPostListNews = createAsyncThunk('news/getPostListNews',
     return response.data.data;   
 })
 
+export const deleteNews = createAsyncThunk('news/deleteNews',
+    async (id : string, thunkAPI) => {
+        const response = await api.delete<TypeDataNews>(`/news/${id}` , {
+            signal: thunkAPI.signal
+        });
+        return response.data
+})
+
 export const createNews = createAsyncThunk('news/postNews', 
     async(post: TypeDataNews, thunkAPI) => {
         console.log(post)
@@ -38,17 +47,7 @@ export const createNews = createAsyncThunk('news/postNews',
                 name: post.name,
                 img: post.img,
                 description: post.description, 
-                // description: [
-                // {
-                //     type: "paragraph",
-                //     children: [
-                //     {
-                //         type: "text",
-                //         text: post.description, 
-                //       },
-                //     ],
-                // },
-                // ],
+                introduction: post.introduction,
                 slug: post.slug,
               }
             };
@@ -86,6 +85,12 @@ export const newtState = createSlice({
         console.log(data)
         state.news.push(data)
     })
+    .addCase(deleteNews.fulfilled, (state,action) => {
+        // const postIdd = action.meta.arg;
+        // console.log(postIdd === action.payload.id)//true
+        const postId = state.news.findIndex(news => news.documentId === action.payload.documentId)
+        state.news.splice(postId,1);
+    })  
   },
 })
 

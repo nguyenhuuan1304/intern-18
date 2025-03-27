@@ -1,3 +1,5 @@
+import { StrapiBlock } from "@/components/createPostNews/until";
+
 interface TypeDescription {
     type: "paragraph",
     children: [
@@ -11,9 +13,11 @@ interface TypeDescription {
 export interface TypeDataNews {
   name: string;
   img: typeImg[] | number[]  ; // Cho phép nhiều ảnh
-  description: TypeDescription[] | string;
-  documentId: string
+  description: TypeDescription[] | string | StrapiBlock[];
+  documentId: string,
   slug: string;
+  introduction: string,
+  is_block?: boolean
 } 
 
 interface typeImg  {

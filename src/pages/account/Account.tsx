@@ -16,7 +16,10 @@ interface TypeNavbarItem {
 }
 
 const Account = () => {
-  const user:  TypeUser = JSON.parse(localStorage.getItem("user") || "null");
+  const user: TypeUser & { id: string } = {
+    ...JSON.parse(localStorage.getItem("user") || "null"),
+    
+  };
   const [selectTab, setSelectTab] = useState(() => {
     return localStorage.getItem("selectedTab") || "info";
   });
@@ -54,22 +57,21 @@ const Account = () => {
               </div>
               <ul className="text-[#4a4a4a]">
                 {dataNavbar.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href=""
+                    <li key={item.id} className="my-[10px] ">
+                    <button
                       className={`
                           ${
                             item.id === selectTab
-                              ? "bg-[#0f35c4] text-[#fff]"
+                              ? "bg-[#0590f9] text-[#fff]"
                               : ""
                           }
-                          flex p-[10px] hover:bg-[#0f35c4] hover:text-[#fff]
+                          flex p-[10px] rounded-[4px] hover:bg-[#0590f9] hover:cursor-pointer hover:text-[#fff] w-[100%]
                           `}
                       onClick={() => handleSelectTab(item.id)}
                     >
                       {item.icon}
                       <p className="ml-[20px]">{item.label}</p>
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>

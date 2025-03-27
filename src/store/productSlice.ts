@@ -20,13 +20,16 @@ export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const [productsResponse, imagesResponse] = await Promise.all([
-        api.get("/products?populate=*"),
-        api.get("/product-images?populate=*"),
-      ]);
+        const [productsResponse, imagesResponse] = await Promise.all([
+            api.get("/products?populate=*"),
+            api.get("/product-images?populate=*"),
+        ]);
+        if (!productsResponse.data || !imagesResponse.data) {
+            throw new Error("Invalid response data");
+          }
+        const productsData = productsResponse.data;
+        const imagesData = imagesResponse.data;
 
-      const productsData = productsResponse.data;
-      const imagesData = imagesResponse.data;
 
       const productImagesMap = new Map<
         string,
@@ -151,12 +154,13 @@ export const fetchProducts = createAsyncThunk(
 );
 
 const productSlice = createSlice({
-  name: "products",
-  initialState,
-  reducers: {
-    sortProducts(state, action: PayloadAction<string>) {
-      const value = action.payload;
-      let sortedProducts = [...state.allProducts];
+    name: "products",
+    initialState,
+    reducers: {
+        sortProducts(state, action: PayloadAction<string>) {
+            const value = action.payload;
+            const sortedProducts = [...state.allProducts];
+
 
       if (value === "low_price") {
         sortedProducts.sort((a, b) => a.prices - b.prices);
@@ -164,25 +168,28 @@ const productSlice = createSlice({
         sortedProducts.sort((a, b) => b.prices - a.prices);
       }
 
-      state.products = sortedProducts;
+            state.products = sortedProducts;
+        },
+        
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchProducts.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.products = action.payload;
-        state.allProducts = action.payload;
-        state.loading = false;
-      })
-      .addCase(fetchProducts.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
-  },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchProducts.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchProducts.fulfilled, (state, action) => {
+                state.products = action.payload;
+                state.allProducts = action.payload;
+                state.loading = false;
+                console.log(123)
+            })
+            .addCase(fetchProducts.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
+          
+    },
 });
 
 export const { sortProducts } = productSlice.actions;

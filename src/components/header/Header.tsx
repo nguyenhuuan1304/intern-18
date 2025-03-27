@@ -4,22 +4,25 @@ import { NavLink, useNavigate } from "react-router-dom";
 import useAxios from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
 import NavbarMobile from "../navbarMobile/NavbarMobile";
-interface typeImage {
-  Image: string;
-  formats: {
-    thumbnail: {
-      url: string;
-    };
-  };
-}
+import { Product } from '@/components/product/types/ProductType'
 
-export interface typeProduct {
-  documentId: string;
-  name: string;
-  color: string;
-  prices: number;
-  Image: typeImage;
-}
+// interface typeImage {
+//   Image: string;
+//   formats: {
+//     thumbnail: {
+//       url: string;
+//     };
+//   };
+// }
+
+
+// export interface typeProduct {
+//   documentId: string;
+//   name: string;
+//   color: string;
+//   prices: number;
+//   Image: typeImage;
+// }
 
 export interface User {
   username: string;
@@ -37,7 +40,7 @@ const Header = () => {
   const [value, setValue] = useState("");
   const [valueIpad, setValueIpad] = useState("");
   const [circle, setCircle] = useState(false);
-  const [arrSearch, setArrSearch] = useState<typeProduct[]>([]);
+  const [arrSearch, setArrSearch] = useState<Product[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputRefIpad = useRef<HTMLInputElement>(null);
   const debounce = useDebounce(value || valueIpad, 500) as string;
@@ -57,18 +60,17 @@ const Header = () => {
         setArrSearch([]);
         return;
       }
-
+  
       try {
-        const response = await api.get(
-          `/products?query=${debounce}&populate=*`
-        );
+        const response = await api.get(`/products?query=${debounce}&populate=*`);
+        console.log(response.data)
         setArrSearch(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
         setArrSearch([]);
       }
     };
-
+  
     fetchData();
   }, [debounce]);
 
@@ -113,11 +115,12 @@ const Header = () => {
     }
   };
 
-  const thumbnailUrls: { price: number; name: string; thumbnailUrl: string }[] =
+  const thumbnailUrls: {id:string; price: number; name: string; thumbnailUrl: string }[] =
     arrSearch.map((product) => ({
+      id: product.documentId,
       price: product.prices,
       name: product.name,
-      thumbnailUrl: product.Image?.formats?.thumbnail?.url || "Không có ảnh",
+      thumbnailUrl: product?.Image[0]?.url || "Không có ảnh",
     }));
 
   const handleLogout = (): void => {
@@ -170,7 +173,7 @@ const Header = () => {
                 <Search className="m-auto text-[#fff]" />
               </button>
             </form>
-            {(value !== "" || circle) && (
+            {(value !== "") && (
               <button
                 className="absolute top-[12px] right-[80px]"
                 onClick={handleCircle}
@@ -178,7 +181,7 @@ const Header = () => {
                 <X size={22} strokeWidth={0.5} />
               </button>
             )}
-            {(value !== "" || circle) && (
+            {(value !== "") && (
               <div className="absolute top-[60px] z-[99] max-h-[336px] w-[420px] bg-white rounded-[5px] shadow-[0_4px_60px_0_rgba(0,0,0,0.2)]">
                 <div className="bg-[#f5f5f5] h-[36px] flex items-center">
                   <span className="p-[10px] text-[13px] text-[#666]">
@@ -188,7 +191,7 @@ const Header = () => {
                 {arrSearch.length !== 0 ? (
                   <div className="product-slider-vertical scroll-area">
                     {thumbnailUrls.map((item, index) => (
-                      <div key={index} className="flex p-[10px] cursor-pointer">
+                      <NavLink to={`/product-detail/${item.id}`} key={index} className="flex p-[10px] cursor-pointer">
                         <div className="w-[75px] h-[75px] mr-[10px]">
                           <img
                             className="object-cover h-full"
@@ -202,7 +205,7 @@ const Header = () => {
                           </h3>
                           <span className="text-[#ff5c5f]">{item.price}đ</span>
                         </div>
-                      </div>
+                      </NavLink>
                     ))}
                   </div>
                 ) : (
@@ -219,7 +222,7 @@ const Header = () => {
           <div className="flex grow justify-between gap-[15px]">
             <div>
               <NavLink
-                to={(user && "/account") || "/login"}
+                to={user && "/account" || "/login"}
                 className="text-[#343434] w-[auto] grid grid-cols-[30px_auto] gap-[5px] h-full items-center"
               >
                 <div>
@@ -414,14 +417,14 @@ const Header = () => {
               key={index}
               className="h-auto mb-[10px] border-b border-gray-300 cursor-pointer"
             >
-              <a href="" className="flex h-[75px] p-[4px]">
+              <NavLink to={`/product-detail/${item.id}`} className="flex h-[75px] p-[4px]">
                 <img
                   className="object-cover h-full"
                   src={`http://localhost:1337${thumbnailUrls[0].thumbnailUrl}`}
                   alt=""
                 />
                 <h3 className="ml-[10px]">{item.name}</h3>
-              </a>
+              </NavLink>
             </div>
           ))}
         </div>

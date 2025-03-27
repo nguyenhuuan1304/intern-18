@@ -8,12 +8,9 @@ import { motion } from "framer-motion";
 import { useSelector } from 'react-redux'
 import { useAppDispatch,RootState } from '@/store/store' 
 import { getPostListNews } from '@/store/news.slice'
-import CreatePostNews from '@/components/createPostNews/CreatePostNews'
 
 const News = () => {
-    const user : User = JSON.parse(localStorage.getItem('user') || "null")
     const listNews  = useSelector((state: RootState) => state.news.news) ?? [];
-    console.log(listNews)
     const dispatch = useAppDispatch()
     useEffect(() => {
         const promise = dispatch(getPostListNews())
@@ -21,15 +18,6 @@ const News = () => {
           promise.abort()
         }
     },[dispatch])
-
-    const handleShowAddNews = () => {
-        const element = document.getElementById('modal')
-        console.log(element)
-        if(element)
-        {
-            element.style.display = 'block'
-        }
-    }
 
     return (
     <div className=''>
@@ -42,7 +30,7 @@ const News = () => {
                 { label: "Tin tức" }
             ]}
         />  
-        {user && 
+        {/* {user && 
             <div className='max-w-[1400px] mx-[auto] flex justify-end'>
                 <button 
                     onClick={handleShowAddNews}
@@ -51,7 +39,7 @@ const News = () => {
                     Create new postNews
                 </button>
             </div>
-        }
+        } */}
         <div className='max-w-[1400px] mx-[auto] flex mx-[6%] layout max-lg:flex-wrap' >
             <div className=' my-[4%] grid h-[100%] grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1 max-lg:basis-[100%] basis-[80%] gap-x-[10px] gap-y-[20px] '>
             {listNews.map((product,id) => (
@@ -65,7 +53,7 @@ const News = () => {
              >
                 <div>
                     <ItemNews
-                        title='Bộ sưu tập quần áo cầu lông Flick nam nữ đẹp ấn tượng'
+                        title={product?.name}
                         slug = {product?.slug}
                         id = {product?.documentId}
                         img= { 
@@ -73,7 +61,7 @@ const News = () => {
                             ? `http://localhost:1337${product?.img[0].url}` 
                             : `${null}`
                         }
-                        description='Áo cầu lông FlickLấy cảm hứng từ những cú đánh nhẹ nhưng nhanh đến bất ngờ, họa tiết trên mẫu áo cầu lông Flick được thiết kế tựa như những mũi tên gió – nhẹ và bén.'
+                        introduction={product.introduction}
                     />
                 </div>
              </motion.div>
@@ -86,9 +74,9 @@ const News = () => {
                 <ContentSideBarNew title='Tin Tức Nổi Bậc'/>
             </div>
         </div>
-        <div id='modal' className=' modal'>
+        {/* <div id='modal' className=' modal'>
             <CreatePostNews element = {document.getElementById('modal')}/>
-        </div>
+        </div> */}
     </div>
   )
 }

@@ -36,13 +36,13 @@ const NavbarMobile = () => {
                 </div>
             </div>
             <div>
-                <a href="">
+                <NavLink to={'/account'}>
                     <ShoppingBag/>
                     <span>Đơn hàng</span>
-                </a>
+                </NavLink>
             </div>
             <div>
-                <NavLink to={'/'}>
+                <NavLink to={'/account'}>
                     <User />
                     <span>tài khoản</span>
                 </NavLink>

@@ -1,39 +1,28 @@
-import React, { useEffect, useState } from "react";
-import ContentSideBarNew from "@/components/contentSideBarNew/ContentSideBarNew";
-import Header from "@/components/header/Header";
-import ServiceMenu from "@/components/ServiceMenu";
-import {
-  CalendarMinus2,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Facebook,
-  Instagram,
-  Lightbulb,
-  Newspaper,
-  Star,
-  Twitter,
-} from "lucide-react";
-import { NavLink } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { api } from "@/hooks/useAxios";
+import React, { useEffect, useState } from 'react'
+import ContentSideBarNew from '@/components/contentSideBarNew/ContentSideBarNew'
+import Header from '@/components/header/Header'
+import ServiceMenu from '@/components/ServiceMenu'
+import { CalendarMinus2, ChevronLeft, ChevronRight, Eye, Facebook, Instagram, Lightbulb, Newspaper, Star, Twitter } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
+import { motion ,AnimatePresence} from "framer-motion";
+import { api } from '@/hooks/useAxios'
 import { useSearchParams } from "react-router-dom";
-import {
-  BlocksRenderer,
-  type BlocksContent,
-} from "@strapi/blocks-react-renderer";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
+import { useSelector } from 'react-redux'
+import { RootState } from '@/store/store' 
+import { TypeDataNews } from '../news/typeNews'
+
 
 interface DetailProductNewsProps {
   category: string;
 }
-interface Typedata {
-  id: number;
-  title: string;
-  image: string;
-  path: string;
-}
+// interface TypeData {
+//     id: number;
+//     title: string;
+//     product_images: string;
+//     path: string;
+// }
+
 
 interface TypeImg {
   url: string;
@@ -45,16 +34,12 @@ interface TypeNews {
   img: TypeImg[];
 }
 
-const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
-  const listNews = useSelector((state: RootState) => state.news.news) || [];
-  console.log(listNews);
-  const [news, setNews] = useState<TypeNews>({
-    name: "",
-    description: "",
-    img: [],
-  });
-  const [navStart, setNavStart] = useState(0);
-  const [data, setData] = useState<Typedata[]>([]); // Lưu trữ bản sao của dữ liệu
+const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
+  const listNews = useSelector((state: RootState) => state.news.news) || []
+  const [news,setNews] = useState<TypeNews>({name: '', description: '', img: []})
+  const [navStart, setNavStart] = useState(0)
+  const [data, setData] = useState<TypeDataNews[]>(listNews); // Lưu trữ bản sao của dữ liệu
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [savedId, setSavedId] = useState<string | null>(null);
   const listImg: TypeImg[] = news.img || [];
@@ -62,6 +47,7 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
     ? news.description
     : [];
 
+  console.log(data)
   useEffect(() => {
     const id = searchParams.get("id") || null;
 
@@ -80,7 +66,7 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
   const nextSlide = () => {
     setData((prev) => {
       const newData = [...prev];
-      const firstIndex = newData.shift() as Typedata;
+      const firstIndex = newData.shift();
       newData.push(firstIndex); // Dịch chuyển phần tử đầu tiên về cuối
       return newData;
     });
@@ -90,17 +76,18 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
   const prevSlide = () => {
     setData((prev) => {
       const newData = [...prev];
-      const lastIndex = newData.pop() as Typedata;
+      const lastIndex = newData.pop();
       newData.unshift(lastIndex); // Dịch chuyển phần tử cuối về đầu
       return newData;
     });
     setNavStart((pre) => pre - 1);
   };
   // Tự động chuyển slide 5s/lần
-  useEffect(() => {
-    const timer = setInterval(nextSlide, 3000);
-    return () => clearInterval(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setInterval(nextSlide, 3000);
+  //   return () => clearInterval(timer);  
+  // }, []);
+
 
   useEffect(() => {
     if (savedId === null) {
@@ -113,11 +100,12 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
   }, [savedId]);
 
   return (
-    <div className="">
-      <Header />
-      <ServiceMenu />
-      <div className="max-w-[1400px] mx-[auto] h-[38px] bg-[#f5f5fb] w-full flex items-center  ">
-        <div className="row text-[14px] text-[#2e2e2e] flex flex-wrap items-center">
+    <div className=''>
+      <Header/>
+      <ServiceMenu/>
+      <div className=' h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
+        <div className='ml-[7.5%] text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
+
           <a href="">
             <span>Trang chủ</span>
           </a>
@@ -151,13 +139,9 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
               <Newspaper className="block h-[18px] mr-[5px]" />
               <span>Tin tức</span>
             </div>
-          </div>
-          <div className="text-[#333333] text-[14px]">
-            <span>(Có 81 người đang xem cùng bạn)</span>
-          </div>
-          <div className="flex flex-col text-[#333333] text-[14px] leading-[25px]"></div>
-          <div className="flex flex-col text-[#333333] text-[14px] leading-[25px]">
-            <BlocksRenderer content={content} />
+            <div className='markdown flex flex-col text-[#333333] text-[14px] leading-[25px]'>
+              <BlocksRenderer  content={content}/>
+
 
             {/* <span className=''>BST bóng đá : CRX - JUSTPLAY</span>
               <span>Bộ trang phục siêu đẹp CRX sẽ giúp bạn tự tin, phấn khởi khi ra sân bóng, cùng bạn đồng hành chiến thắng, giành lấy vinh quang.Bộ trang phục siêu đẹp CRX sẽ giúp bạn tự tin, phấn khởi khi ra sân bóng, cùng bạn đồng hành chiến thắng, giành lấy vinh quang.Bộ trang phục siêu đẹp CRX sẽ giúp bạn tự tin, phấn khởi khi ra sân bóng, cùng bạn đồng hành chiến thắng, giành lấy vinh quang.</span>
@@ -169,18 +153,15 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
               <span>? Màu sắc rực rỡ, tươi sáng: Trắng xanh - Trắng tím - Đỏ - Vàng - Xanh Ngọc - Xanh da</span>
               <span>? Kích cỡ: S - M - L - XL – XXL- XXXL</span>
               <span>? Giá niêm yết: 165.000 VNĐ</span> */}
-          </div>
-          <div className="flex flex-wrap lg:basis-[48%]  max-md:flex-1 max-md:flex-shrink max-md:flex-basis-full gap-[10px]">
-            {listImg.map((item, id) => (
-              <div key={id} className="w-[350px] ">
-                <img
-                  className="h-[466px] object-cover"
-                  src={`http://localhost:1337${item?.url}`}
-                  alt=""
-                />
-              </div>
-            ))}
-            {/* <div className='w-[350px]'>
+            </div>
+            <div className='flex flex-wrap lg:basis-[48%]  max-md:flex-1 max-md:flex-shrink max-md:flex-basis-full gap-[10px]'>
+              {listImg.map((item, id) => (
+                <div key={id} className='w-[300px] '>
+                  <img className='h-[466px] object-cover' src={`http://localhost:1337${item?.url}`} alt="" />
+                </div>
+              ))}
+              {/* <div className='w-[350px]'>
+
                 <img src="https://cdn2-retail-images.kiotviet.vn/justplay/b035542358144fd985094e2eb26496d9.jpg" alt="" />
               </div>
               <div className='w-[350px]'>
@@ -260,6 +241,7 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
               </a>
             </div>
           </div>
+          </div>
         </div>
         <div className="basis-[20%] bg-white text-[#333] max-lg:basis-[100%]">
           <ContentSideBarNew title="Tin Tức Mới" />
@@ -267,28 +249,47 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
           <ContentSideBarNew title="Sản phẩm đã xem" />
         </div>
       </div>
-      <div className="flex mx-[5%] lg:mx-[9%] flex-col gap-4">
-        <h3 className="font-[500]">Bài viết liên quan</h3>
-        <div className="slider-container relative grid grid-cols-4 gap-[25px] h-[472px] overflow-hidden  max-sm:grid-cols-1 max-lg:grid-cols-3">
-          {data.slice(0, 4).map((item, id) => (
+      <div className='flex mx-[5%] lg:mx-[9%] flex-col gap-4'>
+        <h3 className='font-[500]'>
+          Bài viết liên quan
+        </h3>
+        <div className='slider-container relative grid grid-cols-4 gap-[25px] h-[472px] overflow-hidden  max-sm:grid-cols-1 max-lg:grid-cols-3'>
+          {data.slice(0,  4).map((item,id) => (
             <div key={id}>
-              {/* <AnimatePresence mode="wait"> */}
-              <motion.div
-                key={navStart}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="anima">
-                  <div className="h-[300px] transform -translate-y-1 shadow-[0_4px_60px_0_rgba(0,0,0,0.2),_0_0_0_transparent]">
-                    <a href="">
-                      <img
-                        className="block h-[100%] object-cover w-[100%]"
-                        src={item.image}
-                        alt=""
-                      />
-                    </a>
+            {/* <AnimatePresence mode="wait"> */}
+                <motion.div
+                    key={navStart}
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -100 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                  <div className='anima' >
+                        <div className="h-[300px] transform -translate-y-1 shadow-[0_4px_60px_0_rgba(0,0,0,0.2),_0_0_0_transparent]" >
+
+                          <NavLink to={`/${item.slug}/?id=${item.documentId}`}>
+                            <img 
+                              className='block h-[100%] object-cover w-[100%]' 
+                              src={ Array.isArray(item?.img) && typeof item?.img[0] === 'object' 
+                                ? `http://localhost:1337${item?.img[0].url}` 
+                                : `${null}`
+                              } alt="" 
+                            />
+                          </NavLink>
+                        </div>
+                        <div>
+                          <span className='my-[10px] mx-0 tracking-[2px] text-[13px] text-[#212529]'>
+                            Vài ngày trước | Đăng bởi admin
+                          </span>
+                          <h3>
+                            <a href="" className=' my-[5px] text-[20px] font-[500] text-[#337ab7] bg-transparent line-clamp-2 text-justify'>
+                              {item.name}
+                            </a>
+                          </h3>
+                          <a href="" className='text-[#687385] text-[14px] my-[10px] line-clamp-3 text-justify'>
+                            <span>Mang đến sự đa dạng và phong phú hơn về trang phục cho vị trí người trấn giữ khung thành, Justplay ra mắt BST quần áo thủ môn JUSTPLAY GEA</span>
+                          </a>
+                        </div>
                   </div>
                   <div>
                     <span className="my-[10px] mx-0 tracking-[2px] text-[13px] text-[#212529]">
@@ -314,11 +315,11 @@ const DetailProductNews: React.FC<DetailProductNewsProps> = ({ category }) => {
                       </span>
                     </a>
                   </div>
-                </div>
               </motion.div>
               {/* </AnimatePresence> */}
             </div>
           ))}
+          
           <button
             onClick={prevSlide}
             className="prevSlide absolute left-4 top-[40%] cursor-pointer -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-white transition-all"

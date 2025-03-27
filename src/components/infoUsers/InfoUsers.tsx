@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {User} from "@/components/header/Header"
 import { toast } from "react-toastify";
 import useAxios from "@/hooks/useAxios";
-
+import useDebounce from "@/hooks/useDebounce";
 
 interface typeInfo {
   user: User & { id: string };
@@ -22,7 +22,30 @@ const initialValue : User = {
 
 const InfoUsers: React.FC<typeInfo>= ({user} ) => {
   const [form, setForm] = useState<User>(initialValue)
+  const [error, setError] = useState<{[key : string] : string}>({})
+  const [isFormChange , setIsFormChange] = useState(false)
   const {api} = useAxios()
+  const debounce = useDebounce(form.username , 500)  as string
+
+
+  useEffect(() => {
+      if(!isFormChange || !debounce) return 
+      console.log(form.username)
+      const fetchData = async () => {
+        try {
+          const res = await api.get(`users?filters[username][$eq]=${debounce}`)
+          const user = res.data
+          if(user && user.length > 0) {
+            setError((pre) => ({...pre , ['username'] : 'tài khoản đã tồn tại'}))
+          } else {
+            setError((pre) => ({...pre , ['username'] : ''}))
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+      fetchData()
+  },[debounce])
 
   useEffect(() => {
     if(user) {
@@ -30,7 +53,33 @@ const InfoUsers: React.FC<typeInfo>= ({user} ) => {
     }
   },[user])
 
+  const handleChange = (e :React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    let message  = ''
+    if (id === "phone") {
+      const isPhone = /^[0-9]{10,11}$/; 
+      if (!isPhone.test(value)) {
+        message = "Số điện thoại không hợp lệ! (độ tài từ 10-11 chữ số)";
+      } else {
+        message = ''; 
+      }
+    }
+
+    if (id === "email") {
+      const emailRegex = /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/; // Regex kiểm tra email hợp lệ
+      if (!emailRegex.test(value)) {
+        message = ("Email không hợp lệ! Vui lòng nhập đúng định dạng.");
+      } else {
+        message = (""); // Reset lỗi nếu hợp lệ
+      }
+    }
+
+    setForm((pre) => ({...pre,[e.target.id] : e.target.value}))
+    setError((pre) => ({...pre , [id] : message}))
+    setIsFormChange(true)
+  }
   const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+    console.log(form)
     e.preventDefault()
     try {
       const res = await api.put(`users/${user.id}`,form)
@@ -57,19 +106,21 @@ const InfoUsers: React.FC<typeInfo>= ({user} ) => {
               <Input 
                 className="mt-[14px]" 
                 id="firstName" 
-                value={form.firstName}
+                value={form.firstName || ''}
                 placeholder="Nhập họ và chữ đệm" 
-                onChange={(e) => setForm((pre) => ({...pre, firstName: e.target.value}))}
+                onChange={handleChange}
               />
             </div>
             <div>
               <Label htmlFor="lastName">Tên</Label>
               <Input 
                 className="mt-[14px]" 
-                id="lastName" 
-                value={form.username} 
-                onChange={(e) => setForm((pre) => ({...pre, username: e.target.value}))}
+                id="username" 
+                value={form.username || ''} 
+                onChange={handleChange}
               />
+              {error.username && <p style={{ color: "red" }}>{error.username}</p>}
+              
             </div>
           </div>
           <div className="mb-4">
@@ -77,27 +128,31 @@ const InfoUsers: React.FC<typeInfo>= ({user} ) => {
             <Input 
               className="mt-[14px]" 
               id="email" 
-              value={form.email}
-              onChange={(e) => setForm((pre) => ({...pre, email: e.target.value}))}
-              placeholder="Nhập Email liên hệ" />
+              value={form.email || ''}
+              onChange={handleChange}
+              placeholder="Nhập Email liên hệ" 
+            />
+            {error.email && <p style={{ color: "red" }}>{error.email}</p>}
           </div>
           <div className="mb-4">
             <Label htmlFor="phone">Số điện thoại</Label>
             <Input 
               className="mt-[14px]" 
               id="phone" 
-              value={form.phone} 
-              onChange={(e) => setForm((pre) => ({...pre, phone: e.target.value}))}
+              value={form.phone || ''} 
+              onChange={handleChange}
             />
+            {error.phone && <p style={{ color: "red" }}>{error.phone}</p>}
           </div>
           <div className="mb-4">
             <Label htmlFor="dob">Ngày sinh</Label>
             <div className="relative">
             <input
               type="date"
+              id="birthday"
               placeholder="dd/mm/yyyy"
-              value={form.birthday}
-              onChange={(e) => setForm((pre) => ({...pre, birthday: e.target.value}))}
+              value={form.birthday || ''}
+              onChange={handleChange}
               className="mt-[14px] w-full px-3 py-2 border rounded-md outline-none"
             />
           </div>
@@ -107,8 +162,8 @@ const InfoUsers: React.FC<typeInfo>= ({user} ) => {
             <Input 
               className="mt-[14px]" 
               id="address"
-              value={form.address}
-              onChange={(e) => setForm((pre) => ({...pre, address: e.target.value}))}
+              value={form.address || ''}
+              onChange={handleChange}
               placeholder="Nhập địa chỉ của bạn" 
             />
           </div>
