@@ -22,6 +22,7 @@ const sortOptions = [
 const ProductList: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { products, loading, error } = useSelector((state: RootState) => state.products);
+    console.log(products)
     const [selectedOption, setSelectedOption] = useState<string>("");
     const [showForm, setShowForm] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);

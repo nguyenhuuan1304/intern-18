@@ -1,12 +1,13 @@
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 import DetailProductNews from "@/pages/detailProductNews/DetailProductNews";
+import Admin from "@/pages/admin/admin";
+import AdminRoute from "./AdminRoute";
 const NotFound = lazy(() => import( "@/components/Notfound")) ;
 const PrivateRoute = lazy(() => import("./PrivateRoutes"));
 const PublicRoute = lazy(() => import("./PublicRoutes"));
 const HomePage = lazy(() => import("../pages/HomePage"));
 const Account = lazy(() => import("../pages/account/Account"));
-const Order = lazy(() => import("../pages/order/Order"));
 const Payment = lazy(() => import("../pages/payment/Payment"));
 const News = lazy(() => import("../pages/news/News"));
 const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
@@ -123,13 +124,23 @@ export const routes: RouteObject[] = [
     element: (
       <ProductDetailPage />
     ),
-
-
-    // element: <Payment />,
   },
   {
     path: "/lien-he",
     element: <Contact />,
+  },
+  {
+    element: <AdminRoute />, // Chỉ admin mới vào được
+    children: [
+      {
+        path: "/admin",
+        element: <Admin />,
+      },
+      // {
+      //   path: "/admin",
+      //   element: <Admin />,
+      // },
+    ],
   },
   {
     path: "/tin-tuc",
@@ -140,17 +151,11 @@ export const routes: RouteObject[] = [
     element: <DetailProductNews category="tin-tuc"/>,
   },
   {
-    // element: <PrivateRoute />,
+    element: <PrivateRoute />,
     children: [
       {
         path: "/account",
         element: <Account />,
-        children: [
-          {
-            path: "order",
-            element: <Order />,
-          },
-        ],
       },
       {
         path: "/cart",

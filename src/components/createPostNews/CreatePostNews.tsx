@@ -15,7 +15,7 @@ interface TypeImg  {
 };
 
 interface TypeElement {
-  element: HTMLElement | null
+  element: HTMLElement |null
 }
 
 const CreatePostNews: React.FC<TypeElement> = ({element}) => {
@@ -25,13 +25,11 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
     description:  [],
     documentId: "",
     slug: "",
+    introduction : ""
   });
-
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [image, setImage] = useState<FileList | null>(null);
   const [api1, contextHolder] = notification.useNotification();
-  const [description , setDescription] = useState('')
-  console.log(description)
   const dispatch = useAppDispatch();  
   const editorRef = useRef(null);
   
@@ -120,11 +118,12 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
   const handleCloseAddNews = () => {
     if(element) {
       element.style.display='none'
+      console.log(123)
     }
   }
 
   return (
-    <div className="overflow-auto  relative m-[auto] lg:top-[10%] max-w-2xl h-[770px] w-[100%] bg-white p-6 shadow-lg rounded-lg">
+    <div className="overflow-auto  relative m-[auto]  max-w-2xl h-[770px] w-[100%] bg-white p-6 shadow-lg rounded-lg">
       {contextHolder}
       <h2 className="text-2xl font-bold mb-4">Tạo bài viết mới</h2>
       <div className="absolute top-[4px] right-[12px] ">
@@ -175,6 +174,16 @@ const CreatePostNews: React.FC<TypeElement> = ({element}) => {
             <button type="button" onClick={updateImg} className="text-[#fff] bg-[#2b7fff] py-[10px] px-[24px] rounded-[10px] cursor-pointer">Save</button>
             </>
         )}
+        <div>
+          <label className="block font-medium">Introduction</label>
+          <textarea
+            name="introduction"
+            onChange={handleChange}
+            rows={4}
+            className="w-full mt-2 px-3 py-2 border rounded-md focus:outline-blue-500"
+            placeholder="Nhập giới thiệu bài viết"
+          />
+        </div>
 
         {/* Mô tả */}
         <div>

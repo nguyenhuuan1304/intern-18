@@ -5,22 +5,22 @@ import ServiceMenu from '@/components/ServiceMenu'
 import { CalendarMinus2, ChevronLeft, ChevronRight, Eye, Facebook, Instagram, Lightbulb, Newspaper, Star, Twitter } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { motion ,AnimatePresence} from "framer-motion";
-import { bannerData } from '@/components/SliderProduct'
 import { api } from '@/hooks/useAxios'
 import { useSearchParams } from "react-router-dom";
 import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
 import { useSelector } from 'react-redux'
-import { RootState } from '@/store/store'
+import { RootState } from '@/store/store' 
+import { TypeDataNews } from '../news/typeNews'
 
 interface DetailProductNewsProps {
   category: string; 
 }
-interface Typedata {
-    id: number;
-    title: string;
-    image: string;
-    path: string;
-}
+// interface TypeData {
+//     id: number;
+//     title: string;
+//     product_images: string;
+//     path: string;
+// }
 
 interface TypeImg {
   url : string
@@ -34,15 +34,15 @@ interface TypeNews {
 
 const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const listNews = useSelector((state: RootState) => state.news.news) || []
-  console.log(listNews)
   const [news,setNews] = useState<TypeNews>({name: '', description: '', img: []})
   const [navStart, setNavStart] = useState(0)
-  const [data, setData] = useState<Typedata[]>(bannerData); // Lưu trữ bản sao của dữ liệu
+  const [data, setData] = useState<TypeDataNews[]>(listNews); // Lưu trữ bản sao của dữ liệu
   const [searchParams, setSearchParams] = useSearchParams();
   const [savedId, setSavedId] = useState<string | null>(null);
   const listImg : TypeImg[] = news.img || []
   const content: BlocksContent = Array.isArray(news?.description) ? news.description : [];
 
+  console.log(data)
   useEffect(() => {
     const id = searchParams.get("id") || null;
     
@@ -61,7 +61,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const nextSlide = () => {
     setData((prev) => {
       const newData = [...prev];
-      const firstIndex = newData.shift() as Typedata;
+      const firstIndex = newData.shift();
       newData.push(firstIndex); // Dịch chuyển phần tử đầu tiên về cuối
       return newData;
     });
@@ -71,7 +71,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const prevSlide = () => {
     setData((prev) => {
       const newData = [...prev];
-      const lastIndex = newData.pop() as Typedata;
+      const lastIndex = newData.pop();
       newData.unshift(lastIndex); // Dịch chuyển phần tử cuối về đầu
       return newData;
     });
@@ -79,10 +79,10 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
 
   };
   // Tự động chuyển slide 5s/lần
-  useEffect(() => {
-    const timer = setInterval(nextSlide, 3000);
-    return () => clearInterval(timer);  
-  }, []);
+  // useEffect(() => {
+  //   const timer = setInterval(nextSlide, 3000);
+  //   return () => clearInterval(timer);  
+  // }, []);
 
 
   useEffect(() => {
@@ -102,8 +102,8 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
     <div className=''>
       <Header/>
       <ServiceMenu/>
-      <div className='max-w-[1400px] mx-[auto] h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
-        <div className='row text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
+      <div className=' h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
+        <div className='ml-[7.5%] text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
           <a href="">
             <span>Trang chủ</span>
           </a>
@@ -144,7 +144,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
             <div  className='flex flex-col text-[#333333] text-[14px] leading-[25px]'>
              
             </div>
-            <div className='flex flex-col text-[#333333] text-[14px] leading-[25px]'>
+            <div className='markdown flex flex-col text-[#333333] text-[14px] leading-[25px]'>
               <BlocksRenderer  content={content}/>
 
               {/* <span className=''>BST bóng đá : CRX - JUSTPLAY</span>
@@ -160,7 +160,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
             </div>
             <div className='flex flex-wrap lg:basis-[48%]  max-md:flex-1 max-md:flex-shrink max-md:flex-basis-full gap-[10px]'>
               {listImg.map((item, id) => (
-                <div key={id} className='w-[350px] '>
+                <div key={id} className='w-[300px] '>
                   <img className='h-[466px] object-cover' src={`http://localhost:1337${item?.url}`} alt="" />
                 </div>
               ))}
@@ -267,11 +267,15 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
                   <div className='anima' >
                         <div className="h-[300px] transform -translate-y-1 shadow-[0_4px_60px_0_rgba(0,0,0,0.2),_0_0_0_transparent]" >
 
-                          <a href="">
+                          <NavLink to={`/${item.slug}/?id=${item.documentId}`}>
                             <img 
                               className='block h-[100%] object-cover w-[100%]' 
-                              src={item.image} alt="" />
-                          </a>
+                              src={ Array.isArray(item?.img) && typeof item?.img[0] === 'object' 
+                                ? `http://localhost:1337${item?.img[0].url}` 
+                                : `${null}`
+                              } alt="" 
+                            />
+                          </NavLink>
                         </div>
                         <div>
                           <span className='my-[10px] mx-0 tracking-[2px] text-[13px] text-[#212529]'>
@@ -279,7 +283,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
                           </span>
                           <h3>
                             <a href="" className=' my-[5px] text-[20px] font-[500] text-[#337ab7] bg-transparent line-clamp-2 text-justify'>
-                              Bộ sưu tập quần áo bóng đá CROSS II thương hiệu JUST PLAY
+                              {item.name}
                             </a>
                           </h3>
                           <a href="" className='text-[#687385] text-[14px] my-[10px] line-clamp-3 text-justify'>

@@ -77,9 +77,14 @@ const Login: React.FC = () => {
           firstName: res.user.firstName,
         };
         localStorage.setItem("user", JSON.stringify(userData));
+        if(res.user.username === 'admin') {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       }
     } catch (error) {
-      const errorMessage = error?.error.message;
+      const errorMessage = error?.error?.message;
       toast.error(errorMessage);
     }
   };

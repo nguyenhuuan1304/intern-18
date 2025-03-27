@@ -22,7 +22,9 @@ export const fetchProducts = createAsyncThunk("products/fetchProducts", async (_
             api.get("/products?populate=*"),
             api.get("/product-images?populate=*"),
         ]);
-
+        if (!productsResponse.data || !imagesResponse.data) {
+            throw new Error("Invalid response data");
+          }
         const productsData = productsResponse.data;
         const imagesData = imagesResponse.data;
 
@@ -129,7 +131,7 @@ const productSlice = createSlice({
     reducers: {
         sortProducts(state, action: PayloadAction<string>) {
             const value = action.payload;
-            let sortedProducts = [...state.allProducts];
+            const sortedProducts = [...state.allProducts];
 
             if (value === "low_price") {
                 sortedProducts.sort((a, b) => a.prices - b.prices);
@@ -151,6 +153,7 @@ const productSlice = createSlice({
                 state.products = action.payload;
                 state.allProducts = action.payload;
                 state.loading = false;
+                console.log(123)
             })
             .addCase(fetchProducts.rejected, (state, action) => {
                 state.loading = false;
