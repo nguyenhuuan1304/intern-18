@@ -10,24 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useNavigate } from "react-router";
-
-// Types
-interface PaymentStatusProps {
-  orderNumber?: string;
-  amount?: string;
-  date?: string;
-  email?: string;
-
-  onTryAgain?: () => void;
-}
-
-// PaymentSuccess Component
-export const PaymentSuccess: React.FC<PaymentStatusProps> = ({
-  orderNumber = "ORD-12345",
-  amount = "$128.00",
-  date = new Date().toLocaleDateString(),
-  email = "example@email.com",
-}) => {
+export const PaymentSuccess: React.FC = () => {
   const navigate = useNavigate();
   return (
     <div className="flex min-h-[500px] w-full items-center justify-center p-4">
@@ -46,25 +29,6 @@ export const PaymentSuccess: React.FC<PaymentStatusProps> = ({
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="rounded-md bg-slate-50 p-4">
-            <div className="flex items-center justify-between py-1">
-              <span className="text-sm text-slate-500">Mã đơn hàng:</span>
-              <span className="font-medium">{orderNumber}</span>
-            </div>
-            <div className="flex items-center justify-between border-t border-dashed border-slate-200 py-1">
-              <span className="text-sm text-slate-500">Số tiền:</span>
-              <span className="font-medium">{amount}</span>
-            </div>
-            <div className="flex items-center justify-between border-t border-dashed border-slate-200 py-1">
-              <span className="text-sm text-slate-500">Ngày:</span>
-              <span className="font-medium">{date}</span>
-            </div>
-            <div className="flex items-center justify-between border-t border-dashed border-slate-200 py-1">
-              <span className="text-sm text-slate-500">Email:</span>
-              <span className="font-medium">{email}</span>
-            </div>
-          </div>
-
           <div className="rounded-lg bg-green-50 p-3 text-sm text-green-600">
             <p className="flex items-center gap-2">
               <Check className="h-4 w-4" />
