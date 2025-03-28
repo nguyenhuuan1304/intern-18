@@ -21,6 +21,7 @@ const initialValue : User = {
 }
 
 const InfoUsers: React.FC<typeInfo>= ({user} ) => {
+  console.log(user)
   const [form, setForm] = useState<User>(initialValue)
   const [error, setError] = useState<{[key : string] : string}>({})
   const [isFormChange , setIsFormChange] = useState(false)
