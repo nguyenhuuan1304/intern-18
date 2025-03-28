@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ReactNode } from "react";
-import Header, { User as TypeUser} from "@/components/header/Header";
+import Header, { User as TypeUser } from "@/components/header/Header";
 import ServiceMenu from "@/components/ServiceMenu";
 import Layout from "@/components/layout/Layout";
 import InfoUsers from "@/components/infoUsers/InfoUsers";
@@ -7,7 +7,6 @@ import InfoShoppingCard from "@/components/infoShoppingCard/InfoShoppingCard";
 import { LockKeyholeOpen, LogOut, ShoppingCart, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ChangePassword from "@/components/changePassword/ChangePasssword";
-
 
 interface TypeNavbarItem {
   id: string;
@@ -18,7 +17,6 @@ interface TypeNavbarItem {
 const Account = () => {
   const user: TypeUser & { id: string } = {
     ...JSON.parse(localStorage.getItem("user") || "null"),
-    
   };
   const [selectTab, setSelectTab] = useState(() => {
     return localStorage.getItem("selectedTab") || "info";
@@ -48,7 +46,9 @@ const Account = () => {
       <div className="layout flex-col">
         <Header />
         <div className="max-w-[1400px] xl:mx-[auto] flex-shrink-0  max-xl:mx-[4%] custom-content-account  max-md:mx-[6%]  py-8 max-sm:mx-0 max-md:pr-2 max-md:pl-2 max-xl:">
-          <div className="hidden md:block "><ServiceMenu /> </div>
+          <div className="hidden md:block ">
+            <ServiceMenu />{" "}
+          </div>
           <div className="bg-white shadow-2xl my-[50px] flex gap-[5px] mx-[10px] max-xl:mx-[10px]  max-md:flex-col max-md:max-w-[540px] max-sm:m-[auto]">
             <div className=" w-[25%] max-sm:w-[100%] max-md:w-[100%]">
               <div className="text-[#212529] text-[15px] flex flex-col items-center p-[10px] border-b border-[#F7F8FA]">
@@ -57,7 +57,7 @@ const Account = () => {
               </div>
               <ul className="text-[#4a4a4a]">
                 {dataNavbar.map((item) => (
-                    <li key={item.id} className="my-[10px] ">
+                  <li key={item.id} className="my-[10px] ">
                     <button
                       className={`
                           ${
@@ -77,7 +77,7 @@ const Account = () => {
               </ul>
             </div>
             <div className="flex-[1] max-md:w-[100%]">
-              {selectTab === "info" && <InfoUsers user={user}/>}
+              {selectTab === "info" && <InfoUsers user={user} />}
               {selectTab === "password" && <ChangePassword />}
               {selectTab === "orders" && <InfoShoppingCard />}
             </div>

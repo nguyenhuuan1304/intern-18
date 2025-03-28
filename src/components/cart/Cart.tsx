@@ -16,6 +16,8 @@ import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { PaymentSuccess } from "./PaymentSuccess";
 import { PaymentFail } from "./PaymentFail";
+import { toast } from "react-toastify";
+
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -25,11 +27,11 @@ const CartPage: React.FC = () => {
     loading,
   } = useSelector((state: RootState) => state.cart);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const email = user.email || "";
 
   const searchParams = new URLSearchParams(location.search);
   const success = searchParams.get("success");
   const cancel = searchParams.get("cancel");
+
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -38,6 +40,16 @@ const CartPage: React.FC = () => {
   const [selectedProvince, setSelectedProvince] = useState<any>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
   const [selectedWard, setSelectedWard] = useState<any>(null);
+  const [phoneNumber, setPhoneNumber] = useState(user.phone || "");
+  const [email, setEmail] = useState(user.email || "");
+  const [note, setNote] = useState("");
+  const [addressShipping] = useState(user.address || "");
+
+  // State lưu lỗi validate
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string;
+  }>({});
+
   useEffect(() => {
     getProvinces().then(setProvinces);
   }, []);
@@ -56,6 +68,7 @@ const CartPage: React.FC = () => {
       setSelectedWard(null);
     }
   }, [selectedDistrict]);
+
   useEffect(() => {
     dispatch(fetchCartItems());
   }, [dispatch]);
@@ -87,8 +100,44 @@ const CartPage: React.FC = () => {
   useEffect(() => {
     localStorage.setItem("cartTotalItems", totalItems.toString());
   }, [totalItems]);
+
+  const validateCheckout = () => {
+    const errors: { [key: string]: string } = {};
+
+    if (!phoneNumber || !/^0\d{9}$/.test(phoneNumber)) {
+      errors.phoneNumber = "Số điện thoại không hợp lệ";
+    }
+
+    if (!email || !/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      errors.email = "Email không hợp lệ.";
+    }
+    if (
+      !streetAddress ||
+      !selectedWard ||
+      !selectedDistrict ||
+      !selectedProvince
+    ) {
+      errors.address =
+        "Vui lòng nhập đầy đủ địa chỉ (số nhà, xã, huyện, tỉnh).";
+    }
+
+    return errors;
+  };
+
   const handleCheckout = async () => {
     if (cart.length === 0) return;
+
+    const errors = validateCheckout();
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      toast.error("Vui lòng kiểm tra lại thông tin vận chuyển.", {
+        autoClose: 2000,
+      });
+      return;
+    } else {
+      setValidationErrors({});
+    }
+
     try {
       const stripe = await loadStripe(
         "pk_test_51R66O0DftvJgslwBKdVOWz4UJ7sdpk6W9ALddQgPs3XBYQCV46xaDSgSqYpWAFZevhLYKgFyPAmp4wLm7THP3r0400LXhtMelk"
@@ -101,6 +150,11 @@ const CartPage: React.FC = () => {
             quantity: item.quantity,
           })),
           email,
+          address: `${streetAddress}, ${selectedWard?.label || ""}, ${
+            selectedDistrict?.label || ""
+          }, ${selectedProvince?.label || ""}`.trim(),
+          phoneNumber,
+          note,
         },
         {
           headers: { "Content-Type": "application/json" },
@@ -141,9 +195,8 @@ const CartPage: React.FC = () => {
         </NavLink>
 
         <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-all 
-                           text-sm md:text-base h-10 md:h-9 w-[110px] md:w-[150px] justify-center"
+          onClick={() => navigate("/product")}
+          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-all text-sm md:text-base h-10 md:h-9 w-[110px] md:w-[150px] justify-center"
         >
           <ArrowLeft size={18} />
           <span className="hidden sm:inline">Quay lại</span>
@@ -162,7 +215,14 @@ const CartPage: React.FC = () => {
               type="text"
               className="w-full p-2 border border-gray-300 rounded"
               placeholder="Số điện thoại của bạn"
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              value={phoneNumber}
             />
+            {validationErrors.phoneNumber && (
+              <p className="text-red-500 mt-1">
+                {validationErrors.phoneNumber}
+              </p>
+            )}
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Email</label>
@@ -171,7 +231,11 @@ const CartPage: React.FC = () => {
               className="w-full p-2 border border-gray-300 rounded"
               placeholder="Điền địa chỉ email của bạn"
               value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
+            {validationErrors.email && (
+              <p className="text-red-500 mt-1">{validationErrors.email}</p>
+            )}
           </div>
 
           <div className="relative">
@@ -182,42 +246,50 @@ const CartPage: React.FC = () => {
                   <h3 className="text-lg font-medium mb-4">Nhập địa chỉ</h3>
 
                   {/* Chọn Tỉnh */}
-                  <Select
-                    options={provinces}
-                    value={selectedProvince}
-                    onChange={setSelectedProvince}
-                    placeholder="Chọn tỉnh"
-                    className="mb-2"
-                  />
+                  <div className="mb-4">
+                    <Select
+                      options={provinces}
+                      value={selectedProvince}
+                      onChange={setSelectedProvince}
+                      placeholder="Chọn tỉnh"
+                      className="mb-2 w-full"
+                    />
+                  </div>
 
                   {/* Chọn Huyện */}
-                  <Select
-                    options={districts}
-                    value={selectedDistrict}
-                    onChange={setSelectedDistrict}
-                    placeholder="Chọn huyện"
-                    isDisabled={!selectedProvince}
-                    className="mb-2"
-                  />
+                  <div className="mb-4">
+                    <Select
+                      options={districts}
+                      value={selectedDistrict}
+                      onChange={setSelectedDistrict}
+                      placeholder="Chọn huyện"
+                      isDisabled={!selectedProvince}
+                      className="mb-2 w-full"
+                    />
+                  </div>
 
                   {/* Chọn Xã */}
-                  <Select
-                    options={wards}
-                    value={selectedWard}
-                    onChange={setSelectedWard}
-                    placeholder="Chọn xã"
-                    isDisabled={!selectedDistrict}
-                    className="mb-2"
-                  />
+                  <div className="mb-4">
+                    <Select
+                      options={wards}
+                      value={selectedWard}
+                      onChange={setSelectedWard}
+                      placeholder="Chọn xã"
+                      isDisabled={!selectedDistrict}
+                      className="mb-2 w-full"
+                    />
+                  </div>
 
                   {/* Nhập số nhà, tên đường */}
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded"
-                    placeholder="Số nhà, tên đường"
-                    value={streetAddress}
-                    onChange={(e) => setStreetAddress(e.target.value)}
-                  />
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      className="w-full p-2 border border-gray-300 rounded"
+                      placeholder="Số nhà, tên đường"
+                      value={streetAddress}
+                      onChange={(e) => setStreetAddress(e.target.value)}
+                    />
+                  </div>
 
                   {/* Nút Lưu và Đóng */}
                   <div className="flex justify-end mt-4">
@@ -255,6 +327,9 @@ const CartPage: React.FC = () => {
               {selectedDistrict?.label && `${selectedDistrict.label}, `}
               {selectedProvince?.label && `${selectedProvince.label}`}
             </p>
+            {validationErrors.address && (
+              <p className="text-red-500 mt-1">{validationErrors.address}</p>
+            )}
           </div>
 
           <div className="mb-4">
@@ -262,6 +337,7 @@ const CartPage: React.FC = () => {
             <textarea
               className="w-full p-2 border border-gray-300 rounded"
               placeholder="Ghi chú đơn hàng"
+              onChange={(e) => setNote(e.target.value)}
             />
           </div>
         </div>
@@ -338,7 +414,7 @@ const CartPage: React.FC = () => {
                 handleCheckout();
               }}
             >
-              <span className="relative z-10 b-5">Đặt Hàng</span>
+              <span className="relative z-10">Đặt Hàng</span>
             </button>
           </div>
         </div>
@@ -346,4 +422,5 @@ const CartPage: React.FC = () => {
     </>
   );
 };
+
 export default CartPage;
