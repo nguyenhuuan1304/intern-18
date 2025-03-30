@@ -29,36 +29,26 @@ export interface ProductImage {
     color?: string | null;
 }
 
-// export interface ShirtPantSize {
-//     id: number;
-//     documentId: string;
-//     S?: number;
-//     M?: number;
-//     L?: number;
-//     XL?: number;
-//     XXL?: number;
-// }
-
-// export interface ShoeSize {
-//     id: number;
-//     documentId: string;
-//     38?: number;
-//     39?: number;
-//     40?: number;
-//     41?: number;
-//     42?: number;
-//     43?: number;
-// }
-type Inventory = {
-    length: number;
+export interface ShirtPantSize {
     id: number;
     documentId: string;
-    size: string;
-    quantity: number;
-    createdAt: string;
-    updatedAt: string;
-    publishedAt: string;
-  };
+    S?: number;
+    M?: number;
+    L?: number;
+    XL?: number;
+    XXL?: number;
+}
+
+export interface ShoeSize {
+    id: number;
+    documentId: string;
+    38?: number;
+    39?: number;
+    40?: number;
+    41?: number;
+    42?: number;
+    43?: number;
+}
 
 export interface Product {
     ratings: any;
@@ -72,14 +62,13 @@ export interface Product {
     Image: Image[];
     name_category: Category;
     product_images: ProductImage[];
-    // id_shirt_pant?: ShirtPantSize | null;
-    // id_shoe?: ShoeSize | null;
+    id_shirt_pant?: ShirtPantSize | null;
+    id_shoe?: ShoeSize | null;
     product_detail?: ProductDetail | null;
     rating: number;
     slug: string;
     product_sale?: ProductSale | null;
     imageUrl?: string;
-    inventory: Inventory[];
 }
 
 export interface ProductDetail {

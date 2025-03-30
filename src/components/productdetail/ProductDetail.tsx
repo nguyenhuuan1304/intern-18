@@ -33,43 +33,36 @@ const ProductDetail: React.FC = () => {
         }
     }, [dispatch, products.length]);
 
-    // const hasStock = () => {
-    //     const hasShoeStock = productDetail?.id_shoe
-    //         ? Object.entries(productDetail.id_shoe)
-    //             .filter(([key, value]) => key.startsWith("S") && typeof value === "number")
-    //             .some(([_, value]) => value > 0)
-    //         : false;
-
-    //     const hasShirtPantStock = productDetail?.id_shirt_pant
-    //         ? Object.entries(productDetail.id_shirt_pant)
-    //             .filter(([key, value]) => ["S", "M", "L", "XL", "XXL"].includes(key) && typeof value === "number")
-    //             .some(([_, value]) => value > 0)
-    //         : false;
-
-    //     return hasShoeStock || hasShirtPantStock;
-    // };
-
-    // const availableSizes = () => {
-    //     const shoeSizes = productDetail?.id_shoe
-    //         ? Object.entries(productDetail.id_shoe)
-    //             .filter(([key, value]) => key.startsWith("S") && typeof value === "number" && value > 0)
-    //             .map(([key]) => key)
-    //         : [];
-
-    //     const shirtPantSizes = productDetail?.id_shirt_pant
-    //         ? Object.entries(productDetail.id_shirt_pant)
-    //             .filter(([key, value]) => ["S", "M", "L", "XL", "XXL"].includes(key) && typeof value === "number" && value > 0)
-    //             .map(([key]) => key)
-    //         : [];
-
-    //     return [...shoeSizes, ...shirtPantSizes];
-    // };
     const hasStock = () => {
-        return productDetail?.inventory.some(item => item.quantity > 0);
+        const hasShoeStock = productDetail?.id_shoe
+            ? Object.entries(productDetail.id_shoe)
+                .filter(([key, value]) => key.startsWith("S") && typeof value === "number")
+                .some(([_, value]) => value > 0)
+            : false;
+
+        const hasShirtPantStock = productDetail?.id_shirt_pant
+            ? Object.entries(productDetail.id_shirt_pant)
+                .filter(([key, value]) => ["S", "M", "L", "XL", "XXL"].includes(key) && typeof value === "number")
+                .some(([_, value]) => value > 0)
+            : false;
+
+        return hasShoeStock || hasShirtPantStock;
     };
 
     const availableSizes = () => {
-        return productDetail?.inventory?.filter(item => item.quantity > 0).map(item => item.size) || [];
+        const shoeSizes = productDetail?.id_shoe
+            ? Object.entries(productDetail.id_shoe)
+                .filter(([key, value]) => key.startsWith("S") && typeof value === "number" && value > 0)
+                .map(([key]) => key)
+            : [];
+
+        const shirtPantSizes = productDetail?.id_shirt_pant
+            ? Object.entries(productDetail.id_shirt_pant)
+                .filter(([key, value]) => ["S", "M", "L", "XL", "XXL"].includes(key) && typeof value === "number" && value > 0)
+                .map(([key]) => key)
+            : [];
+
+        return [...shoeSizes, ...shirtPantSizes];
     };
 
     const handleBuyNowClick = () => {
@@ -97,10 +90,6 @@ const ProductDetail: React.FC = () => {
             quantity: quantity,
             price: finalPrice,
             image: productImageUrl,
-            product: {
-                documentId: productDetail?.documentId ?? "",
-                name: productDetail?.name ?? ""
-            },
             products: [{ documentId: productDetail?.documentId }],
         };
 
@@ -217,7 +206,7 @@ const ProductDetail: React.FC = () => {
                         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
                             <div className="bg-white p-6 rounded-lg shadow-lg w-[500px] relative">
                                 <button onClick={closeModal} className="absolute top-2 right-2 text-red-500 hover:text-red-600">
-                                    <X />
+                                    <X/>
                                 </button>
                                 <h2 className="text-2xl text-cyan-800 font-bold mb-4 text-center">Chọn kích thước và số lượng</h2>
                                 <p className="text-lg text-cyan-800 text-center">
@@ -264,7 +253,7 @@ const ProductDetail: React.FC = () => {
                     )}
                 </div>
             </motion.div>
-            <ReviewSection />
+            <ReviewSection/>
             <SaleSection />
         </div>
     );

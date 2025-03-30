@@ -37,14 +37,14 @@ const ProductList: React.FC = () => {
     const filteredProducts = useMemo(() => {
         if (!categorySlug) return products;
         return products.filter((product) => product.slug === categorySlug);
-    }, [products, categorySlug]);
+    }, [products, categorySlug]);    
 
     const handleCartClick = (product: Product) => {
         const imageUrl = mainImages[product.id] || (product.Image?.length ? product.Image[0].url : "");
         setSelectedProduct({ ...product, imageUrl });
         setShowForm(true);
     };
-
+    
     const handleCloseForm = () => setShowForm(false);
 
     const handleOptionClick = (value: string) => {
@@ -160,17 +160,27 @@ const ProductList: React.FC = () => {
 
                             <div className="w-1/4 flex flex-col items-start text-sm font-medium space-y-2">
                                 <p className="font-semibold">Tồn kho</p>
-                                {product.inventory && product.inventory.length > 0 ? ( // ✅ Sửa lại từ product.inventories -> product.inventory
-                                    product.inventory.map((inventory) => (
-                                        <div key={inventory.id} className="flex justify-between w-full">
-                                            <p>{inventory.size}</p>
-                                            <p>{inventory.quantity}</p>
-                                        </div>
-                                    ))
+                                {product.id_shirt_pant ? (
+                                    Object.entries(product.id_shirt_pant)
+                                        .filter(([key]) => key !== "id" && key !== "documentId")
+                                        .map(([size, quantity]) => (
+                                            <div key={size} className="flex justify-between w-full">
+                                                <p>{size}</p>
+                                                <p>{quantity}</p>
+                                            </div>
+                                        ))
+                                ) : product.id_shoe ? (
+                                    Object.entries(product.id_shoe)
+                                        .filter(([key]) => key !== "id" && key !== "documentId")
+                                        .map(([size, quantity]) => (
+                                            <div key={size} className="flex justify-between w-full">
+                                                <p>{size}</p>
+                                                <p>{quantity}</p>
+                                            </div>
+                                        ))
                                 ) : (
                                     <p>Hết hàng</p>
                                 )}
-
                                 <div className="mt-auto">
                                     <Link to={`/product-detail/${product.documentId}`} className="w-32 text-center text-blue-500">
                                         Xem chi tiết
@@ -199,7 +209,7 @@ const ProductList: React.FC = () => {
                                     onClick={handleCloseForm}
                                     className="absolute cursor-pointer top-2 right-2 text-red-500 hover:text-red-600"
                                 >
-                                    <X />
+                                    <X/>
                                 </button>
 
                                 {selectedProduct &&

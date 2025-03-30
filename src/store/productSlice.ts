@@ -99,38 +99,29 @@ export const fetchProducts = createAsyncThunk(
               color: img.color,
               img: productImagesMap.get(img.documentId)?.img || [],
             })) || [],
-          // id_shirt_pant: item.id_shirt_pant
-          //   ? {
-          //       id: item.id_shirt_pant.id,
-          //       documentId: item.id_shirt_pant.documentId,
-          //       S: item.id_shirt_pant.S,
-          //       M: item.id_shirt_pant.M,
-          //       L: item.id_shirt_pant.L,
-          //       XL: item.id_shirt_pant.XL,
-          //       XXL: item.id_shirt_pant.XXL,
-          //     }
-          //   : null,
-          // id_shoe: item.id_shoe
-          //   ? {
-          //       id: item.id_shoe.id,
-          //       documentId: item.id_shoe.documentId,
-          //       S38: item.id_shoe.S38,
-          //       S39: item.id_shoe.S39,
-          //       S40: item.id_shoe.S40,
-          //       S41: item.id_shoe.S41,
-          //       S42: item.id_shoe.S42,
-          //       S43: item.id_shoe.S43,
-          //     }
-          //   : null,
-          inventory: item.inventories
-          ? item.inventories.map((inv: { id: any; documentId: any; size: any; quantity: any; }) => ({
-              id: inv.id,
-              documentId: inv.documentId,
-              size: inv.size,
-              quantity: inv.quantity,
-            }))
-          : [],
-        
+          id_shirt_pant: item.id_shirt_pant
+            ? {
+                id: item.id_shirt_pant.id,
+                documentId: item.id_shirt_pant.documentId,
+                S: item.id_shirt_pant.S,
+                M: item.id_shirt_pant.M,
+                L: item.id_shirt_pant.L,
+                XL: item.id_shirt_pant.XL,
+                XXL: item.id_shirt_pant.XXL,
+              }
+            : null,
+          id_shoe: item.id_shoe
+            ? {
+                id: item.id_shoe.id,
+                documentId: item.id_shoe.documentId,
+                S38: item.id_shoe.S38,
+                S39: item.id_shoe.S39,
+                S40: item.id_shoe.S40,
+                S41: item.id_shoe.S41,
+                S42: item.id_shoe.S42,
+                S43: item.id_shoe.S43,
+              }
+            : null,
           product_detail: item.product_detail
             ? {
                 id: item.product_detail.id,

@@ -6,7 +6,6 @@ import newsReducer from "./news.slice"
 import productReducer from "./productSlice";
 import ratingReducer from "../store/ratingSlice";
 import cartReducer from "./cartSlice";
-import inventoryReducer from "./inventorySlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,7 +15,6 @@ export const store = configureStore({
     category: categoryReducer,
     news: newsReducer,
     cart: cartReducer,
-    inventory: inventoryReducer,
   },
 });
 
