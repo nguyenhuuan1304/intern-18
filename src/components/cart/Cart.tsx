@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeft, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -9,6 +8,7 @@ import {
   removeCartItem,
   updateCartItemQuantity,
 } from "@/store/cartSlice";
+import { fetchInventories, updateInventory } from "@/store/inventorySlice";
 import Select from "react-select";
 import { getProvinces, getDistricts, getWards } from "./service/addressService";
 import { selectTotalItems } from "@/store/cartSlice";
@@ -26,7 +26,6 @@ const CartPage: React.FC = () => {
   } = useSelector((state: RootState) => state.cart);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const email = user.email || "";
-
   const searchParams = new URLSearchParams(location.search);
   const success = searchParams.get("success");
   const cancel = searchParams.get("cancel");
@@ -38,6 +37,8 @@ const CartPage: React.FC = () => {
   const [selectedProvince, setSelectedProvince] = useState<any>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
   const [selectedWard, setSelectedWard] = useState<any>(null);
+  const inventories = useSelector((state: RootState) => state.inventory.inventories);
+
   useEffect(() => {
     getProvinces().then(setProvinces);
   }, []);
@@ -56,9 +57,16 @@ const CartPage: React.FC = () => {
       setSelectedWard(null);
     }
   }, [selectedDistrict]);
+
   useEffect(() => {
     dispatch(fetchCartItems());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (inventories.length === 0) {
+      dispatch(fetchInventories());
+    }
+  }, [dispatch, inventories.length]);
 
   const handleIncrease = (documentId: string, currentQuantity: number) => {
     dispatch(
@@ -67,18 +75,71 @@ const CartPage: React.FC = () => {
   };
 
   const handleDecrease = (documentId: string, currentQuantity: number) => {
-    if (currentQuantity > 1) {
-      dispatch(
-        updateCartItemQuantity({ documentId, quantity: currentQuantity - 1 })
-      );
+    if (currentQuantity < 1) {
+      dispatch(removeCartItem(documentId));
     }
+    dispatch(
+      updateCartItemQuantity({ documentId, quantity: currentQuantity - 1 })
+    );
   };
 
   const handleRemove = (documentId: string) => {
     dispatch(removeCartItem(documentId));
   };
-
   const cart = useSelector((state: RootState) => state.cart.items);
+
+  const handleOrder = () => {
+    if (!cart || cart.length === 0) {
+      console.error("Cart is empty");
+      return;
+    }
+
+    if (!inventories || inventories.length === 0) {
+      console.error("Inventory data is missing");
+      return;
+    }
+
+    console.log("Cart Data:", cart);
+    console.log("Inventories Data:", inventories);
+
+    const updatedQuantities = cart
+      .map((cartItem) => {
+        const documentId = cartItem.products?.[0]?.documentId;
+        const size = cartItem.size;
+
+        if (!documentId || !size) {
+          console.warn("Cart item missing documentId or size:", cartItem);
+          return null;
+        }
+
+        const inventoryItem = inventories.find(
+          (inventory) =>
+            inventory?.product?.documentId === documentId &&
+            inventory?.size === size
+        );
+
+        if (!inventoryItem) {
+          console.warn(`No inventory found for product ${documentId} - size ${size}`);
+          return null;
+        }
+
+        return {
+          documentId: String(inventoryItem.documentId),
+          quantity: Math.max(inventoryItem.quantity - cartItem.quantity, 0),
+        };
+      })
+      .filter((item): item is { documentId: string; quantity: number } => item !== null);
+
+    console.log("Updated Quantities:", updatedQuantities);
+
+    if (updatedQuantities.length === 0) {
+      console.warn("No valid inventory updates to process.");
+      return;
+    }
+
+    dispatch(updateInventory(updatedQuantities));
+  };
+
   const totalPrice = cart.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
     0
@@ -334,9 +395,10 @@ const CartPage: React.FC = () => {
               className="relative w-full bg-orange-500 text-white p-2 rounded border border-transparent overflow-hidden
                             before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
                             hover:text-red-500 hover:border-red-500"
-              onClick={() => {
-                handleCheckout();
-              }}
+              // onClick={() => {
+              //   handleCheckout();
+              // }}
+              onClick={handleOrder}
             >
               <span className="relative z-10 b-5">Đặt Hàng</span>
             </button>
