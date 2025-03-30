@@ -49,6 +49,7 @@ const Header = () => {
   // State để quản lý hiển thị sidebar category trên mobile
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
   useEffect(() => {
     if (!debounce.trim()) {
       setArrSearch([]);
