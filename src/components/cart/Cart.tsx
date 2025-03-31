@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,11 +12,10 @@ import {
 import Select from "react-select";
 import { getProvinces, getDistricts, getWards } from "./service/addressService";
 import { selectTotalItems } from "@/store/cartSlice";
-import { loadStripe } from "@stripe/stripe-js";
-import axios from "axios";
 import { PaymentSuccess } from "./PaymentSuccess";
 import { PaymentFail } from "./PaymentFail";
 import { toast } from "react-toastify";
+import { CartItem, checkoutOrder, OptionType } from "@/store/checkout.slice";
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,44 +26,51 @@ const CartPage: React.FC = () => {
     loading,
   } = useSelector((state: RootState) => state.cart);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-
+  const { loading: checkoutLoading } = useSelector(
+    (state: RootState) => state.checkout
+  );
   const searchParams = new URLSearchParams(location.search);
   const success = searchParams.get("success");
   const cancel = searchParams.get("cancel");
 
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-  const [streetAddress, setStreetAddress] = useState("");
-  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
-  const [selectedProvince, setSelectedProvince] = useState<any>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
-  const [selectedWard, setSelectedWard] = useState<any>(null);
-  const [phoneNumber, setPhoneNumber] = useState(user.phone || "");
-  const [email, setEmail] = useState(user.email || "");
-  const [note, setNote] = useState("");
-  const [addressShipping] = useState(user.address || "");
-
+  const [provinces, setProvinces] = useState<OptionType[]>([]);
+  const [districts, setDistricts] = useState<OptionType[]>([]);
+  const [wards, setWards] = useState<OptionType[]>([]);
+  const [streetAddress, setStreetAddress] = useState<string>("");
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState<boolean>(false);
+  const [selectedProvince, setSelectedProvince] = useState<OptionType | null>(
+    null
+  );
+  const [selectedDistrict, setSelectedDistrict] = useState<OptionType | null>(
+    null
+  );
+  const [selectedWard, setSelectedWard] = useState<OptionType | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState<string>(user.phone || "");
+  const [email, setEmail] = useState<string>(user.email || "");
+  const [note, setNote] = useState<string>("");
   // State lưu lỗi validate
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: string;
   }>({});
 
   useEffect(() => {
-    getProvinces().then(setProvinces);
+    getProvinces().then((data: OptionType[]) => setProvinces(data));
   }, []);
 
   useEffect(() => {
     if (selectedProvince) {
-      getDistricts(selectedProvince.value).then(setDistricts);
+      getDistricts(selectedProvince.value).then((data: OptionType[]) =>
+        setDistricts(data)
+      );
       setSelectedDistrict(null);
       setSelectedWard(null);
     }
   }, [selectedProvince]);
-
   useEffect(() => {
     if (selectedDistrict) {
-      getWards(selectedDistrict.value).then(setWards);
+      getWards(selectedDistrict.value).then((data: OptionType[]) =>
+        setWards(data)
+      );
       setSelectedWard(null);
     }
   }, [selectedDistrict]);
@@ -90,9 +96,9 @@ const CartPage: React.FC = () => {
   const handleRemove = (documentId: string) => {
     dispatch(removeCartItem(documentId));
   };
-
-  const cart = useSelector((state: RootState) => state.cart.items);
-  const totalPrice = cart.reduce(
+  const cart: CartItem[] = useSelector((state: RootState) => state.cart.items);
+  console.log("cart", cart);
+  const totalPrice: number = cart.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
     0
   );
@@ -124,7 +130,7 @@ const CartPage: React.FC = () => {
     return errors;
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cart.length === 0) return;
 
     const errors = validateCheckout();
@@ -138,44 +144,19 @@ const CartPage: React.FC = () => {
       setValidationErrors({});
     }
 
-    try {
-      const stripe = await loadStripe(
-        "pk_test_51R66O0DftvJgslwBKdVOWz4UJ7sdpk6W9ALddQgPs3XBYQCV46xaDSgSqYpWAFZevhLYKgFyPAmp4wLm7THP3r0400LXhtMelk"
-      );
-      const response = await axios.post(
-        "http://localhost:1337/api/orders",
-        {
-          orders: cart.map((item) => ({
-            productId: item.documentId,
-            quantity: item.quantity,
-          })),
-          email,
-          address: `${streetAddress}, ${selectedWard?.label || ""}, ${
-            selectedDistrict?.label || ""
-          }, ${selectedProvince?.label || ""}`.trim(),
-          phoneNumber,
-          note,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      const data = response.data;
-
-      if (data.error) throw new Error(data.error);
-      if (!data.stripeSession?.id)
-        throw new Error("Failed to create Stripe session");
-
-      // Chuyển hướng đến trang thanh toán của Stripe
-      await stripe?.redirectToCheckout({
-        sessionId: data.stripeSession.id,
-      });
-    } catch (err) {
-      console.error("Thanh toán lỗi:", err);
-    }
+    dispatch(
+      checkoutOrder({
+        cart,
+        email,
+        streetAddress,
+        selectedWard,
+        selectedDistrict,
+        selectedProvince,
+        phoneNumber,
+        note,
+      })
+    );
   };
-
   if (success === "true") {
     return <PaymentSuccess />;
   }
@@ -408,13 +389,20 @@ const CartPage: React.FC = () => {
             </div>
             <button
               className="relative w-full bg-orange-500 text-white p-2 rounded border border-transparent overflow-hidden
-                            before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
-                            hover:text-red-500 hover:border-red-500"
+             before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
+             hover:text-red-500 hover:border-red-500"
               onClick={() => {
                 handleCheckout();
               }}
             >
-              <span className="relative z-10">Đặt Hàng</span>
+              {checkoutLoading ? (
+                <div className="flex items-center justify-center">
+                  <span className="relative z-10">Đang xử lý </span>
+                  <Loader2 className="h-4 w-4 animate-spin ml-2 relative z-10" />
+                </div>
+              ) : (
+                <span className="relative z-10">Đặt hàng</span>
+              )}
             </button>
           </div>
         </div>

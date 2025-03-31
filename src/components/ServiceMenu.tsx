@@ -32,10 +32,8 @@ const ServiceMenu: React.FC = () => {
             <Menu className="w-4 h-4" />
             DANH MỤC SẢN PHẨM
           </Button>
-          {/* Khi hover và không ở trang chủ, hiển thị CategorySidebar kèm cầu nối */}
           {!isHomePage && showCategory && (
             <div className="absolute top-full left-0  z-50">
-              {/* Phần tử "cầu nối" là hình chữ nhật */}
               <div className="flex justify-center">
                 <div className="w-[250px] h-2 bg-white" />
               </div>
