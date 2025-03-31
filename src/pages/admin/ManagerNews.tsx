@@ -4,7 +4,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
 import { Ellipsis } from 'lucide-react';
 import CreatePostNews from '@/components/createPostNews/CreatePostNews';
-import { deleteNews, getPostListNews } from '@/store/news.slice';
+import { deleteNews, getPostListNews, startEditingNews } from '@/store/news.slice';
 import { useSelector } from 'react-redux';
 import { RootState, useAppDispatch } from '@/store/store';
 import { TypeDataNews } from '../news/typeNews';
@@ -14,13 +14,12 @@ const ManagerNews = () => {
     const listNews = useSelector((state : RootState) => state.news.news)
     const [modalElement, setModalElement] = useState<HTMLElement | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedNews, setSelectedNews] = useState<string | undefined>(undefined)
+    const [selectedNews, setSelectedNews] = useState<string | undefined>(undefined);
+    const [checkId, setCheckId] = useState(0)
     const [lastPage, setLastPage] = useState(1);  
     const [searchName, setSearchName] = useState('');
     const dispatch = useAppDispatch()
-    console.log(listNews)
 
-  console.log(selectedNews)
     useEffect(() => {
       const promise = dispatch(getPostListNews())
       return () => {
@@ -34,40 +33,40 @@ const ManagerNews = () => {
 
     const handleDelete = (selectedNews : string) => {
         dispatch(deleteNews(selectedNews))
-        console.log(123)
+        console.log(selectedNews)
     }
 
     const items = [
         {
           key: '0',
           label: (
-            <a
+            <button
               type="button"
-              // onClick={() => navigate(`/course-manage-description/${selectedCourse}`)}
+              onClick={() =>selectedNews && handleShowAddNews(selectedNews)}
             >
               Edit
-            </a>
+            </button>
           )
         },
         {
           key: '1',
           label: (
-            <a 
+            <button 
               type="button" 
               onClick={() => selectedNews && handleDelete(selectedNews)}
             >
               Delete
-            </a>
+            </button>
           )
         },
         {
             label: (
-              <a 
+              <button
                 type="button" 
                 onClick={() => handleStatus}
               >
                 status switch
-              </a>
+              </button>
             ),
             key: '2'
         }
@@ -129,14 +128,19 @@ const ManagerNews = () => {
       }
     ];
 
-    const handleShowAddNews = () => {
+    const handleShowAddNews = (selectedNews : string) => {
       const element = document.getElementById('modal')
-      console.log(element)
+      console.log(selectedNews)
       if(element)
       {
           element.style.display = 'block'
+          setCheckId(pre => pre + 1)
+          if(selectedNews) {
+            dispatch(startEditingNews(selectedNews))
+          } else {
+            dispatch(startEditingNews(''))
+          }
       }
-      console.log(123)
     }
 
     useEffect(() => {
@@ -149,9 +153,9 @@ const ManagerNews = () => {
 
   return (
     <div>
-       <div id='modal' className='modal'>
+        <div id='modal' className='modal'>
             {/* <CreatePostNews element = {document.getElementById('modal')}/> */}
-            <CreatePostNews element={modalElement} />
+            <CreatePostNews element={modalElement} checkId = {checkId} />
         </div>
          <div
           style={{
@@ -171,7 +175,7 @@ const ManagerNews = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={handleShowAddNews}
+            onClick={() => handleShowAddNews('')}
           >
             Create News
           </Button>

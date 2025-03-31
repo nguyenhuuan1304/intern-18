@@ -14,6 +14,7 @@ export interface TypeDataNews {
   name: string;
   img: typeImg[] | number[]  ; // Cho phép nhiều ảnh
   description: TypeDescription[] | string | StrapiBlock[];
+  id: string,
   documentId: string,
   slug: string;
   introduction: string,

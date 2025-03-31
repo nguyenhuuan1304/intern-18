@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -9,6 +8,7 @@ import {
   removeCartItem,
   updateCartItemQuantity,
 } from "@/store/cartSlice";
+import { fetchInventories, updateInventory } from "@/store/inventorySlice";
 import Select from "react-select";
 import { getProvinces, getDistricts, getWards } from "./service/addressService";
 import { selectTotalItems } from "@/store/cartSlice";
@@ -16,6 +16,7 @@ import { PaymentSuccess } from "./PaymentSuccess";
 import { PaymentFail } from "./PaymentFail";
 import { toast } from "react-toastify";
 import { CartItem, checkoutOrder, OptionType } from "@/store/checkout.slice";
+import { number } from "zod";
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,13 +27,13 @@ const CartPage: React.FC = () => {
     loading,
   } = useSelector((state: RootState) => state.cart);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   const { loading: checkoutLoading } = useSelector(
     (state: RootState) => state.checkout
   );
   const searchParams = new URLSearchParams(location.search);
   const success = searchParams.get("success");
   const cancel = searchParams.get("cancel");
-
   const [provinces, setProvinces] = useState<OptionType[]>([]);
   const [districts, setDistricts] = useState<OptionType[]>([]);
   const [wards, setWards] = useState<OptionType[]>([]);
@@ -45,9 +46,13 @@ const CartPage: React.FC = () => {
     null
   );
   const [selectedWard, setSelectedWard] = useState<OptionType | null>(null);
+  const inventories = useSelector(
+    (state: RootState) => state.inventory.inventories
+  );
   const [phoneNumber, setPhoneNumber] = useState<string>(user.phone || "");
   const [email, setEmail] = useState<string>(user.email || "");
   const [note, setNote] = useState<string>("");
+  const [addressShipping] = useState(user.address || "");
   // State lưu lỗi validate
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: string;
@@ -79,6 +84,12 @@ const CartPage: React.FC = () => {
     dispatch(fetchCartItems());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (inventories.length === 0) {
+      dispatch(fetchInventories());
+    }
+  }, [dispatch, inventories.length]);
+
   const handleIncrease = (documentId: string, currentQuantity: number) => {
     dispatch(
       updateCartItemQuantity({ documentId, quantity: currentQuantity + 1 })
@@ -86,18 +97,75 @@ const CartPage: React.FC = () => {
   };
 
   const handleDecrease = (documentId: string, currentQuantity: number) => {
-    if (currentQuantity > 1) {
-      dispatch(
-        updateCartItemQuantity({ documentId, quantity: currentQuantity - 1 })
-      );
+    if (currentQuantity < 1) {
+      dispatch(removeCartItem(documentId));
     }
+    dispatch(
+      updateCartItemQuantity({ documentId, quantity: currentQuantity - 1 })
+    );
   };
 
   const handleRemove = (documentId: string) => {
     dispatch(removeCartItem(documentId));
   };
   const cart: CartItem[] = useSelector((state: RootState) => state.cart.items);
-  console.log("cart", cart);
+  const handleOrder = () => {
+    if (!cart || cart.length === 0) {
+      console.error("Cart is empty");
+      return;
+    }
+
+    if (!inventories || inventories.length === 0) {
+      console.error("Inventory data is missing");
+      return;
+    }
+
+    console.log("Cart Data:", cart);
+    console.log("Inventories Data:", inventories);
+
+    const updatedQuantities = cart
+      .map((cartItem) => {
+        const documentId = cartItem.products?.[0]?.documentId;
+        const size = cartItem.size;
+
+        if (!documentId || !size) {
+          console.warn("Cart item missing documentId or size:", cartItem);
+          return null;
+        }
+
+        const inventoryItem = inventories.find(
+          (inventory) =>
+            inventory?.product?.documentId === documentId &&
+            inventory?.size === size
+        );
+
+        if (!inventoryItem) {
+          console.warn(
+            `No inventory found for product ${documentId} - size ${size}`
+          );
+          return null;
+        }
+
+        return {
+          documentId: String(inventoryItem.documentId),
+          quantity: Math.max(inventoryItem.quantity - cartItem.quantity, 0),
+        };
+      })
+      .filter(
+        (item): item is { documentId: string; quantity: number } =>
+          item !== null
+      );
+
+    console.log("Updated Quantities:", updatedQuantities);
+
+    if (updatedQuantities.length === 0) {
+      console.warn("No valid inventory updates to process.");
+      return;
+    }
+
+    dispatch(updateInventory(updatedQuantities));
+  };
+
   const totalPrice: number = cart.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
     0
@@ -393,6 +461,7 @@ const CartPage: React.FC = () => {
              hover:text-red-500 hover:border-red-500"
               onClick={() => {
                 handleCheckout();
+                handleOrder();
               }}
             >
               {checkoutLoading ? (

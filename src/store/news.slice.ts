@@ -1,19 +1,18 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { api } from '@/hooks/useAxios'
 import { TypeDataNews } from '@/pages/news/typeNews'
-import { parseDocument } from "htmlparser2";
-import { create } from 'node:domain';
-
+import { create } from 'domain';
 
 interface TypeList {
     news: TypeDataNews[],
-    // editingPost: TypePost | null,
+    editingPost: TypeDataNews | null,
     // loading: boolean,
     // currentRequestId: undefined | string
 }
 
 const initialState: TypeList = {
-    news: []
+    news: [],
+    editingPost: null
 }
 
 interface ApiResponse<T> {
@@ -21,21 +20,12 @@ interface ApiResponse<T> {
 }
 
 
-// First, create the thunk
 export const getPostListNews = createAsyncThunk('news/getPostListNews', 
     async(_, thunkAPI) => {
     const response = await api.get<ApiResponse<TypeDataNews[]>>('news?populate=*', {
         signal: thunkAPI.signal
     });
     return response.data.data;   
-})
-
-export const deleteNews = createAsyncThunk('news/deleteNews',
-    async (id : string, thunkAPI) => {
-        const response = await api.delete<TypeDataNews>(`/news/${id}` , {
-            signal: thunkAPI.signal
-        });
-        return response.data
 })
 
 export const createNews = createAsyncThunk('news/postNews', 
@@ -51,15 +41,13 @@ export const createNews = createAsyncThunk('news/postNews',
                 slug: post.slug,
               }
             };
+            console.log(formattedPost)
             const response = await api.post("news", formattedPost, {
               signal: thunkAPI.signal,
             });
             if(response.status === 200) {
                 console.log('ok')
                 return response.data.data;
-            } else {
-                console.log('fail')
-                return
             }
         } catch (error) {
             console.log(error)
@@ -67,12 +55,57 @@ export const createNews = createAsyncThunk('news/postNews',
         }
 })
 
+export const deleteNews = createAsyncThunk('news/deleteNews',
+    async (id : string, thunkAPI) => {
+        try {
+            const response = await api.delete<TypeDataNews>(`/news/${id}` , {
+                signal: thunkAPI.signal
+            });
+            if(response.status === 200) {
+                return response.data
+            }
+        } catch (error) {
+            console.error(error)
+        }
+})
+
+export const updateNews = createAsyncThunk('news/updateNews',
+    async ({body, id} : {body :TypeDataNews , id: string}, thunkAPI) => {
+        try {
+            const formattedPost = {
+                data: {
+                name: body.name,
+                img: body.img,
+                description: body.description, 
+                introduction: body.introduction,
+                slug: body.slug,
+              }
+            };
+            const response = await api.put<TypeDataNews>(`news/${id}`, formattedPost, {
+                signal: thunkAPI.signal
+            })
+            if(response.status === 200) {
+                console.log('ok')
+                return response.data;
+            }
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+)
+
 
 
 export const newtState = createSlice({
   name: 'news',
   initialState,
   reducers: {
+    startEditingNews: (state, action) => {
+        const newsId = action.payload;
+        const news = state.news.find((post) => post.documentId === newsId);
+        state.editingPost = news || null;
+    }
     
   },
   extraReducers(builder) {
@@ -88,13 +121,26 @@ export const newtState = createSlice({
     .addCase(deleteNews.fulfilled, (state,action) => {
         // const postIdd = action.meta.arg;
         // console.log(postIdd === action.payload.id)//true
-        const postId = state.news.findIndex(news => news.documentId === action.payload.documentId)
+        const postId = state.news.findIndex(news => news.documentId === (action.payload?.documentId))
         state.news.splice(postId,1);
     })  
+    .addCase(updateNews.fulfilled, (state,action) => {
+        const newsId = action.payload?.documentId
+        state.news.some((item,index) => {
+            if(item.documentId === newsId) {
+                if (action.payload) {
+                    state.news[index] = action.payload;
+                }
+                return 
+            }
+            return false
+        })
+    })
+
   },
 })
 
 // Action creators are generated for each case reducer function
-// export const {} = counterSlice.actions
+export const {startEditingNews} = newtState.actions
 
 export default newtState.reducer
