@@ -20,7 +20,6 @@ const ManagerNews = () => {
     const [searchName, setSearchName] = useState('');
     const dispatch = useAppDispatch()
 
-  console.log(selectedNews)
     useEffect(() => {
       const promise = dispatch(getPostListNews())
       return () => {
@@ -154,9 +153,9 @@ const ManagerNews = () => {
 
   return (
     <div>
-       <div id='modal' className='modal'>
+        <div id='modal' className='modal'>
             {/* <CreatePostNews element = {document.getElementById('modal')}/> */}
-            <CreatePostNews element={modalElement} checkId = {checkId} setCheckId = {setCheckId}/>
+            <CreatePostNews element={modalElement} checkId = {checkId} />
         </div>
          <div
           style={{

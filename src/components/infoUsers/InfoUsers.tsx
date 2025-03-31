@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "@/components/header/Header";
 import { toast } from "react-toastify";
 import useAxios from "@/hooks/useAxios";
@@ -26,7 +26,7 @@ const InfoUsers: React.FC<typeInfo> = ({ user }) => {
   const [isFormChange, setIsFormChange] = useState(false);
   const { api } = useAxios();
   const debounce = useDebounce(form.username, 500) as string;
-
+  console.log(user)
   useEffect(() => {
     if (!isFormChange || !debounce) return;
     console.log(form.username);
@@ -47,10 +47,17 @@ const InfoUsers: React.FC<typeInfo> = ({ user }) => {
   }, [debounce]);
 
   useEffect(() => {
-    if (user) {
-      setForm(user);
-    }
-  }, [user]);
+    const fetchUserData = async () => {
+      try {
+        const res = await api.get(`/users/${user.id}`);
+        setForm(res.data);
+      } catch (error) {
+        console.log("Lỗi khi lấy dữ liệu người dùng:", error);
+      }
+    };
+    fetchUserData();
+  }, []); 
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;

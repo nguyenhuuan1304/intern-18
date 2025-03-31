@@ -4,26 +4,68 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { TableProps } from 'antd';
 import { Ellipsis } from 'lucide-react';
+import { RootState, useAppDispatch } from '@/store/store';
+import { deleteUser, editStatus, getListUser } from '@/store/user.slice';
+import { useSelector } from 'react-redux';
+import { toast } from "react-toastify";
+import CreatePostNews from '@/components/createPostNews/CreatePostNews';
+import AddUser from '@/components/createUser/AddUser';
+
 // import useAxios from '../../../hooks/useAxios';
 // import { render } from 'nprogress';
 const { Search } = Input;
 
-interface TypeAdmin { 
+export interface TypeUser { 
     id: string,
     name: string,
     address: string,
     phone: number,
     email: string,
-    status: boolean
+    blocked: boolean
 }
 
+
+
 const ManagerUser = () => {
+    const listStateUser = useSelector((state : RootState) => state.user.user)
+    const [selectUser, setSelectUser] = useState<string | undefined>(undefined);
     const [currentPage, setCurrentPage] = useState(1);
-    const [lastPage, setLastPage] = useState(1);  
-    const [searchName, setSearchName] = useState('');
-    // const { api } = useAxios();
+    const [searchName, setSearchName] = useState('')
     const navigate = useNavigate();
-    
+    const dispatch = useAppDispatch()
+
+    // console.log(selectUser)
+   
+    useEffect(() => {
+      dispatch(getListUser())
+    },[dispatch])
+
+    const handleStatus = (selectUser: string) => {
+      const item = listStateUser.find((item) => item.id === selectUser)
+      dispatch(editStatus({
+          id: selectUser,
+          body: !item?.blocked
+      }))
+      .unwrap()
+      .then(() => {
+        toast.success('edit status success')
+      })
+      .catch(() => {
+        toast.error('edit status failed')
+      })  
+    }
+
+    const handleDelete = (selectUser: string) => {
+      dispatch(deleteUser(selectUser))
+      .unwrap()
+      .then(() => {
+        toast.success('delete users success')
+      })
+      .catch(() => {
+        toast.error('delete users failed')
+      })
+    }
+
     const items = [
       {
         label: (
@@ -40,7 +82,7 @@ const ManagerUser = () => {
         label: (
           <a 
             type="button" 
-            // onClick={() => navigate(`/course-manage-content/${selectedCourse}`)}
+            onClick={() => selectUser &&  handleDelete(selectUser)}
           >
             Delete
           </a>
@@ -51,7 +93,7 @@ const ManagerUser = () => {
         label: (
           <a 
             type="button" 
-            // onClick={() => navigate(`/course-manage-content/${selectedCourse}`)}
+            onClick={() => selectUser &&  handleStatus(selectUser)}
           >
             Status change
           </a>
@@ -61,62 +103,11 @@ const ManagerUser = () => {
       
     ];
 
-    const data: TypeAdmin[] = [
-        {
-          id: '1',
-          name: 'John ',
-          address: 'New York No. 1 Lake Park',
-          phone: 21123123312,
-          email: 'huynhquyn@gmail.com',
-          status: true,
-        },
-        {
-          id: '2',
-          name: 'Jim Green',
-          address: 'London No. 1 Lake Park',
-          phone: 21113272312,
-          email: 'huynhquyn@gmail.com',
-          status: true,
-        },
-        {
-          id: '3',
-          name: 'Joe Black',
-          address: 'Sydney No. 1 Lake Park',
-          phone: 21221391231,
-          email: 'huynhquyn@gmail.com',
-          status: true,
-        },
-        {
-          id: '4',
-          name: 'Brown',
-          address: 'New York No. 1 Lake Park',
-          phone: 21123123312,
-          email: 'huynhquyn@gmail.com',
-          status: true,
-        },
-        {
-          id: '5',
-          name: 'Huynh Quyn',
-          address: 'New York No. 1 Lake Park',
-          phone: 21123123312,
-          email: 'huynhquyn@gmail.com',
-          status: true,
-        },
-        {
-          id: '6',
-          name: 'Nhat',
-          address: 'New York No. 1 Lake Park',
-          phone: 21123123312,
-          email: 'huynhquyn@gmail.com',
-          status: true,
-        },
-    ];
-  
-    const columns :TableProps<TypeAdmin>['columns'] = [
+    const columns :TableProps<TypeUser>['columns'] = [
       {
         title: 'Name',
-        dataIndex: 'name',
-        key: 'name'
+        dataIndex: 'username',
+        key: 'username'
       },
       {
         title: 'Address',
@@ -139,11 +130,11 @@ const ManagerUser = () => {
       },
       {
         title: 'Status',
-        key: 'status',
-        dataIndex: 'status',
-        render: (status ) => {
-          const color = status === true ? 'green' : 'cyan';
-          const text = status === true ? 'PUBLIC' : 'PRIVATE';
+        key: 'blocked',
+        dataIndex: 'blocked',
+        render: (blocked ) => {
+          const color = blocked === false ? 'green' : 'cyan';
+          const text = blocked === false ? 'PUBLIC' : 'PRIVATE';
           return (
             <Tag color={color}>
               {text}
@@ -155,13 +146,13 @@ const ManagerUser = () => {
       {
         title: 'Action',
         key: 'action',
-          render: () => (
+          render: (_,record) => (
           <Dropdown
             menu={{
               items
             }}
             trigger={['click']}
-            // onClick={() => setSelectedCourse(record.id)}
+            onOpenChange={(open) => open && setSelectUser(record.id)}
           >
             <a style={{ color: 'black' }} onClick={(e) => e.preventDefault()}>
               <Ellipsis  />
@@ -174,8 +165,24 @@ const ManagerUser = () => {
    const handlePageChange = (page:number) => {
       setCurrentPage(page)
    }
+
+   const getUserSearch = () => {
+    console.log(searchName)
+   }
+
+   const handleShowUser = () => {
+    const element = document.getElementById('modal')
+    if(element) {
+      element.style.display='block'
+    }
+   }
+
     return (
       <>
+        <div id='modal' className='modal'>
+            {/* <CreatePostNews element = {document.getElementById('modal')}/> */}
+            <AddUser/>
+        </div>
         <div
           style={{
             display: 'flex',
@@ -188,21 +195,25 @@ const ManagerUser = () => {
             placeholder="Search by class name"
             enterButton="Search"
             size="middle"
+            // value={}
             onChange={e => setSearchName(e.target.value)}
-            // onSearch={() => getCourses(true)}
+            onSearch={() => {
+              getUserSearch()
+              setSearchName(' ')
+            }}
           />
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/admin')}
+            // onClick={() => handleShowUser()}
           >
-            New Course
+            New User
           </Button>
         </div>
-        <Table columns={columns} dataSource={data} pagination={{
+        <Table columns={columns} dataSource={listStateUser.map(user=> ({ ...user, key: user.id }))} pagination={{
           current: currentPage,
           pageSize: 3,
-          total: data.length,
+          total: listStateUser.length,
           onChange: handlePageChange,
           showSizeChanger: false
         }}/>

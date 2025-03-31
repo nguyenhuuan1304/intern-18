@@ -6,6 +6,7 @@ import newsReducer from "./news.slice"
 import productReducer from "./productSlice";
 import ratingReducer from "../store/ratingSlice";
 import cartReducer from "./cartSlice";
+import  userSlice  from "./user.slice";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     category: categoryReducer,
     news: newsReducer,
     cart: cartReducer,
+    user: userSlice
   },
 });
 

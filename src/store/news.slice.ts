@@ -57,10 +57,16 @@ export const createNews = createAsyncThunk('news/postNews',
 
 export const deleteNews = createAsyncThunk('news/deleteNews',
     async (id : string, thunkAPI) => {
-        const response = await api.delete<TypeDataNews>(`/news/${id}` , {
-            signal: thunkAPI.signal
-        });
-        return response.data
+        try {
+            const response = await api.delete<TypeDataNews>(`/news/${id}` , {
+                signal: thunkAPI.signal
+            });
+            if(response.status === 200) {
+                return response.data
+            }
+        } catch (error) {
+            console.error(error)
+        }
 })
 
 export const updateNews = createAsyncThunk('news/updateNews',
@@ -91,8 +97,6 @@ export const updateNews = createAsyncThunk('news/updateNews',
 
 
 
-
-
 export const newtState = createSlice({
   name: 'news',
   initialState,
@@ -117,7 +121,7 @@ export const newtState = createSlice({
     .addCase(deleteNews.fulfilled, (state,action) => {
         // const postIdd = action.meta.arg;
         // console.log(postIdd === action.payload.id)//true
-        const postId = state.news.findIndex(news => news.documentId === action.payload.documentId)
+        const postId = state.news.findIndex(news => news.documentId === (action.payload?.documentId))
         state.news.splice(postId,1);
     })  
     .addCase(updateNews.fulfilled, (state,action) => {
