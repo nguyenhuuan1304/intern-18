@@ -75,7 +75,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
         ...url
       ]));
     }
-  }, [editingPost,checkId]);
+  }, [dispatch,editingPost,checkId]);
 
   useEffect(() => {
     if (!currentNews.id) { // Kiểm tra nếu currentNews chưa được gán giá trị
@@ -91,24 +91,29 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
 
   const openNotificationUpdateImage = (type: NotificationType) => {
     api1[type]({
-      message: 'Update  success',
+      message: 'Update Image successfully',
       duration: 1.5
     })
   };
 
-  const openNotificationAddNews = (type: NotificationType) => {
+  const openNotificationAddNews = (type: NotificationType ) => {
     api1[type]({
-      message: 'Add news success',
+      message: 'Add news successfully',
       duration: 1.5
     })
   };
 
   const openNotificationUpdateNews = (type: NotificationType) => {
+    const message = type === 'success'
+      ? 'updated successfully!'
+      : 'No modifications were found. Please update the content before saving.'; 
     api1[type]({
-      message: 'No modifications were found. Please update the content before saving.',
+      message,
       duration: 1.5
     })
   };
+
+  
 
 
   const updateImg = async () => {
@@ -168,16 +173,21 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
               id: editingPost.documentId,
               body: post
               })).unwrap()
+              .then(() => {
+                openNotificationUpdateNews('success')
+              })
           }
 
       } else {
         await dispatch(createNews(post)).unwrap()
+        .then(() => {
+          openNotificationAddNews('success')
+        })
       }
       
       if(element) {
         element.style.display = 'none'
       }
-      openNotificationAddNews('success')
       
 
     } catch (error) {
