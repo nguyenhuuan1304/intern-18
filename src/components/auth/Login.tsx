@@ -62,7 +62,7 @@ const Login: React.FC = () => {
         password: values.password,
       };
       const res = await dispatch(loginUser(loginPayload)).unwrap();
-      console.log(res.user)
+      console.log(res.user);
       if (res.user) {
         toast.success("Đăng nhập thành công");
         navigate("/");
@@ -70,14 +70,12 @@ const Login: React.FC = () => {
           jwt: res.jwt,
           username: res.user.username,
           email: res.user.email,
-          id : res.user.id,
-          // phone: res.user.phone,
-          // birthday: res.user.birthday,
-          // address: res.user.address,
-          // firstName: res.user.firstName,
+          id: res.user.id,
+          phone: res.user.phone,
+          address: res.user.address,
         };
         localStorage.setItem("user", JSON.stringify(userData));
-        if(res.user.username === 'admin') {
+        if (res.user.username === "admin") {
           navigate("/admin");
         } else {
           navigate("/");
@@ -89,11 +87,10 @@ const Login: React.FC = () => {
     }
   };
   return (
-    <div className="container w-full max-w-screen-lg mx-auto px-2 md:px-4 md:w-[1100px]">
-      <div className="w-full  overflow-hidden flex flex-col md:flex-row  ">
-        {/* Left Column - Form */}
-        <div className="w-full md:w-1/2 p-10 ">
-          <div className="flex items-center mb-8">
+    <div className="container mx-auto px-4 py-8 lg:w-6xl">
+      <div className="w-full rounded-2xl flex flex-col lg:flex-row">
+        <div className="w-full lg:w-1/2 p-4 sm:p-6 md:p-8">
+          <div className="flex items-center mb-6 md:mb-8">
             <Link
               to="/"
               className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
@@ -210,7 +207,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Right Column - Image */}
-        <div className="flex w-full md:w-1/2 p-6 md:p-8 bg-gradient-to-br ">
+        <div className="hidden md:flex md:w-1/2 lg:w-1/2 bg-gradient-to-br items-center justify-center">
           <motion.div
             className="flex w-1/2 items-center justify-center p-8"
             initial={{ x: -100, opacity: 0 }}

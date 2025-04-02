@@ -16,7 +16,6 @@ import { PaymentSuccess } from "./PaymentSuccess";
 import { PaymentFail } from "./PaymentFail";
 import { toast } from "react-toastify";
 import { CartItem, checkoutOrder, OptionType } from "@/store/checkout.slice";
-import { number } from "zod";
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
