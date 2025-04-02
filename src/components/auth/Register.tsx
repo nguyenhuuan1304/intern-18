@@ -11,6 +11,8 @@ import {
   Mail,
   Loader2,
   UserPlus2,
+  PhoneCall,
+  MapPin,
 } from "lucide-react";
 import bgRegister from "@/assets/bgRegister.webp";
 import { useState } from "react";
@@ -53,6 +55,11 @@ const formSchema = z
       .string()
       .min(1, "Mật khẩu không được để trống")
       .min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
+    phone: z
+      .string()
+      .min(1, "Số điện thoại không được để trống")
+      .regex(/^\d{10}$/, "Số điện thoại phải có 10 chữ số"),
+    address: z.string().min(1, "Địa chỉ không được để trống"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Mật khẩu không khớp",
@@ -73,6 +80,8 @@ const Register: React.FC = () => {
       username: "",
       password: "",
       confirmPassword: "",
+      phone: "",
+      address: "",
     },
   });
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -81,6 +90,8 @@ const Register: React.FC = () => {
         email: values.email,
         username: values.username,
         password: values.password,
+        phone: values.phone,
+        address: values.address,
       };
       const res = await dispatch(registerUser(registerPayload)).unwrap();
       if (res.user) {
@@ -88,16 +99,16 @@ const Register: React.FC = () => {
         navigate("/login");
       }
     } catch (error) {
+      console.log("error", error);
       const erroMessage = error?.error.message;
       toast.error(erroMessage);
     }
   };
   return (
-    <div className=" container w-full md:w-[100%]">
-      <div className="w-full rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row ">
-        {/* Left Column - Form and extra content */}
-        <div className="w-full md:w-1/2 p-8">
-          <div className="flex items-center mb-8">
+    <div className="container mx-auto px-4 py-8 lg:w-6xl">
+      <div className="w-full rounded-2xl flex flex-col lg:flex-row">
+        <div className="w-full lg:w-1/2 p-4 sm:p-6 md:p-8">
+          <div className="flex items-center mb-6 md:mb-8">
             <Link
               to="/"
               className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
@@ -112,12 +123,16 @@ const Register: React.FC = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Đăng ký</h2>
-            <p className="text-gray-600 mb-8">Tham gia cùng chúng tôi👋</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+              Đăng ký
+            </h2>
+            <p className="text-gray-600 mb-6 md:mb-8">
+              Tham gia cùng chúng tôi👋
+            </p>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
+                className="space-y-4 md:space-y-6"
               >
                 <FormField
                   control={form.control}
@@ -126,33 +141,12 @@ const Register: React.FC = () => {
                     <FormItem>
                       <FormLabel>Tên đăng nhập</FormLabel>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                         <FormControl>
                           <Input
                             {...field}
                             placeholder="Nhập tên đăng nhập"
-                            className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                            disabled={loading}
-                          />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />{" "}
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email liên hệ</FormLabel>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Nhập email liên hệ"
-                            className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                            className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
                             disabled={loading}
                           />
                         </FormControl>
@@ -161,21 +155,87 @@ const Register: React.FC = () => {
                     </FormItem>
                   )}
                 />
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row items-start gap-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Email liên hệ</FormLabel>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Nhập email liên hệ"
+                              className="w-full px-10 py-6  border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Số điện thoại</FormLabel>
+                        <div className="relative">
+                          <PhoneCall className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Nhập số điện thoại"
+                              className="w-full px-10 py-6  border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
+                              disabled={loading}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Địa chỉ</FormLabel>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Nhập địa chỉ"
+                            className="w-full px-10 py-6  border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
+                            disabled={loading}
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex flex-col md:flex-row items-start gap-4">
                   <FormField
                     control={form.control}
                     name="password"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm ">Mật khẩu</FormLabel>
-                        <div className="relative ">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <FormItem className="w-full">
+                        <FormLabel className="text-sm">Mật khẩu</FormLabel>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                           <FormControl>
                             <Input
                               {...field}
                               type={showPassword ? "text" : "password"}
                               placeholder="Nhập mật khẩu"
-                              className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
+                              className="w-full px-10 py-6 border rounded-lg focus:outline-blue-500 focus:outline-2 transition-colors"
                               disabled={loading}
                             />
                           </FormControl>
@@ -185,9 +245,9 @@ const Register: React.FC = () => {
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 focus:outline-none"
                           >
                             {showPassword ? (
-                              <EyeOff className="h-5 w-5 text-gray-400" />
+                              <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                             ) : (
-                              <Eye className="h-5 w-5 text-gray-400" />
+                              <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                             )}
                           </button>
                         </div>
@@ -199,12 +259,12 @@ const Register: React.FC = () => {
                     control={form.control}
                     name="confirmPassword"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-sm ">
+                      <FormItem className="w-full">
+                        <FormLabel className="text-sm">
                           Xác nhận mật khẩu
                         </FormLabel>
                         <div className="relative">
-                          <CheckCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                           <FormControl>
                             <Input
                               {...field}
@@ -222,9 +282,9 @@ const Register: React.FC = () => {
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 focus:outline-none"
                           >
                             {showConfirmPassword ? (
-                              <EyeOff className="h-5 w-5 text-gray-400" />
+                              <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                             ) : (
-                              <Eye className="h-5 w-5 text-gray-400" />
+                              <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                             )}
                           </button>
                         </div>
@@ -236,24 +296,26 @@ const Register: React.FC = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6 rounded-lg transition-colors duration-200"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6 rounded-lg transition-colors duration-200 mt-4"
                 >
                   {loading ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <span className="text-[15px]">Đang xử lý...</span>
-                    </>
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                      <span className="text-sm sm:text-[15px]">
+                        Đang xử lý...
+                      </span>
+                    </div>
                   ) : (
-                    <>
-                      <UserPlus2 />
-                      <span className="text-[15px]">Đăng ký</span>
-                    </>
+                    <div className="flex items-center justify-center gap-2">
+                      <UserPlus2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-sm sm:text-[15px]">Đăng ký</span>
+                    </div>
                   )}
                 </Button>
               </form>
             </Form>
 
-            <p className="text-center mt-6 text-gray-600">
+            <p className="text-center mt-6 text-gray-600 text-sm sm:text-base">
               Đã có tài khoản?{" "}
               <Link
                 to="/login"
@@ -264,17 +326,18 @@ const Register: React.FC = () => {
             </p>
           </motion.div>
         </div>
-        <div className="flex  md:w-1/2 bg-gradient-to-brp-12 items-center justify-center">
+
+        <div className="hidden md:flex md:w-1/2 lg:w-1/2 bg-gradient-to-br items-center justify-center">
           <motion.div
-            className="flex w-1/2 items-center justify-center p-8"
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 10, opacity: 1 }}
-            transition={{ duration: 2, ease: "easeInOut" }}
+            className="flex items-center justify-center p-4 sm:p-6 md:p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
           >
             <img
               src={bgRegister}
               alt="Register background"
-              className="max-w-sm md:max-w-lg  object-cover"
+              className="max-w-full h-auto object-cover"
             />
           </motion.div>
         </div>

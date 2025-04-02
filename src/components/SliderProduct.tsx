@@ -7,7 +7,6 @@ import { fetchProducts } from "@/store/productSlice";
 import banner1 from "@/assets/anh-banner-1.webp";
 import banner2 from "@/assets/anh-banner-2.webp";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const SliderProduct: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -19,6 +18,23 @@ const SliderProduct: React.FC = () => {
 
   const [navStart, setNavStart] = useState(0);
   const navigate = useNavigate();
+  const [itemsToShow, setItemsToShow] = useState(4);
+
+  useEffect(() => {
+    const updateItemsToShow = () => {
+      if (window.innerWidth < 640) {
+        setItemsToShow(1);
+      } else if (window.innerWidth < 1024) {
+        setItemsToShow(2);
+      } else {
+        setItemsToShow(4);
+      }
+    };
+
+    updateItemsToShow();
+    window.addEventListener("resize", updateItemsToShow);
+    return () => window.removeEventListener("resize", updateItemsToShow);
+  }, []);
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % sliderData.length);
   };
@@ -54,7 +70,7 @@ const SliderProduct: React.FC = () => {
       ? currentItem?.Image[0]?.url || ""
       : "";
   return (
-    <div className="max-w-7xl px-4 py-8">
+    <div className="max-w-7xl ">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main Slider */}
         <div className="lg:col-span-2">
@@ -95,25 +111,25 @@ const SliderProduct: React.FC = () => {
               <ChevronRight className="w-6 h-6" />
             </button>
           </div>
-
-          {/* Thanh điều hướng tiêu đề, nằm bên dưới ảnh với khoảng cách 50px */}
-          <div className="mt-[50px] flex justify-center gap-4">
-            {sliderData.slice(navStart, navStart + 4).map((item, idx) => {
-              const actualIndex = navStart + idx;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setCurrentIndex(actualIndex)}
-                  className={`px-3 py-1 rounded transition-colors ${
-                    actualIndex === currentIndex
-                      ? " text-red-600"
-                      : " text-gray-600"
-                  }`}
-                >
-                  <span className="text-sm line-clamp-2">{item.name}</span>
-                </button>
-              );
-            })}
+          <div className="mt-[20px] mb-10  flex justify-center gap-4">
+            {sliderData
+              .slice(navStart, navStart + itemsToShow)
+              .map((item, idx) => {
+                const actualIndex = navStart + idx;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setCurrentIndex(actualIndex)}
+                    className={`px-3 cursor-pointer py-1 rounded transition-colors ${
+                      actualIndex === currentIndex
+                        ? " text-red-600"
+                        : " text-gray-600"
+                    }`}
+                  >
+                    <span className="text-sm line-clamp-2">{item.name}</span>
+                  </button>
+                );
+              })}
           </div>
         </div>
 
