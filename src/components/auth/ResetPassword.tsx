@@ -83,11 +83,10 @@ const ResetPassword: React.FC = () => {
     }
   };
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="bg-white  overflow-hidden flex flex-col md:flex-row">
-        {/* Left Column - Form */}
-        <div className="w-full md:w-1/2 p-6 md:p-8">
-          <div className="flex items-center mb-6">
+    <div className="container mx-auto px-4 py-8 lg:w-6xl">
+      <div className="w-full rounded-2xl flex flex-col lg:flex-row">
+        <div className="w-full lg:w-1/2 p-4 sm:p-6 md:p-8">
+          <div className="flex items-center mb-6 md:mb-8">
             <Link
               to="/"
               className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
@@ -105,7 +104,7 @@ const ResetPassword: React.FC = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
               Khôi phục mật khẩu
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-6 w-[270px] sm:w-full ">
               Vui lòng điền mật khẩu mới và xác nhận mật khẩu để hoàn tất quá
               trình đặt lại mật khẩu.
             </p>
@@ -217,7 +216,7 @@ const ResetPassword: React.FC = () => {
         </div>
 
         {/* Right Column - Image */}
-        <div className="w-full md:w-1/2 bg-gradient-to-br  flex items-center justify-center p-6 md:p-8">
+        <div className="hidden md:flex md:w-1/2 lg:w-1/2 bg-gradient-to-br items-center justify-center">
           <motion.div
             className="w-full sm:w-2/3 md:w-full"
             initial={{ x: -100, opacity: 0 }}
