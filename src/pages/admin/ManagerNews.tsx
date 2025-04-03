@@ -4,7 +4,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd';
 import { Ellipsis } from 'lucide-react';
 import CreatePostNews from '@/components/createPostNews/CreatePostNews';
-import { deleteNews, getPostListNews, startEditingNews } from '@/store/news.slice';
+import { deleteNews, getPostListNews, searchNews, startEditingNews } from '@/store/news.slice';
 import { useSelector } from 'react-redux';
 import { RootState, useAppDispatch } from '@/store/store';
 import { TypeDataNews } from '../news/typeNews';
@@ -151,6 +151,11 @@ const ManagerNews = () => {
         setCurrentPage(page)
     }
 
+    const handleSearchNews = () => {
+      dispatch(searchNews(searchName))
+      setSearchName('')
+    }
+    
   return (
     <div>
         <div id='modal' className='modal'>
@@ -169,8 +174,9 @@ const ManagerNews = () => {
             placeholder="Search by class name"
             enterButton="Search"
             size="middle"
-            // onChange={e => setSearchName(e.target.value)}
-            // onSearch={() => getCourses(true)}
+            value={searchName}
+            onChange={e => setSearchName(e.target.value)}
+            onSearch={() => handleSearchNews()}
           />
           <Button
             type="primary"
@@ -180,7 +186,7 @@ const ManagerNews = () => {
             Create News
           </Button>
         </div>
-        <Table columns={columns} dataSource={listNews} pagination={{
+        <Table rowKey={"id"} columns={columns} dataSource={listNews} pagination={{
           current: currentPage,
           pageSize: 3,
           total: listNews.length,

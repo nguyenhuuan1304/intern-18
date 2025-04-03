@@ -200,7 +200,7 @@ const CartPage: React.FC = () => {
 
     try {
       const stripe = await loadStripe(
-        "pk_test_51R66O0DftvJgslwBKdVOWz4UJ7sdpk6W9ALddQgPs3XBYQCV46xaDSgSqYpWAFZevhLYKgFyPAmp4wLm7THP3r0400LXhtMelk"
+        "pk_test_51R90Ib4Zjv2wvvyB7x9mjvS7VNaGMc2WlOaI321AuIgExhawvdfm04lkNzKbmMcYOHVlu25WXlbN5En7l9fN4kHn00ZtXOpm1Z"
       );
       const response = await axios.post(
         "http://localhost:1337/api/orders",
@@ -470,10 +470,10 @@ const CartPage: React.FC = () => {
               className="relative w-full bg-orange-500 text-white p-2 rounded border border-transparent overflow-hidden
                             before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
                             hover:text-red-500 hover:border-red-500"
-              // onClick={() => {
-              //   handleCheckout();
-              // }}
-              onClick={handleOrder}
+              onClick={() => {
+                handleCheckout();
+                handleOrder();
+              }}
             >
               <span className="relative z-10">Đặt Hàng</span>
             </button>

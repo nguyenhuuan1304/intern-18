@@ -8,6 +8,9 @@ import { motion } from "framer-motion";
 import { useSelector } from 'react-redux'
 import { useAppDispatch,RootState } from '@/store/store' 
 import { getPostListNews } from '@/store/news.slice'
+import FeatureSection from '@/components/FeatureSection'
+import { CardFooter } from '@/components/ui/card'
+import Footer from '@/components/layout/Footer'
 
 const News = () => {
     const listNews  = useSelector((state: RootState) => state.news.news) ?? [];
@@ -73,6 +76,9 @@ const News = () => {
                 <ContentSideBarNew title='Tin Tức Mới'/>
                 <ContentSideBarNew title='Tin Tức Nổi Bậc'/>
             </div>
+        </div>
+        <div className="mt-3">
+          <Footer />
         </div>
         {/* <div id='modal' className=' modal'>
             <CreatePostNews element = {document.getElementById('modal')}/>

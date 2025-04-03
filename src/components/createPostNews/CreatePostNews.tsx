@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState,memo } from "react";
 import { api } from "@/hooks/useAxios";
 import { TypeDataNews } from "@/pages/news/typeNews";
 import { RootState, useAppDispatch } from "@/store/store";
@@ -49,9 +49,9 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
   const dispatch = useAppDispatch();  
   const editorRef = useRef(null); 
 
-  
+    console.log(post)
   const description  = editingPost?.description
-  console.log(description)
+  console.log(1234)
   useEffect(() => {
     if (Array.isArray(description) && description.every(item => typeof item === 'object')) {
       const htmlContent = convertStrapiJSONToTinyMCE(description as StrapiBlock[]);
@@ -336,4 +336,4 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
   );
 };
 
-export default CreatePostNews;
+export default memo(CreatePostNews);

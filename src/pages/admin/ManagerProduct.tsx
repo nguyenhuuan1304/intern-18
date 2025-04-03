@@ -17,7 +17,6 @@ interface TypeProduct {
 
 const ManagerProduct = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [searchName, setSearchName] = useState('');
     const navigate = useNavigate();
 
     const items = [
@@ -192,7 +191,7 @@ const ManagerProduct = () => {
             New Course
           </Button>
         </div>
-        <Table columns={columns} dataSource={data} pagination={{
+        <Table rowKey={"documentId"} columns={columns} dataSource={data} pagination={{
           current: currentPage,
           pageSize: 3,
           total: data.length,

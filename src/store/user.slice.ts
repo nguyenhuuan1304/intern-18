@@ -1,6 +1,8 @@
 import { api } from "@/hooks/useAxios";
 import { TypeUser } from "@/pages/admin/ManagerUser";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import Password from "antd/es/input/Password";
+import { create } from "domain";
 
 
 interface TypeStateUser {
@@ -50,14 +52,28 @@ export const editStatus = createAsyncThunk('users/editStatus',
 export const deleteUser = createAsyncThunk('users/deleteUser',
     async (id: string, thunkAPI) => {
         try {
-            const res = await api.delete(`users/${id}`,{
+            const res = await api.delete<TypeUser>(`users/${id}`,{
                 signal: thunkAPI.signal
             })
             if(res.status === 200) {
                 return res.data
             }
         } catch (error) {
-            console.error('error',error)
+            return thunkAPI.rejectWithValue(error.response.data)
+        }
+    }
+)
+
+export const createUser = createAsyncThunk('users/createUser' , 
+    async ({id , body} : {id:string, body: boolean }, thunkAPI) => {
+        try {
+            const response = await api.post(
+              "http://localhost:1337/api/auth/local/register",
+              payload
+            );
+            return response.data;
+        } catch (error: any) {
+            return thunkAPI.rejectWithValue(error.response.data);
         }
     }
 )
@@ -65,7 +81,7 @@ export const deleteUser = createAsyncThunk('users/deleteUser',
 export const searchUser = createAsyncThunk('users/searchUser',
     async (value: string, thunkAPI) => {
         try {
-            const res = await api.get(`users?filters[username][$contains]=${value}`,{
+            const res = await api.get<TypeUser[]>(`users?filters[username][$contains]=${value}`,{
                 signal: thunkAPI.signal
             })
             if(res.status === 200) {

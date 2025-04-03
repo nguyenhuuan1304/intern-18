@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Product } from "./types/ProductType";
 import CartDrawer from "../cart/CartDrawer";
-import { useAppDispatch } from "../../store/store";
 import { addToCartApi } from "@/store/cartSlice";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "@/store/store";
 
 interface AddProductProps {
     product: Product;
@@ -17,7 +17,7 @@ const AddProduct: React.FC<AddProductProps> = ({ product, onClose, imageUrl, car
     if (!product) return null;
 
     const [quantities, setQuantities] = useState<Record<string, number>>({});
-    const dispatch = useAppDispatch();
+    const dispatch = useAppDispatch;
     const [error, setError] = useState<string>("");
     const stockData = product.inventory.reduce<Record<string, number>>((acc, item) => {
         acc[item.size] = (acc[item.size] || 0) + item.quantity;
@@ -39,7 +39,7 @@ const AddProduct: React.FC<AddProductProps> = ({ product, onClose, imageUrl, car
 
     const totalQuantity = Object.values(quantities).reduce((acc, qty) => acc + qty, 0);
     const totalPrice = totalQuantity * (finalPrice || 0);
-    const navigate = useNavigate();
+    const navigate = useNavigate;
 
     const handleAddToCart = async () => {
         if (totalQuantity === 0) {

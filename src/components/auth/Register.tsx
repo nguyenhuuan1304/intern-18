@@ -88,8 +88,9 @@ const Register: React.FC = () => {
         navigate("/login");
       }
     } catch (error) {
-      const erroMessage = error?.error.message;
-      toast.error(erroMessage);
+      const errorMessage = error?.error.message;
+      console.log(errorMessage)
+      toast.error(errorMessage);
     }
   };
   return (
@@ -132,7 +133,7 @@ const Register: React.FC = () => {
                             {...field}
                             placeholder="Nhập tên đăng nhập"
                             className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                            disabled={loading}
+                            // disabled={loading}
                           />
                         </FormControl>
                       </div>
