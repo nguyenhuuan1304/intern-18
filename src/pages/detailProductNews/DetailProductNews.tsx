@@ -2,15 +2,22 @@ import React, { useEffect, useState } from 'react'
 import ContentSideBarNew from '@/components/contentSideBarNew/ContentSideBarNew'
 import Header from '@/components/header/Header'
 import ServiceMenu from '@/components/ServiceMenu'
-import { CalendarMinus2, ChevronLeft, ChevronRight, Eye, Facebook, Instagram, Lightbulb, Newspaper, Star, Twitter } from 'lucide-react'
+import { CalendarMinus2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Facebook, Instagram, Lightbulb, Newspaper, Star, Twitter } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { motion ,AnimatePresence} from "framer-motion";
 import { api } from '@/hooks/useAxios'
 import { useSearchParams } from "react-router-dom";
 import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
 import { useSelector } from 'react-redux'
-import { RootState } from '@/store/store' 
+import { RootState, useAppDispatch } from '@/store/store' 
 import { TypeDataNews } from '../news/typeNews'
+import { getPostListNews } from '@/store/news.slice'
+import { toast } from "react-toastify";
+
+
+interface User {
+  username: string
+}
 
 interface DetailProductNewsProps {
   category: string; 
@@ -32,23 +39,55 @@ interface TypeNews {
   img: TypeImg[];
 }
 
+interface TypeRating {
+  username: string,
+  rating: number,
+  news: {
+    documentId: string
+  },
+  description?: string ,
+  createdAt: string,
+  updatedAt:string
+
+}
+
 const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const listNews = useSelector((state: RootState) => state.news.news) || []
   const [news,setNews] = useState<TypeNews>({name: '', description: '', img: []})
   const [navStart, setNavStart] = useState(0)
   const [data, setData] = useState<TypeDataNews[]>(listNews); // Lưu trữ bản sao của dữ liệu
   const [searchParams, setSearchParams] = useSearchParams();
+  const [listRating, setListRating] = useState<TypeRating[]>([])
+  const [filterRating, setFilterRating] = useState<TypeRating[]>(listRating)
+  const [viewCount, setViewCount] = useState(3); 
+  const [active, setActive] = useState(0)
+  const [quantity, setQuantity] = useState(0)
+  const [avg, setAvg] = useState(0)
+  const [hoverIndex, setHoverIndex] = useState(-1);
   const [savedId, setSavedId] = useState<string | null>(null);
   const listImg: TypeImg[] = news.img || [];
   const content: BlocksContent = Array.isArray(news?.description)? news.description: [];
+  const user: User= JSON.parse(localStorage.getItem("user") || "null")?.username
+  const dispatch = useAppDispatch()
 
-  console.log(data)
+  useEffect(() => {
+    const promise = dispatch(getPostListNews())
+      return () => {
+        promise.abort()
+      }
+  },[dispatch])
+
+  useEffect(() => {
+    if (listNews.length > 0) {
+      setData(listNews);
+    }
+  }, [listNews]);
+
   useEffect(() => {
     const id = searchParams.get("id") || null;
-
     if (id) {
       setSavedId(id);
-      localStorage.setItem("savedId", id); // Lưu vào localStorage
+      localStorage.setItem("savedId", id); 
       window.history.replaceState({}, "", window.location.pathname);
     } else {
       const storedId = localStorage.getItem("savedId");
@@ -61,7 +100,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const nextSlide = () => {
     setData((prev) => {
       const newData = [...prev];
-      const firstIndex = newData.shift();
+      const firstIndex = newData.shift() ?? {} as TypeDataNews;
       newData.push(firstIndex); // Dịch chuyển phần tử đầu tiên về cuối
       return newData;
     });
@@ -71,7 +110,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const prevSlide = () => {
     setData((prev) => {
       const newData = [...prev];
-      const lastIndex = newData.pop();
+      const lastIndex = newData.pop() ?? {} as TypeDataNews;;
       newData.unshift(lastIndex); // Dịch chuyển phần tử cuối về đầu
       return newData;
     });
@@ -86,18 +125,119 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
 
 
   useEffect(() => {
-    if (savedId === null) {
-      return;
-    } else {
-      api.get(`/news/${savedId}?populate=*`)
-      .then((res) => {
-        setNews(res.data.data);
-      });
+    const getData = async () => {
+      try {
+        if (savedId === null) {
+          return;
+        } else {
+          const res = await api.get(`/news/${savedId}?populate=*`)
+          if(res.status === 200) {
+            setNews(res.data.data);
+            const data : TypeRating[]= res.data.data?.rating_news || []
+            console.log(data)
+            setListRating(data.map((item) =>({
+              ...item,
+              description: (() => {
+                switch (item.rating) {
+                  case 1:
+                    return 'rất không hài lòng';
+                  case 2:
+                    return 'không hài lòng';
+                  case 3:
+                    return 'tạm ổn';
+                  case 4:
+                    return 'hài lòng';
+                  case 5:
+                    return 'rất hài lòng';
+                  default:
+                    return '';
+                }
+              })()
+            })).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+            console.log(res.data.data?.rating_news)
+          }
+    
+        }
+      } catch (error) {
+        console.error(error)
+      }
 
     }
+    getData()
+   
   }, [savedId]);
 
+  // useEffect(() => {
+  //   const getRatingNews = async () => {
+  //     try {
+  //       const res = await api.get('http://localhost:1337/api/rating-news?filters[news][documentId][$eq]=c2hv3sfjc0phc3xzms359pzh&pagination[pageSize]=3&pagination[page]=1&sort=createdAt:desc')
+  //       if(res.status === 200) {
+  //         const data : TypeRating[]= res.data.data
+  //         setListRating(data.map((item) =>({
+  //           ...item,
+  //           description: item.rating < 2 ? "không hài lòng" : item.rating >=3 && item.rating <=4 ? "hài lòng" : "rất hài lòng"
+  //         })) )
+  //       }
+  //     } catch (error) {
+  //       console.error(error)
+  //     }
+  //   }
+  //   getRatingNews()
+  // },[])
 
+  useEffect(() => {
+    const rai = listRating.reduce((acc,cur) => {
+        return acc + cur.rating
+    },0)
+    setAvg(rai)
+    setFilterRating(listRating.slice(0,viewCount));
+    setQuantity(listRating.length)
+  }, [listRating,viewCount]);
+
+  const handleViewRating = (index : number) => {
+    if(index === 0) {
+      setFilterRating(listRating)
+      setActive(index)
+      return
+    }
+    const filter = listRating.filter((item) => item.rating === index)
+    setFilterRating(filter)
+    setActive(index)
+  }
+  
+  const handleRating = async (index : number) => {
+    if(!user) {
+      toast.info("You must be login in to rate this news", { autoClose: 1500 });
+      return
+    }
+    const body = {
+      data : {
+        "username": user,
+        "rating": index,
+        "news": savedId
+      }
+    }
+    try {
+      const res = await api.post('rating-news?populate=news',body)
+      if(res.status === 201) {
+        toast.success("Thanks you for rating the news", { autoClose: 1500 });
+      }
+    } catch (error) {
+        toast.error("Rating failed", { autoClose: 1500 });
+      console.error(error)
+    }
+  }
+  const handleViewMore = () => {
+    if(viewCount < listRating.length) {
+      setViewCount(pre => pre + 3)
+    }
+  }
+
+  const handleViewLess = () => {
+    setViewCount(3)
+  }
+
+  console.log(viewCount)
   return (
     <div className=''>
       <Header/>
@@ -122,18 +262,18 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
       <div className="max-w-[1400px] 2xl:mx-[auto]  flex max-lg:flex-wrap flex-col lg:flex-row  max-2xl:mx-[4%] my-[10px] gap-6">
         <div className=" my-[4%] flex flex-col basis-[80%] gap-x-[10px] gap-y-[20px]">
           <h3 className="text-[20px] font-[500]">{news.name}</h3>
-          <div className="flex flex-wrap">
-            <div className="flex items-center px-[12px] mr-[20px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]">
+          <div className="flex flex-wrap gap-1">
+            <div className="flex items-center px-[12px] mr-[10px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]">
               <div>
                 <CalendarMinus2 className="block h-[18px] mr-[5px]" />
               </div>
               <span>Vài ngày trước</span>
             </div>
-            <div className="flex items-center px-[12px] mr-[20px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]">
+            <div className="flex items-center px-[12px] mr-[10px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]">
                 <Eye className="block h-[18px] mr-[5px]" />
                 <span>Lượt xem: 360</span>
             </div>
-            <div className="flex items-center px-[12px] mr-[20px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]">
+            <div className="flex items-center px-[12px] mr-[10px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]">
                 <Newspaper className="block h-[18px] mr-[5px]" />
                 <span>Tin tức</span>
             </div>
@@ -165,18 +305,22 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
             </div>
           </div>      
           <div className='flex items-center  '>
-               <div className=' text-[#ffb500] flex mr-[10px] gap-1 cursor-pointer '>
-                 <Star className='hover:fill-[#ffff00]'/>
-                 <Star className='hover:fill-[#ffff00]'/>
-                 <Star className='hover:fill-[#ffff00]'/>
-                 <Star className='hover:fill-[#ffff00]'/>
-                 <Star className='hover:fill-[#ffff00]'/>
-               </div>
+                <div className='text-[#ffb500] flex mr-[10px] gap-1 cursor-pointer'>
+                  {[1, 2, 3, 4, 5].map((index) => (
+                    <Star 
+                      key={index}
+                      onClick={() => handleRating(index)}
+                      className={index <= hoverIndex ? 'fill-[#ffb500]' : ''}
+                      onMouseEnter={() => setHoverIndex(index)}
+                      onMouseLeave={() => setHoverIndex(-1)}
+                    />
+                  ))}
+                </div>
                <div className='text-[#333333] text-[12px]'>
-                 <strong>{0}</strong>
-                 <span>/5</span>
+                  <strong>{avg ? (avg / listRating.length).toFixed(1) : "0.0"}</strong>
+                 <span>/5 </span>
                  <span>(</span>
-                 <strong> {0} </strong>
+                 <strong> {quantity} </strong>
                  <span>bình chọn)</span>
                </div>
              </div>
@@ -185,39 +329,110 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
                  Lọc theo:
                </div>
                <div className='flex items-center gap-[5px] flex-wrap'>
-                 <div className='flex hover:cursor-pointer  bg-[#E6EEF7] text-[#0d5cb6] py-[6px] px-[22px] rounded-[10px] mx-[5px]'>
+                 <div 
+                    onClick={() => handleViewRating(0)}
+                    className={` ${active === 0 ? 'bg-[#e6eef7] text-[#0d5cb6]' : ''}flex hover:cursor-pointer bg-[#e6eef7] text-[#0d5cb6] py-[6px] px-[22px] rounded-[10px] mx-[5px]`}
+                  >
                    <span>Tất cả</span>
                  </div>
-                 <div className='flex hover:cursor-pointer bg-[#eeeeee] py-[5px] px-[20px] rounded-[10px]'>
+                 <div 
+                    className={` ${active === 1 ? 'bg-[#e6eef7] text-[#0d5cb6]' : 'bg-[#eeeeee]'} flex hover:cursor-pointer hover:opacity-[0.8] py-[5px] px-[20px] rounded-[10px]`}
+                    onClick={() => handleViewRating(1)}
+                  >
                    <span>1</span>
                    <Star className='ml-[4px] text-[10px] fill-[#ccc] text-[#ccc]'/>
                  </div>
-                 <div className='flex hover:cursor-pointer bg-[#eeeeee] py-[5px] px-[20px] rounded-[10px]'>
+                 <div 
+                    onClick={() => handleViewRating(2)}
+                    className={` ${active === 2 ? 'bg-[#e6eef7] text-[#0d5cb6]' : 'bg-[#eeeeee]'} flex hover:cursor-pointer  hover:opacity-[0.8] py-[5px] px-[20px] rounded-[10px]`}
+                  >
                    <span>2</span>
                    <Star className='ml-[4px] fill-[#ccc] text-[#ccc] text-[10px]'/>
                  </div>
-                 <div className='flex hover:cursor-pointer bg-[#eeeeee] py-[5px] px-[20px] rounded-[10px]'>
+                 <div 
+                    onClick={() => handleViewRating(3)}
+                    className={` ${active === 3 ? 'bg-[#e6eef7] text-[#0d5cb6]' : 'bg-[#eeeeee]'} flex hover:cursor-pointer hover:opacity-[0.8] py-[5px] px-[20px] rounded-[10px]`}
+                  >
                    <span>3</span>
                    <Star className='ml-[4px] fill-[#ccc] text-[#ccc] text-[10px]'/>
                  </div>
-                 <div className='flex hover:cursor-pointer bg-[#eeeeee] py-[5px] px-[20px] rounded-[10px]'>
+                 <div 
+                    onClick={() => handleViewRating(4)}
+                    className={` ${active === 4 ? 'bg-[#e6eef7] text-[#0d5cb6]' : 'bg-[#eeeeee]'} flex hover:cursor-pointer hover:opacity-[0.8] py-[5px] px-[20px] rounded-[10px]`}
+
+                  >
                    <span>4</span>
                    <Star className='ml-[4px] fill-[#ccc] text-[#ccc] text-[10px]'/>
                  </div>
-                 <div className='flex hover:cursor-pointer bg-[#eeeeee] py-[5px] px-[20px] rounded-[10px]'>
+                 <div 
+                    onClick={() => handleViewRating(5)}
+                    className={` ${active === 5 ? 'bg-[#e6eef7] text-[#0d5cb6]' : 'bg-[#eeeeee]'} flex hover:cursor-pointer hover:opacity-[0.8] py-[5px] px-[20px] rounded-[10px]`}
+
+                  >
                    <span>5</span>
                    <Star className='ml-[4px] fill-[#ccc] text-[#ccc] text-[10px]'/>
                  </div>
                </div>
              </div>
-             <div className='flex bg-[#ffe38b] text-[#fff] rounded-[6px] items-center'>
-               <div className='bg-[#fbda72] py-[15px] px-[18px] relative top-[10px] left-[12px] rounded-[6px]'>
-                 <Lightbulb className='w-[24px] h-[30px]'/>
-               </div>
-               <div className='ml-[24px]'>
-                 <span>Lưu ý Không có review nào</span>
-               </div>
-             </div>
+             {listRating.length > 0 && 
+                <div className='my-[20px] '>
+                  {filterRating.map((item,index) => (
+                      <div key={index} className='flex flex-col gap-2 border-t border-t-gray-150 py-5'>
+                          <div className=' w-[150px] flex flex-row items-center gap-2 '>
+                            <img 
+                              className='h-[40px] w-[40px] rounded-[50%]'
+                              src="https://cellphones.com.vn/sforum/wp-content/uploads/2023/10/avatar-trang-4.jpg" alt="" 
+                            />
+                            <span className='truncate'>{item.username}</span>
+                          </div>
+                          <div className=' flex:1 flex flex-col '>
+                            <div className=' text-[#ffb500] flex mr-[10px] gap-0.5 cursor-pointer '>
+                              {[...Array(item.rating)].map((_,id) => (
+                                <Star key={id} className='fill-[#ffb500] h-[12px] w-[20px]'/>
+                              ))}
+                            
+                            </div>
+                            <div>
+                              <p>Đánh giá bài viết {item.description}</p>
+                            </div>
+                          </div>
+                            <div>
+                              <span>{new Date(item?.createdAt).toLocaleString()}</span>
+                            </div>
+                      </div>
+                  ))}
+                  {active === 0 && viewCount < listRating.length
+                    &&
+                    <div 
+                      className='flex  text-[#333] hover:cursor-pointer hover:opacity-[0.7]'
+                      onClick={handleViewMore}
+                    >
+                      <button className='pointer-events-none'>View More</button>
+                      <ChevronDown className='relative top-[2px]'/>
+                    </div>
+                  }
+                  {
+                    active === 0 && viewCount >= listRating.length && listRating.length >= 3 &&
+                    <div 
+                      className='flex  text-[#333] hover:cursor-pointer hover:opacity-[0.7]'
+                      onClick={handleViewLess}
+                    >
+                      <button className='pointer-events-none'>View less</button>
+                      <ChevronUp className='relative top-[2px]'/>
+                    </div>
+                  }
+                  
+                </div>
+             ||
+                <div className='flex bg-[#ffe38b] text-[#fff] rounded-[6px] items-center'>
+                  <div className='bg-[#fbda72] py-[15px] px-[18px] relative top-[10px] left-[12px] rounded-[6px]'>
+                    <Lightbulb className='w-[24px] h-[30px]'/>
+                  </div>
+                  <div className='ml-[24px]'>
+                    <span>Lưu ý Không có review nào</span>
+                  </div>
+                </div>
+             }
              <div className='flex mt-[10px] px-6 py-2.5 border border-gray-300 gap-[10px] items-center'>
                <span className='font-[450]'>Chia sẻ</span>
                <div className='bg-[#516eab] text-[#fff] h-[32px] w-[32px] flex items-center justify-center'>

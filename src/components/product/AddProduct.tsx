@@ -3,7 +3,8 @@ import { Product } from "./types/ProductType";
 import CartDrawer from "../cart/CartDrawer";
 import { addToCartApi } from "@/store/cartSlice";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "@/hooks/useRedux";
+import { useAppDispatch } from "@/store/store";
+
 
 interface AddProductProps {
   product: Product;
@@ -32,6 +33,7 @@ const AddProduct: React.FC<AddProductProps> = ({
   );
   const discountPercent = product.product_sale?.percent_discount ?? 0;
   const finalPrice = product.prices - (product.prices * discountPercent) / 100;
+
 
   const handleQuantityChange = (size: string, delta: number) => {
     setQuantities((prev) => {

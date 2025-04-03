@@ -49,7 +49,6 @@ const Header = () => {
   // State để quản lý hiển thị sidebar category trên mobile
   const [showSidebarMobile, setShowSidebarMobile] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
   useEffect(() => {
     if (!debounce.trim()) {
       setArrSearch([]);
@@ -123,7 +122,6 @@ const Header = () => {
       name: product.name,
       thumbnailUrl: product?.Image[0]?.url || "Không có ảnh",
     }));
-
   const handleLogout = (): void => {
     localStorage.removeItem("user");
     navigate("/login");
@@ -196,7 +194,7 @@ const Header = () => {
                         <div className="w-[75px] h-[75px] mr-[10px]">
                           <img
                             className="object-cover h-full"
-                            src={`http://localhost:1337${thumbnailUrls[0].thumbnailUrl}`}
+                            src={`http://localhost:1337${thumbnailUrls[index].thumbnailUrl}`}
                             alt=""
                           />
                         </div>

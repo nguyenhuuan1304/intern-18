@@ -211,6 +211,42 @@ const CartPage: React.FC = () => {
       setValidationErrors({});
     }
 
+    try {
+      const stripe = await loadStripe(
+        "pk_test_51R90Ib4Zjv2wvvyB7x9mjvS7VNaGMc2WlOaI321AuIgExhawvdfm04lkNzKbmMcYOHVlu25WXlbN5En7l9fN4kHn00ZtXOpm1Z"
+      );
+      const response = await axios.post(
+        "http://localhost:1337/api/orders",
+        {
+          orders: cart.map((item) => ({
+            productId: item.documentId,
+            quantity: item.quantity,
+          })),
+          email,
+          address: `${streetAddress}, ${selectedWard?.label || ""}, ${
+            selectedDistrict?.label || ""
+          }, ${selectedProvince?.label || ""}`.trim(),
+          phoneNumber,
+          note,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const data = response.data;
+
+      if (data.error) throw new Error(data.error);
+      if (!data.stripeSession?.id)
+        throw new Error("Failed to create Stripe session");
+
+      // Chuyển hướng đến trang thanh toán của Stripe
+      await stripe?.redirectToCheckout({
+        sessionId: data.stripeSession.id,
+      });
+    } catch (err) {
+      console.error("Thanh toán lỗi:", err);
+    }
     dispatch(
       checkoutOrder({
         cart,
@@ -456,8 +492,8 @@ const CartPage: React.FC = () => {
             </div>
             <button
               className="relative w-full bg-orange-500 text-white p-2 rounded border border-transparent overflow-hidden
-             before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
-             hover:text-red-500 hover:border-red-500"
+                            before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
+                            hover:text-red-500 hover:border-red-500"
               onClick={() => {
                 handleCheckout();
                 handleOrder();

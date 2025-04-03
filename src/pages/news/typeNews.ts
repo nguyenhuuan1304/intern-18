@@ -18,7 +18,8 @@ export interface TypeDataNews {
   documentId: string,
   slug: string;
   introduction: string,
-  is_block?: boolean
+  is_block?: boolean,
+  rating_news: []
 } 
 
 interface typeImg  {
