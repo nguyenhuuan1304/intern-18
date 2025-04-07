@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
-import { Star, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { createRating } from "@/store/ratingSlice";
 import { AppDispatch, RootState } from "@/store/store";
+import { FaStar } from "react-icons/fa";
 
 interface ReviewFormProps {
     onClose: () => void;
@@ -64,54 +65,54 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
     };
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-1/2 relative animate-fadeIn">
-                <button className="absolute top-2 right-2 text-red-500 hover:text-red-600" onClick={onClose}>
-                    <X/>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 px-4">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg sm:max-w-md md:max-w-lg lg:max-w-xl relative animate-fadeIn">
+                <button className="cursor-pointer absolute top-2 right-2 text-red-500 hover:text-red-600" onClick={onClose}>
+                    <X />
                 </button>
-
-                <h2 className="text-lg font-semibold text-gray-800 mb-3">Viết đánh giá của bạn</h2>
-
-                <div className="flex space-x-1 mb-3">
+    
+                <h2 className="text-lg font-semibold text-gray-800 mb-3 text-center">Viết đánh giá của bạn</h2>
+    
+                <div className="flex justify-center space-x-1 mb-3">
                     {[1, 2, 3, 4, 5].map((star) => (
                         <span
                             key={star}
                             className={`cursor-pointer text-2xl ${star <= rating ? "text-yellow-400" : "text-gray-300"}`}
                             onClick={() => setRating(star)}
                         >
-                            <Star />
+                            <FaStar />
                         </span>
                     ))}
                 </div>
-
+    
                 <textarea
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
                     placeholder="Nhập đánh giá của bạn..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
-
+    
                 <input type="file" multiple ref={fileInputRef} accept="image/*" onChange={handleImageChange} className="mb-3 hidden" />
                 <button
                     type="button"
                     onClick={handleButtonClick}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-2"
+                    className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-2 w-full sm:w-auto"
                 >
                     Đính kèm ảnh
                 </button>
-
+    
                 <div className="flex space-x-2 overflow-x-auto">
                     {previewImages.map((src, index) => (
                         <img key={index} src={src} alt="Preview" className="w-16 h-16 object-cover rounded-lg" />
                     ))}
                 </div>
-
+    
                 <div className="flex justify-end space-x-2 mt-4">
-                    <button className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500" onClick={onClose}>
+                    <button className="cursor-pointer px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 w-full sm:w-auto" onClick={onClose}>
                         Hủy
                     </button>
                     <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                        className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 w-full sm:w-auto"
                         onClick={handleSubmit}
                         disabled={loading}
                     >
@@ -121,7 +122,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onClose, documentId }) => {
             </div>
         </div>,
         document.body
-    );
+    );    
 };
 
 export default ReviewForm;

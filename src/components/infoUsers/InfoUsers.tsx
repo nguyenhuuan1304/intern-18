@@ -6,6 +6,8 @@ import { User } from "@/components/header/Header";
 import { toast } from "react-toastify";
 import useAxios from "@/hooks/useAxios";
 import useDebounce from "@/hooks/useDebounce";
+import { getProvinces, getDistricts, getWards } from "../cart/service/addressService";
+import Select from "react-select";
 
 interface typeInfo {
   user: User & { id: string };
@@ -26,7 +28,15 @@ const InfoUsers: React.FC<typeInfo> = ({ user }) => {
   const [isFormChange, setIsFormChange] = useState(false);
   const { api } = useAxios();
   const debounce = useDebounce(form.username, 500) as string;
-  console.log(user)
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [streetAddress, setStreetAddress] = useState("");
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
+  const [selectedProvince, setSelectedProvince] = useState<any>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
+  const [selectedWard, setSelectedWard] = useState<any>(null);
+
   useEffect(() => {
     if (!isFormChange || !debounce) return;
     console.log(form.username);
@@ -47,6 +57,29 @@ const InfoUsers: React.FC<typeInfo> = ({ user }) => {
   }, [debounce]);
 
   useEffect(() => {
+    getProvinces().then(setProvinces);
+  }, []);
+
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string;
+  }>({});
+
+  useEffect(() => {
+    if (selectedProvince) {
+      getDistricts(selectedProvince.value).then(setDistricts);
+      setSelectedDistrict(null);
+      setSelectedWard(null);
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      getWards(selectedDistrict.value).then(setWards);
+      setSelectedWard(null);
+    }
+  }, [selectedDistrict]);
+
+  useEffect(() => {
     const fetchUserData = async () => {
       try {
         const res = await api.get(`/users/${user.id}`);
@@ -56,8 +89,8 @@ const InfoUsers: React.FC<typeInfo> = ({ user }) => {
       }
     };
     fetchUserData();
-  }, []); 
-  
+  }, []);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -163,16 +196,110 @@ const InfoUsers: React.FC<typeInfo> = ({ user }) => {
               />
             </div>
           </div>
-          <div className="mb-4">
-            <Label htmlFor="address">Địa chỉ</Label>
-            <Input
-              className="mt-[14px]"
-              id="address"
-              value={form.address || ""}
-              onChange={handleChange}
-              placeholder="Nhập địa chỉ của bạn"
-            />
+
+          <div className="relative">
+            {/* Form nhập địa chỉ (ẩn/hiện) */}
+            {isAddressFormOpen && (
+              <div className="fixed inset-0 flex items-center justify-center bg-gray-800/50 z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                  <h3 className="text-lg font-medium mb-4">Nhập địa chỉ</h3>
+
+                  {/* Chọn Tỉnh */}
+                  <div className="mb-4">
+                    <Select
+                      options={provinces}
+                      value={selectedProvince}
+                      onChange={setSelectedProvince}
+                      placeholder="Chọn tỉnh"
+                      className="mb-2 w-full"
+                    />
+                  </div>
+
+                  {/* Chọn Huyện */}
+                  <div className="mb-4">
+                    <Select
+                      options={districts}
+                      value={selectedDistrict}
+                      onChange={setSelectedDistrict}
+                      placeholder="Chọn huyện"
+                      isDisabled={!selectedProvince}
+                      className="mb-2 w-full"
+                    />
+                  </div>
+
+                  {/* Chọn Xã */}
+                  <div className="mb-4">
+                    <Select
+                      options={wards}
+                      value={selectedWard}
+                      onChange={setSelectedWard}
+                      placeholder="Chọn xã"
+                      isDisabled={!selectedDistrict}
+                      className="mb-2 w-full"
+                    />
+                  </div>
+
+                  {/* Nhập số nhà, tên đường */}
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      className="w-full p-2 border border-gray-300 rounded"
+                      placeholder="Số nhà, tên đường"
+                      value={streetAddress}
+                      onChange={(e) => setStreetAddress(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Nút Lưu và Đóng */}
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={() => setIsAddressFormOpen(false)}
+                      className="bg-gray-400 text-white px-4 py-2 rounded mr-2"
+                    >
+                      Đóng
+                    </button>
+                    <button
+                      onClick={() => setIsAddressFormOpen(false)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded"
+                    >
+                      Lưu
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex space-x-2">
+              <Label htmlFor="address">Địa chỉ</Label>
+              <p
+                onClick={() => setIsAddressFormOpen(true)}
+                className="text-blue-500 cursor-pointer"
+              >
+                Nhập địa chỉ
+              </p>
+            </div>
+
+            {/* Hiển thị thông tin đã chọn */}
+            <div className="mb-4">
+              <Input
+                className="mt-[14px]"
+                id="address"
+                value={
+                  streetAddress || selectedWard?.label || selectedDistrict?.label || selectedProvince?.label
+                    ? `${streetAddress ? `${streetAddress}, ` : ""}${selectedWard?.label ? `${selectedWard.label}, ` : ""
+                    }${selectedDistrict?.label ? `${selectedDistrict.label}, ` : ""}${selectedProvince?.label ? selectedProvince.label : ""
+                    }`
+                    : form.address || ""
+                }
+                onChange={handleChange}
+                placeholder="Nhập địa chỉ của bạn"
+              />
+            </div>
+            {validationErrors.address && (
+              <p className="text-red-500 mt-1">{validationErrors.address}</p>
+            )}
           </div>
+
           <Button
             type="submit"
             className="cursor-pointer relative w-[130px] h-[40px] text-white font-bold py-2 rounded-[6px] border border-[#3f7df6] overflow-hidden transition-colors duration-300 group"

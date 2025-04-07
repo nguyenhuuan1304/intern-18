@@ -4,11 +4,13 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useAppDispatch, RootState } from "@/store/store";
 import { fetchProducts } from "@/store/productSlice";
-import { Send, Star, X } from "lucide-react";
+import { Send, X } from "lucide-react";
 import ReviewSection from "./ReviewSection";
 import SaleSection from "../product/SaleSession";
 import { addToCartApi } from "@/store/cartSlice";
 import { useNavigate } from "react-router-dom";
+import { FaRegStar, FaStar, FaStarHalfAlt } from "react-icons/fa";
+import CurrencyFormatter from "@/components/CurrencyFormatter";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 50 },
@@ -33,37 +35,6 @@ const ProductDetail: React.FC = () => {
         }
     }, [dispatch, products.length]);
 
-    // const hasStock = () => {
-    //     const hasShoeStock = productDetail?.id_shoe
-    //         ? Object.entries(productDetail.id_shoe)
-    //             .filter(([key, value]) => key.startsWith("S") && typeof value === "number")
-    //             .some(([_, value]) => value > 0)
-    //         : false;
-
-    //     const hasShirtPantStock = productDetail?.id_shirt_pant
-    //         ? Object.entries(productDetail.id_shirt_pant)
-    //             .filter(([key, value]) => ["S", "M", "L", "XL", "XXL"].includes(key) && typeof value === "number")
-    //             .some(([_, value]) => value > 0)
-    //         : false;
-
-    //     return hasShoeStock || hasShirtPantStock;
-    // };
-
-    // const availableSizes = () => {
-    //     const shoeSizes = productDetail?.id_shoe
-    //         ? Object.entries(productDetail.id_shoe)
-    //             .filter(([key, value]) => key.startsWith("S") && typeof value === "number" && value > 0)
-    //             .map(([key]) => key)
-    //         : [];
-
-    //     const shirtPantSizes = productDetail?.id_shirt_pant
-    //         ? Object.entries(productDetail.id_shirt_pant)
-    //             .filter(([key, value]) => ["S", "M", "L", "XL", "XXL"].includes(key) && typeof value === "number" && value > 0)
-    //             .map(([key]) => key)
-    //         : [];
-
-    //     return [...shoeSizes, ...shirtPantSizes];
-    // };
     const hasStock = () => {
         return productDetail?.inventory.some(item => item.quantity > 0);
     };
@@ -119,7 +90,7 @@ const ProductDetail: React.FC = () => {
     if (!productDetail) return <p className="text-gray-500">Không tìm thấy sản phẩm.</p>;
 
     return (
-        <div className="p-6 min-h-screen">
+        <div className="p-2 md:p-6 min-h-screen">
             {/* Product Section */}
             <motion.div
                 className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg flex flex-wrap"
@@ -128,7 +99,7 @@ const ProductDetail: React.FC = () => {
                 viewport={{ once: true }}
                 variants={fadeIn}
             >
-                <div className="w-full md:w-1/2 p-4">
+                <div className="w-full md:w-1/2 p-2 md:p-4">
                     {productDetail?.product_sale?.percent_discount ? (
                         <div className="relative overflow-hidden">
                             <img
@@ -156,9 +127,18 @@ const ProductDetail: React.FC = () => {
                     </h1>
 
                     <div className="flex items-center space-x-1 text-sm font-bold">
-                        {[...Array(5)].map((_, index) => (
-                            <Star key={index} className={index < Math.round(productDetail.rating || 0) ? "text-yellow-500" : "text-gray-300"} />
-                        ))}
+                        {[...Array(5)].map((_, i) => {
+                            const fullStars = Math.floor(productDetail.rating);
+                            const hasHalfStar = productDetail.rating % 1 !== 0 && i === fullStars;
+
+                            return hasHalfStar ? (
+                                <FaStarHalfAlt key={i} className="text-yellow-500 text-sm" />
+                            ) : i < fullStars ? (
+                                <FaStar key={i} className="text-yellow-500 text-sm" />
+                            ) : (
+                                <FaRegStar key={i} className="text-gray-300 text-sm" />
+                            );
+                        })}
                         <p className="ml-2 text-gray-600">({productDetail.ratingCount} đánh giá)</p>
                     </div>
 
@@ -179,26 +159,23 @@ const ProductDetail: React.FC = () => {
                         <div className="flex space-x-2">
 
                             <p className="text-gray-500 line-through">
-                                {productDetail.prices.toLocaleString()}đ
+                                <CurrencyFormatter amount={productDetail.prices}/>
                             </p>
 
                             <p className="text-red-500 text-base font-bold">
-                                {(
-                                    productDetail.prices -
-                                    (productDetail.prices * productDetail.product_sale.percent_discount) / 100
-                                ).toLocaleString()}đ
+                                <CurrencyFormatter amount={productDetail.prices - (productDetail.prices * productDetail.product_sale.percent_discount) /100}/>
                             </p>
                         </div>
                     ) : (
 
                         <p className="text-red-500 text-base font-bold">
-                            {productDetail?.prices.toLocaleString()}đ
+                            <CurrencyFormatter amount={productDetail.prices}/>
                         </p>
                     )}
 
                     <button
                         onClick={handleBuyNowClick}
-                        className="bg-orange-600 text-white px-4 py-2 rounded-lg"
+                        className="cursor-pointer bg-orange-600 text-white px-4 py-2 rounded-lg"
                     >
                         Mua ngay
                     </button>
@@ -215,46 +192,62 @@ const ProductDetail: React.FC = () => {
                     {/* Form chọn size và số lượng */}
                     {showSizeForm && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-                            <div className="bg-white p-6 rounded-lg shadow-lg w-[500px] relative">
-                                <button onClick={closeModal} className="absolute top-2 right-2 text-red-500 hover:text-red-600">
+                            <div className="bg-white p-4 rounded-lg shadow-lg w-[90%] sm:w-[50%px] max-w-xs sm:max-w-sm relative overflow-auto">
+                                <button
+                                    onClick={closeModal}
+                                    className="cursor-pointer absolute top-2 right-2 text-red-500 hover:text-red-600"
+                                >
                                     <X />
                                 </button>
-                                <h2 className="text-2xl text-cyan-800 font-bold mb-4 text-center">Chọn kích thước và số lượng</h2>
-                                <p className="text-lg text-cyan-800 text-center">
+                                <h2 className="text-lg sm:text-2xl text-cyan-800 font-bold mb-4 text-center">
+                                    Chọn kích thước và số lượng
+                                </h2>
+                                <p className="text-sm sm:text-lg text-cyan-800 text-center">
                                     {productDetail?.name}
                                 </p>
                                 <img
                                     src={productImageUrl}
                                     alt={productDetail.name}
-                                    className="w-[50%] h-[50%] object-cover"
+                                    className="w-[80%] sm:w-[50%] mx-auto h-auto object-cover"
                                 />
-                                <p className="font-bold text-red-500">
+                                <p className="font-bold text-red-500 text-lg">
                                     {finalPrice.toLocaleString()}đ
                                 </p>
-                                <label className="block mb-2">Kích thước:</label>
-                                <select
-                                    className="w-full border rounded p-2"
-                                    value={selectedSize}
-                                    onChange={(e) => setSelectedSize(e.target.value)}
-                                >
-                                    <option value="">Chọn kích thước</option>
-                                    {availableSizes().map((size) => (
-                                        <option key={size} value={size}>
-                                            {size}
-                                        </option>
-                                    ))}
-                                </select>
 
-                                <label className="block mt-2">Số lượng:</label>
-                                <input
-                                    type="number"
-                                    className="w-full border rounded p-2"
-                                    value={quantity}
-                                    onChange={(e) => setQuantity(Number(e.target.value))}
-                                    min={1}
-                                />
+                                {/* Chọn kích thước */}
+                                <div className="relative w-full">
+                                    <label className="block text-sm sm:text-base font-medium">Kích thước:</label>
+                                    <div className="relative">
+                                        <select
+                                            className="w-full max-w-[150px] md:max-w-full border rounded-lg p-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                            value={selectedSize}
+                                            onChange={(e) => setSelectedSize(e.target.value)}
+                                        >
+                                            <option value="">Chọn kích thước</option>
+                                            {availableSizes().map((size) => (
+                                                <option key={size} value={size}>
+                                                    {size}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
 
-                                <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg w-full"
+                                {/* Chọn số lượng */}
+                                <div className="mt-2 space-y-2">
+                                    <label className="block text-sm sm:text-base font-medium">Số lượng:</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border rounded-lg p-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                        value={quantity}
+                                        onChange={(e) => setQuantity(Number(e.target.value))}
+                                        min={1}
+                                    />
+                                </div>
+
+                                {/* Nút xác nhận */}
+                                <button
+                                    className="cursor-pointer mt-4 bg-green-600 text-white px-4 py-2 rounded-lg w-full text-sm sm:text-base"
                                     onClick={handleConfirmBuyNow}
                                 >
                                     Xác nhận mua ngay
@@ -262,6 +255,8 @@ const ProductDetail: React.FC = () => {
                             </div>
                         </div>
                     )}
+
+
                 </div>
             </motion.div>
             <ReviewSection />
