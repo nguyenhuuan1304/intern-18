@@ -1,17 +1,17 @@
 import { UserPen } from 'lucide-react'
 import React from 'react'
-import { Navigate, NavLink, useNavigate ,Link} from 'react-router-dom';
+import { NavLink} from 'react-router-dom';
 
 interface TypeItemNews {
     img?: string;
     title?: string;
-    description?: string;
-    slug: string;
+    introduction?: string;
+    slug?: string;
     id: string
 }
 
 
-const ItemNews: React.FC<TypeItemNews> = ({img,title, description,slug,id}) => {
+const ItemNews: React.FC<TypeItemNews> = ({img,title, introduction,slug,id}) => {
 
   return (
     <>  
@@ -31,7 +31,7 @@ const ItemNews: React.FC<TypeItemNews> = ({img,title, description,slug,id}) => {
                         <UserPen className='w-[14px] mr-[6px]'/>
                         <span>Đăng bởi Admin</span>
                     </div>
-                    <div className='text-[12px] mt-[10px]  line-clamp-3 text-justify'>{description}</div>
+                    <div className='text-[12px] mt-[10px]  line-clamp-3 text-justify'>{introduction}</div>
                 </div>
              </NavLink>
             </div>

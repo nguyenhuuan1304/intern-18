@@ -1,7 +1,15 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Lock, ArrowLeft, Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
+import {
+  User,
+  Lock,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  LogIn,
+  Loader2,
+} from "lucide-react";
 import loginBg from "@/assets/login-bg.svg";
 import loginTree from "@/assets/login-tree.svg";
 import { useState } from "react";
@@ -35,9 +43,9 @@ const formSchema = z.object({
     ),
 });
 const Login: React.FC = () => {
-  const dispatch = useAppDispatch()
-  const {loading} = useAppSelector((state) => state.auth)
-  const [showPassword, setShowPassword] = useState(false)
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.auth);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,37 +54,46 @@ const Login: React.FC = () => {
       password: "",
     },
   });
-  const onSubmit =async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values);
-  try {
+    try {
       const loginPayload = {
         identifier: values.username,
         password: values.password,
       };
-      const res = await dispatch(loginUser(loginPayload)).unwrap()
-     if(res.user) {
-         toast.success("Đăng nhập thành công");
-        navigate("/")
+      const res = await dispatch(loginUser(loginPayload)).unwrap();
+      console.log(res.user);
+      if (res.user) {
+        toast.success("Đăng nhập thành công");
+        navigate("/");
         const userData = {
           jwt: res.jwt,
           username: res.user.username,
           email: res.user.email,
+          id : res.user.id,
+          phone: res.user.phone,
+          birthday: res.user.birthday,
+          address: res.user.address,
+          firstName: res.user.firstName,
+          documentId: res.user.documentId,
         };
         localStorage.setItem("user", JSON.stringify(userData));
-
+        if (res.user.username === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
         }
-  } catch (error) {
-      if (error instanceof Error) {        
-         toast.error("Email, tên đăng nhập hoặc mật khẩu không chính xác!");
-      } 
-  }
+      }
+    } catch (error) {
+      const errorMessage = error?.error?.message;
+      toast.error(errorMessage);
+    }
   };
   return (
-    <div className="container w-full max-w-screen-lg mx-auto px-2 md:px-4 md:w-[1100px]">
-      <div className="w-full  overflow-hidden flex flex-col md:flex-row  ">
-        {/* Left Column - Form */}
-        <div className="w-full md:w-1/2 p-10 ">
-          <div className="flex items-center mb-8">
+    <div className="container mx-auto px-4 py-8 lg:w-6xl">
+      <div className="w-full rounded-2xl flex flex-col lg:flex-row">
+        <div className="w-full lg:w-1/2 p-4 sm:p-6 md:p-8">
+          <div className="flex items-center mb-6 md:mb-8">
             <Link
               to="/"
               className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
@@ -160,7 +177,7 @@ const Login: React.FC = () => {
                     </FormItem>
                   )}
                 />
-               
+
                 <Button
                   type="submit"
                   disabled={loading}
@@ -193,7 +210,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Right Column - Image */}
-        <div className="flex w-full md:w-1/2 p-6 md:p-8 bg-gradient-to-br ">
+        <div className="hidden md:flex md:w-1/2 lg:w-1/2 bg-gradient-to-br items-center justify-center">
           <motion.div
             className="flex w-1/2 items-center justify-center p-8"
             initial={{ x: -100, opacity: 0 }}
@@ -217,7 +234,6 @@ const Login: React.FC = () => {
       </div>
     </div>
   );
-
 };
 
 export default Login;

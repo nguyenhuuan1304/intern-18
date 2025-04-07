@@ -8,9 +8,9 @@ const useAxios = () => {
             headers: {"Content-Type": "application/json"}
         })
     },[])
-
+    
     return {
-        api
+        api,
     }
 }
 export const api = axios.create({

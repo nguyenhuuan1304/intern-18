@@ -7,12 +7,14 @@ interface CategoryItemProps {
   category: Category;
   level?: number;
   onSubmenuOpen?: (id: string) => void;
+  onCategorySelect?: (slug: string) => void;
 }
 
 const CategoryItem: React.FC<CategoryItemProps> = ({
   category,
   level = 1,
   onSubmenuOpen = () => {},
+  onCategorySelect = () => {},
 }) => {
   const [submenuOpen, setSubmenuOpen] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -26,11 +28,9 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Khi nhấn vào ChevronRight, mở submenu và thông báo cho cha (để đóng các submenu khác nếu cần)
   const handleChevronClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    // Mở submenu, đồng thời hiệu ứng trượt sẽ được thực hiện nhờ CSS chuyển đổi
     setSubmenuOpen(true);
     onSubmenuOpen(category.documentId);
   };
@@ -38,13 +38,13 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   const handleBackClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    // Đóng submenu, sẽ có hiệu ứng trượt ra nhờ CSS
     setSubmenuOpen(false);
   };
 
   const handleLinkClick = () => {
     if (isMobile) {
       setSubmenuOpen(false);
+      onCategorySelect(category.slug);
     }
   };
 
@@ -60,7 +60,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     >
       <div className="flex items-center justify-between">
         <Link
-          to={category.slug}
+          to={`/product/${category.slug}`}
           className="block flex-1 p-3 hover:bg-gray-100"
           onClick={handleLinkClick}
         >
@@ -83,13 +83,12 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         category.children.length > 0 &&
         level < 3 &&
         (isMobile ? (
-          // Với mobile: luôn render submenu, nhưng điều chỉnh vị trí qua CSS transform để tạo hiệu ứng trượt
           <div
-            className={`fixed inset-0 bg-white z-50 transform transition-transform duration-500 ${
+            className={`fixed top-[60px] left-0 right-0 bottom-0 bg-white z-40 transform transition-transform duration-500 ${
               submenuOpen ? "translate-x-0" : "translate-x-full"
             }`}
           >
-            <div className="flex items-center p-3 border-b bg-gray-50">
+            <div className="flex items-center p-3 border-b bg-gray-50 h-[60px]">
               <button onClick={handleBackClick} className="mr-2">
                 <ChevronLeft className="h-5 w-5 text-gray-500" />
               </button>
@@ -107,7 +106,6 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
             </div>
           </div>
         ) : (
-          // Với desktop: hiển thị submenu theo hover với hiệu ứng opacity
           <div
             className={`absolute left-full top-0 transition-opacity duration-300 border shadow-md z-10 min-w-[200px] ${
               submenuOpen
