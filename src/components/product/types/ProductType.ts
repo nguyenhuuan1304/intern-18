@@ -72,8 +72,6 @@ export interface Product {
     Image: Image[];
     name_category: Category;
     product_images: ProductImage[];
-    // id_shirt_pant?: ShirtPantSize | null;
-    // id_shoe?: ShoeSize | null;
     product_detail?: ProductDetail | null;
     rating: number;
     slug: string;

@@ -17,6 +17,7 @@ import axios from "axios";
 import { PaymentSuccess } from "./PaymentSuccess";
 import { PaymentFail } from "./PaymentFail";
 import { toast } from "react-toastify";
+import CurrencyFormatter from "@/components/CurrencyFormatter";
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,11 +28,9 @@ const CartPage: React.FC = () => {
     loading,
   } = useSelector((state: RootState) => state.cart);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const email = user.email || "";
   const searchParams = new URLSearchParams(location.search);
   const success = searchParams.get("success");
   const cancel = searchParams.get("cancel");
-
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -111,16 +110,12 @@ const CartPage: React.FC = () => {
       return;
     }
 
-    console.log("Cart Data:", cart);
-    console.log("Inventories Data:", inventories);
-
     const updatedQuantities = cart
       .map((cartItem) => {
         const documentId = cartItem.products?.[0]?.documentId;
         const size = cartItem.size;
 
         if (!documentId || !size) {
-          console.warn("Cart item missing documentId or size:", cartItem);
           return null;
         }
 
@@ -131,7 +126,6 @@ const CartPage: React.FC = () => {
         );
 
         if (!inventoryItem) {
-          console.warn(`No inventory found for product ${documentId} - size ${size}`);
           return null;
         }
 
@@ -142,10 +136,8 @@ const CartPage: React.FC = () => {
       })
       .filter((item): item is { documentId: string; quantity: number } => item !== null);
 
-    console.log("Updated Quantities:", updatedQuantities);
 
     if (updatedQuantities.length === 0) {
-      console.warn("No valid inventory updates to process.");
       return;
     }
 
@@ -200,7 +192,7 @@ const CartPage: React.FC = () => {
 
     try {
       const stripe = await loadStripe(
-        "pk_test_51R66O0DftvJgslwBKdVOWz4UJ7sdpk6W9ALddQgPs3XBYQCV46xaDSgSqYpWAFZevhLYKgFyPAmp4wLm7THP3r0400LXhtMelk"
+        "pk_test_51Qylp0Ho1WzKDZx8plkpSGeYIYCnmsJiQDCqaDqZ2MyzjrO9xinFZddIoNCcRSasApne4aavMdujgT2PI8DMVXJn00pnDDhtFR"
       );
       const response = await axios.post(
         "http://localhost:1337/api/orders",
@@ -210,9 +202,8 @@ const CartPage: React.FC = () => {
             quantity: item.quantity,
           })),
           email,
-          address: `${streetAddress}, ${selectedWard?.label || ""}, ${
-            selectedDistrict?.label || ""
-          }, ${selectedProvince?.label || ""}`.trim(),
+          address: `${streetAddress}, ${selectedWard?.label || ""}, ${selectedDistrict?.label || ""
+            }, ${selectedProvince?.label || ""}`.trim(),
           phoneNumber,
           note,
         },
@@ -256,7 +247,7 @@ const CartPage: React.FC = () => {
 
         <button
           onClick={() => navigate("/product")}
-          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-all text-sm md:text-base h-10 md:h-9 w-[110px] md:w-[150px] justify-center"
+          className="cursor-pointer flex items-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-all text-sm md:text-base h-10 md:h-9 w-[110px] md:w-[150px] justify-center"
         >
           <ArrowLeft size={18} />
           <span className="hidden sm:inline">Quay lại</span>
@@ -272,7 +263,6 @@ const CartPage: React.FC = () => {
           <div className="mb-4">
             <label className="block text-gray-700">Điện thoại</label>
             <input
-              type="text"
               className="w-full p-2 border border-gray-300 rounded"
               placeholder="Số điện thoại của bạn"
               onChange={(e) => setPhoneNumber(e.target.value)}
@@ -355,13 +345,13 @@ const CartPage: React.FC = () => {
                   <div className="flex justify-end mt-4">
                     <button
                       onClick={() => setIsAddressFormOpen(false)}
-                      className="bg-gray-400 text-white px-4 py-2 rounded mr-2"
+                      className="cursor-pointer bg-gray-400 text-white px-4 py-2 rounded mr-2"
                     >
                       Đóng
                     </button>
                     <button
                       onClick={() => setIsAddressFormOpen(false)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded"
+                      className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded"
                     >
                       Lưu
                     </button>
@@ -382,14 +372,14 @@ const CartPage: React.FC = () => {
 
             {/* Hiển thị thông tin đã chọn */}
             <p className="text-gray-700 mt-4 mb-4">
-              {streetAddress && `${streetAddress}, `}
-              {selectedWard?.label && `${selectedWard.label}, `}
-              {selectedDistrict?.label && `${selectedDistrict.label}, `}
-              {selectedProvince?.label && `${selectedProvince.label}`}
+              {([streetAddress, selectedWard?.label, selectedDistrict?.label, selectedProvince?.label].filter(Boolean).length > 0)
+                ? [streetAddress, selectedWard?.label, selectedDistrict?.label, selectedProvince?.label].filter(Boolean).join(", ")
+                : addressShipping || ""}
             </p>
             {validationErrors.address && (
               <p className="text-red-500 mt-1">{validationErrors.address}</p>
             )}
+
           </div>
 
           <div className="mb-4">
@@ -432,7 +422,7 @@ const CartPage: React.FC = () => {
                         onClick={() =>
                           handleDecrease(item.documentId, item.quantity)
                         }
-                        className="border px-2"
+                        className="cursor-pointer border px-2"
                       >
                         -
                       </button>
@@ -441,18 +431,18 @@ const CartPage: React.FC = () => {
                         onClick={() =>
                           handleIncrease(item.documentId, item.quantity)
                         }
-                        className="border px-2"
+                        className="cursor-pointer border px-2"
                       >
                         +
                       </button>
                     </div>
                     <p className="text-red-500">
-                      {(item.price * item.quantity).toLocaleString()}₫
+                      <CurrencyFormatter amount={item.price * item.quantity} />
                     </p>
                   </div>
                   <button
                     onClick={() => handleRemove(item.documentId)}
-                    className="text-red-500 hover:text-red-700"
+                    className="cursor-pointer text-red-500 hover:text-red-700"
                   >
                     <Trash2 size={20} />
                   </button>
@@ -464,16 +454,18 @@ const CartPage: React.FC = () => {
           <div className="space-y-5">
             <div className=" flex space-x-2 mt-4 text-lg font-bold">
               <p className="text-cyan-800">Tổng:</p>
-              <p className="text-red-500">{totalPrice.toLocaleString()} đ</p>
+              <p className="text-red-500">
+                <CurrencyFormatter amount={totalPrice}/>
+              </p>
             </div>
             <button
-              className="relative w-full bg-orange-500 text-white p-2 rounded border border-transparent overflow-hidden
+              className="cursor-pointer relative w-full bg-orange-500 text-white p-2 rounded border border-transparent overflow-hidden
                             before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
                             hover:text-red-500 hover:border-red-500"
-              // onClick={() => {
-              //   handleCheckout();
-              // }}
-              onClick={handleOrder}
+              onClick={() => {
+                handleCheckout();
+                handleOrder();
+              }}
             >
               <span className="relative z-10">Đặt Hàng</span>
             </button>

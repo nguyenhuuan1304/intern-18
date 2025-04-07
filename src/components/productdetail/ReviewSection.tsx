@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
-import { Star } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState, useAppDispatch } from "@/store/store";
 import { fetchRatings } from "@/store/ratingSlice";
 import ReviewForm from "./ReviewForm";
 import { useParams } from "react-router-dom";
 import avata from "@/assets/anh-banner-1.webp";
+import { FaStar } from "react-icons/fa";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 50 },
@@ -46,9 +46,9 @@ const ReviewSection: React.FC = () => {
         : productRatings;
 
     return (
-        <div className="border-t p-6 mt-4">
+        <div className="border-t mt-4">
             <motion.div
-                className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-6"
+                className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-2 md:p-4"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
@@ -62,7 +62,7 @@ const ReviewSection: React.FC = () => {
                         <p className="text-gray-600">({ratingCount} đánh giá)</p>
                     </div>
                     <button
-                        className="mt-3 sm:mt-0 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+                        className="cursor-pointer mt-3 sm:mt-0 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
                         onClick={() => setIsReviewFormOpen(true)}
                     >
                         GỬI ĐÁNH GIÁ CỦA BẠN
@@ -92,7 +92,7 @@ const ReviewSection: React.FC = () => {
                     <div className="flex flex-wrap gap-2">
                         <button
                             onClick={() => setSelectedRating(null)}
-                            className={`px-4 py-2 rounded-lg ${selectedRating === null ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
+                            className={`cursor-pointer px-4 py-2 rounded-lg ${selectedRating === null ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
                         >
                             Tất cả
                         </button>
@@ -100,7 +100,7 @@ const ReviewSection: React.FC = () => {
                             <button
                                 key={star}
                                 onClick={() => setSelectedRating(star)}
-                                className={`px-4 py-2 rounded-lg ${selectedRating === star ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
+                                className={`cursor-pointer px-4 py-2 rounded-lg ${selectedRating === star ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
                             >
                                 {star} sao
                             </button>
@@ -113,24 +113,21 @@ const ReviewSection: React.FC = () => {
                     {filteredRatings.length > 0 ? (
                         <>
                             {filteredRatings.slice(0, visibleCount).map((review) => (
-                                <div key={review.id} className="flex bg-gray-100 p-4 rounded-lg shadow-md">
-                                    <div className="w-1/4 flex space-x-2">
-                                        <img
-                                            className="w-10 h-10 rounded-full"
-                                            src={avata}
-                                            alt="avata"
-                                        />
+                                <div key={review.id} className="flex flex-col bg-gray-100 p-4 rounded-lg shadow-md">
+                                    {/* Avatar và tên người dùng */}
+                                    <div className="flex items-center space-x-2 sm:w-1/3 w-full mb-3 sm:mb-0">
+                                        <img className="w-10 h-10 rounded-full" src={avata} alt="avata" />
                                         <p className="text-cyan-700">{review.username || "Người dùng ẩn danh"}</p>
                                     </div>
 
-                                    <div className="w-3/4">
-                                        <div className="flex items-center space-x-2">
+                                    {/* Nội dung đánh giá */}
+                                    <div className="sm:w-2/3 w-full">
+                                        <div className="flex flex-wrap items-center space-x-2">
                                             <div className="flex">
                                                 {Array.from({ length: review.rating }).map((_, i) => (
-                                                    <span key={i} className="text-yellow-500 text-lg"><Star /></span>
+                                                    <span key={i} className="text-yellow-500 text-lg"><FaStar /></span>
                                                 ))}
                                             </div>
-
                                             {review.rating === 5 && <span className="text-green-600">Cực kì hài lòng!</span>}
                                             {review.rating === 4 && <span className="text-blue-600">Hài lòng!</span>}
                                             {review.rating === 3 && <span className="text-yellow-600">Bình thường!</span>}
@@ -140,22 +137,19 @@ const ReviewSection: React.FC = () => {
 
                                         <p className="text-gray-700">{review.description}</p>
 
-                                        {/* Kiểm tra dữ liệu ảnh */}
+                                        {/* Ảnh đánh giá */}
                                         {review.img && review.img.length > 0 && (
                                             <div className="flex flex-wrap gap-2 mt-2">
                                                 {review.img.map((image: { id: number; name: string; url: string; }) => {
-                                                    let imageUrl = image.url;
-                                                    imageUrl = imageUrl.replace("/api/", "/");
-
+                                                    let imageUrl = image.url.replace("/api/", "/");
                                                     return (
                                                         <img
                                                             key={image.id}
                                                             src={imageUrl}
                                                             alt={image.name || "Review Image"}
                                                             className="w-24 h-24 object-cover rounded-md"
-                                                            onError={(e) => {
-                                                                e.currentTarget.src = "/fallback-image.jpg"; // Ảnh mặc định nếu lỗi
-                                                            }} />
+                                                            onError={(e) => { e.currentTarget.src = "/fallback-image.jpg"; }}
+                                                        />
                                                     );
                                                 })}
                                             </div>
@@ -164,12 +158,13 @@ const ReviewSection: React.FC = () => {
                                 </div>
                             ))}
 
+                            {/* Nút "Xem thêm" & "Thu gọn" */}
                             {filteredRatings.length > visibleCount ? (
-                                <button onClick={() => setVisibleCount((prev) => prev + 3)} className="text-blue-500 mt-2">
+                                <button onClick={() => setVisibleCount((prev) => prev + 3)} className="cursor-pointer text-blue-500 mt-2">
                                     Xem thêm
                                 </button>
                             ) : (
-                                <button onClick={() => setVisibleCount(3)} className="text-red-500 mt-2">
+                                <button onClick={() => setVisibleCount(3)} className="cursor-pointer text-red-500 mt-2">
                                     Thu gọn
                                 </button>
                             )}
@@ -178,6 +173,7 @@ const ReviewSection: React.FC = () => {
                         <p className="text-gray-600 text-center mt-4">Chưa có đánh giá nào.</p>
                     )}
                 </div>
+
                 {/* Form đánh giá */}
                 {isReviewFormOpen && documentId && (
                     <ReviewForm onClose={() => setIsReviewFormOpen(false)} documentId={documentId} />
