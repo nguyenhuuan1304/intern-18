@@ -3,25 +3,25 @@ import { api } from "@/hooks/useAxios";
 import { RootState } from "./store";
 
 interface CartItem {
-    documentId: string,
-    name: string;
-    size: string;
-    quantity: number;
-    price: number;
-    image: string;
-    product: Product;
-    products: { documentId: string | undefined }[];
+  documentId: string;
+  name: string;
+  size: string;
+  quantity: number;
+  price: number;
+  image: string;
+  product: Product;
+  products: { documentId: string | undefined }[];
 }
 
 interface CartState {
-    items: CartItem[];
-    loading: boolean;
-    error: string | null;
+  items: CartItem[];
+  loading: boolean;
+  error: string | null;
 }
 
 interface Product {
-    documentId: string;
-    name: string;
+  documentId: string;
+  name: string;
 }
 
 interface User {
@@ -30,41 +30,47 @@ interface User {
 
 // Cập nhật số lượng sản phẩm theo documentId
 export const updateCartItemQuantity = createAsyncThunk(
-    "cart/updateCartItemQuantity",
-    async ({ documentId, quantity }: { documentId: string; quantity: number }, { rejectWithValue }) => {
-        try {
-            console.log("Updating cart item:", { documentId, quantity });
+  "cart/updateCartItemQuantity",
+  async (
+    { documentId, quantity }: { documentId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      console.log("Updating cart item:", { documentId, quantity });
 
-            await api.put(`/carts/${documentId}`, {
-                data: { quantity },
-            });
+      await api.put(`/carts/${documentId}`, {
+        data: { quantity },
+      });
 
-            return { documentId, quantity };
-        } catch (error: any) {
-            console.error("Lỗi khi cập nhật số lượng:", error.response?.data);
-            return rejectWithValue(error.response?.data?.message || "Lỗi khi cập nhật số lượng");
-        }
+      return { documentId, quantity };
+    } catch (error: any) {
+      console.error("Lỗi khi cập nhật số lượng:", error.response?.data);
+      return rejectWithValue(
+        error.response?.data?.message || "Lỗi khi cập nhật số lượng"
+      );
     }
+  }
 );
 
-// xóa sản phẩm khỏi giỏ hàng theo documentId
 export const removeCartItem = createAsyncThunk(
-    "cart/removeCartItem",
-    async (documentId: string, { rejectWithValue }) => {
-        try {
-            console.log("Deleting cart item:", documentId);
-            const response = await api.delete(`/carts/${documentId}`);
+  "cart/removeCartItem",
+  async (documentId: string, { rejectWithValue }) => {
+    try {
+      console.log("Deleting cart item:", documentId);
+      const response = await api.delete(`/carts/${documentId}`);
 
-            if (response.status !== 200 && response.status !== 204) {
-                throw new Error("Xóa không thành công");
-            }
+      if (response.status !== 200 && response.status !== 204) {
+        throw new Error("Xóa không thành công");
+      }
 
-            return documentId;
-        } catch (error: any) {
-            console.error("Lỗi khi xóa sản phẩm:", error.response?.data);
-            return rejectWithValue(error.response?.data?.message || "Lỗi khi xóa sản phẩm");
-        }
+      return documentId;
+    } catch (error: any) {
+      console.error("Lỗi khi xóa sản phẩm:", error.response?.data);
+      return rejectWithValue(
+        error.response?.data?.message || "Lỗi khi xóa sản phẩm"
+      );
     }
+  }
 );
 
 function getDocumentIdFromLocalStorage(): string | null {
@@ -130,6 +136,7 @@ export const fetchCartItems = createAsyncThunk<CartItem[], void, { rejectValue: 
             return rejectWithValue(error instanceof Error ? error.message : 'Lỗi khi lấy giỏ hàng.');
         }
     }
+  }
 );
 
 
@@ -175,71 +182,80 @@ export const addToCartApi = createAsyncThunk(
             return rejectWithValue("Lỗi khi thêm vào giỏ hàng");
         }
     }
+  }
 );
 
 export const selectTotalItems = (state: RootState) =>
-    state.cart.items.reduce((total, item) => total + item.quantity, 0);
+  state.cart.items.reduce((total, item) => total + item.quantity, 0);
 
 const cartSlice = createSlice({
-    name: "cart",
-    initialState: {
-        items: [],
-        loading: false,
-        error: null,
-    } as CartState,
-    reducers: {},
-    extraReducers: (builder) => {
-        builder
-            // Lấy giỏ hàng
-            .addCase(fetchCartItems.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(fetchCartItems.fulfilled, (state, action) => {
-                state.loading = false;
-                state.items = action.payload;
-            })
-            .addCase(fetchCartItems.rejected, (state, action) => {
-                state.loading = false;
-                state.error = typeof action.payload === "string" ? action.payload : "Lỗi không xác định";
-            })
-            // Thêm vào giỏ hàng
-            .addCase(addToCartApi.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
+  name: "cart",
+  initialState: {
+    items: [],
+    loading: false,
+    error: null,
+  } as CartState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
 
-            .addCase(addToCartApi.fulfilled, (state, action) => {
-                state.loading = false;
-                const { name, size, quantity } = action.payload;
+      .addCase(fetchCartItems.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCartItems.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(fetchCartItems.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          typeof action.payload === "string"
+            ? action.payload
+            : "Lỗi không xác định";
+      })
+      // Thêm vào giỏ hàng
+      .addCase(addToCartApi.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
 
-                const existingItem = state.items.find(
-                    (item) => item.name === name && item.size === size
-                );
+      .addCase(addToCartApi.fulfilled, (state, action) => {
+        state.loading = false;
+        const { name, size, quantity } = action.payload;
 
-                if (existingItem) {
-                    existingItem.quantity = quantity;
-                } else {
-                    state.items.push(action.payload);
-                }
-            })
+        const existingItem = state.items.find(
+          (item) => item.name === name && item.size === size
+        );
 
-            .addCase(addToCartApi.rejected, (state, action) => {
-                state.loading = false;
-                state.error = typeof action.payload === "string" ? action.payload : "Lỗi không xác định";
-            })
-            // cập nhật số lượng
-            .addCase(updateCartItemQuantity.fulfilled, (state, action) => {
-                const { documentId, quantity } = action.payload;
-                state.items = state.items.map((item) =>
-                    item.documentId === documentId ? { ...item, quantity } : item
-                );
-            })
-            // xóa sản phẩm khỏi giỏ hàng
-            .addCase(removeCartItem.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => item.documentId !== action.payload);
-            });
-    },
+        if (existingItem) {
+          existingItem.quantity = quantity;
+        } else {
+          state.items.push(action.payload);
+        }
+      })
+
+      .addCase(addToCartApi.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          typeof action.payload === "string"
+            ? action.payload
+            : "Lỗi không xác định";
+      })
+
+      .addCase(updateCartItemQuantity.fulfilled, (state, action) => {
+        const { documentId, quantity } = action.payload;
+        state.items = state.items.map((item) =>
+          item.documentId === documentId ? { ...item, quantity } : item
+        );
+      })
+
+      .addCase(removeCartItem.fulfilled, (state, action) => {
+        state.items = state.items.filter(
+          (item) => item.documentId !== action.payload
+        );
+      });
+  },
 });
 
 export default cartSlice.reducer;

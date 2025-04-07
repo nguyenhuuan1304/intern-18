@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { Product } from "./types/ProductType";
 import CartDrawer from "../cart/CartDrawer";
-import { useAppDispatch } from "../../store/store";
 import { addToCartApi } from "@/store/cartSlice";
 import { useNavigate } from "react-router-dom";
 import CurrencyFormatter from "@/components/CurrencyFormatter";
+import { useAppDispatch } from "@/store/store";
 
 interface AddProductProps {
-    product: Product;
-    onClose: () => void;
-    cartDrawerOpen: boolean;
-    imageUrl?: string;
-    setCartDrawerOpen: (open: boolean) => void;
+  product: Product;
+  onClose: () => void;
+  cartDrawerOpen: boolean;
+  imageUrl?: string;
+  setCartDrawerOpen: (open: boolean) => void;
 }
 
 const AddProduct: React.FC<AddProductProps> = ({ product, onClose, imageUrl, cartDrawerOpen, setCartDrawerOpen }) => {

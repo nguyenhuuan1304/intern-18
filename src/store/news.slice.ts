@@ -71,14 +71,15 @@ export const deleteNews = createAsyncThunk('news/deleteNews',
 
 export const updateNews = createAsyncThunk('news/updateNews',
     async ({body, id} : {body :TypeDataNews , id: string}, thunkAPI) => {
+        console.log(id)
         try {
             const formattedPost = {
                 data: {
-                name: body.name,
-                img: body.img,
-                description: body.description, 
-                introduction: body.introduction,
-                slug: body.slug,
+                    name: body.name,
+                    img: body.img,
+                    description: body.description, 
+                    introduction: body.introduction,
+                    slug: body.slug,
               }
             };
             const response = await api.put<TypeDataNews>(`news/${id}`, formattedPost, {
@@ -95,6 +96,20 @@ export const updateNews = createAsyncThunk('news/updateNews',
     }
 )
 
+export const searchNews = createAsyncThunk('news/searchNews',
+    async (value: string, thunkAPI) => {
+        try {
+            const res = await api.get(`news?filters[name][$contains]=${value}`,{
+                signal: thunkAPI.signal
+            })
+            if(res.status) {
+                return res.data.data
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+) 
 
 
 export const newtState = createSlice({
@@ -135,6 +150,9 @@ export const newtState = createSlice({
             }
             return false
         })
+    })
+    .addCase(searchNews.fulfilled , (state, action) => {
+        state.news = action.payload
     })
 
   },

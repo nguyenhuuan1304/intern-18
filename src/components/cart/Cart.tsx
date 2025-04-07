@@ -1,4 +1,4 @@
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,12 +12,11 @@ import { fetchInventories, updateInventory } from "@/store/inventorySlice";
 import Select from "react-select";
 import { getProvinces, getDistricts, getWards } from "./service/addressService";
 import { selectTotalItems } from "@/store/cartSlice";
-import { loadStripe } from "@stripe/stripe-js";
-import axios from "axios";
 import { PaymentSuccess } from "./PaymentSuccess";
 import { PaymentFail } from "./PaymentFail";
 import { toast } from "react-toastify";
 import CurrencyFormatter from "@/components/CurrencyFormatter";
+import { CartItem, checkoutOrder, OptionType } from "@/store/checkout.slice";
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -28,43 +27,54 @@ const CartPage: React.FC = () => {
     loading,
   } = useSelector((state: RootState) => state.cart);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const { loading: checkoutLoading } = useSelector(
+    (state: RootState) => state.checkout
+  );
   const searchParams = new URLSearchParams(location.search);
   const success = searchParams.get("success");
   const cancel = searchParams.get("cancel");
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-  const [streetAddress, setStreetAddress] = useState("");
-  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
-  const [selectedProvince, setSelectedProvince] = useState<any>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<any>(null);
-  const [selectedWard, setSelectedWard] = useState<any>(null);
-  const inventories = useSelector((state: RootState) => state.inventory.inventories);
-  const [phoneNumber, setPhoneNumber] = useState(user.phone || "");
-  const [email, setEmail] = useState(user.email || "");
-  const [note, setNote] = useState("");
+  const [provinces, setProvinces] = useState<OptionType[]>([]);
+  const [districts, setDistricts] = useState<OptionType[]>([]);
+  const [wards, setWards] = useState<OptionType[]>([]);
+  const [streetAddress, setStreetAddress] = useState<string>("");
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState<boolean>(false);
+  const [selectedProvince, setSelectedProvince] = useState<OptionType | null>(
+    null
+  );
+  const [selectedDistrict, setSelectedDistrict] = useState<OptionType | null>(
+    null
+  );
+  const [selectedWard, setSelectedWard] = useState<OptionType | null>(null);
+  const inventories = useSelector(
+    (state: RootState) => state.inventory.inventories
+  );
+  const [phoneNumber, setPhoneNumber] = useState<string>(user.phone || "");
+  const [email, setEmail] = useState<string>(user.email || "");
+  const [note, setNote] = useState<string>("");
   const [addressShipping] = useState(user.address || "");
-
   // State lưu lỗi validate
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: string;
   }>({});
 
   useEffect(() => {
-    getProvinces().then(setProvinces);
+    getProvinces().then((data: OptionType[]) => setProvinces(data));
   }, []);
 
   useEffect(() => {
     if (selectedProvince) {
-      getDistricts(selectedProvince.value).then(setDistricts);
+      getDistricts(selectedProvince.value).then((data: OptionType[]) =>
+        setDistricts(data)
+      );
       setSelectedDistrict(null);
       setSelectedWard(null);
     }
   }, [selectedProvince]);
-
   useEffect(() => {
     if (selectedDistrict) {
-      getWards(selectedDistrict.value).then(setWards);
+      getWards(selectedDistrict.value).then((data: OptionType[]) =>
+        setWards(data)
+      );
       setSelectedWard(null);
     }
   }, [selectedDistrict]);
@@ -97,8 +107,7 @@ const CartPage: React.FC = () => {
   const handleRemove = (documentId: string) => {
     dispatch(removeCartItem(documentId));
   };
-  const cart = useSelector((state: RootState) => state.cart.items);
-
+  const cart: CartItem[] = useSelector((state: RootState) => state.cart.items);
   const handleOrder = () => {
     if (!cart || cart.length === 0) {
       console.error("Cart is empty");
@@ -134,7 +143,10 @@ const CartPage: React.FC = () => {
           quantity: Math.max(inventoryItem.quantity - cartItem.quantity, 0),
         };
       })
-      .filter((item): item is { documentId: string; quantity: number } => item !== null);
+      .filter(
+        (item): item is { documentId: string; quantity: number } =>
+          item !== null
+      );
 
 
     if (updatedQuantities.length === 0) {
@@ -144,7 +156,7 @@ const CartPage: React.FC = () => {
     dispatch(updateInventory(updatedQuantities));
   };
 
-  const totalPrice = cart.reduce(
+  const totalPrice: number = cart.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
     0
   );
@@ -176,7 +188,7 @@ const CartPage: React.FC = () => {
     return errors;
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cart.length === 0) return;
 
     const errors = validateCheckout();
@@ -225,8 +237,19 @@ const CartPage: React.FC = () => {
     } catch (err) {
       console.error("Thanh toán lỗi:", err);
     }
+    dispatch(
+      checkoutOrder({
+        cart,
+        email,
+        streetAddress,
+        selectedWard,
+        selectedDistrict,
+        selectedProvince,
+        phoneNumber,
+        note,
+      })
+    );
   };
-
   if (success === "true") {
     return <PaymentSuccess />;
   }
@@ -467,7 +490,14 @@ const CartPage: React.FC = () => {
                 handleOrder();
               }}
             >
-              <span className="relative z-10">Đặt Hàng</span>
+              {checkoutLoading ? (
+                <div className="flex items-center justify-center">
+                  <span className="relative z-10">Đang xử lý </span>
+                  <Loader2 className="h-4 w-4 animate-spin ml-2 relative z-10" />
+                </div>
+              ) : (
+                <span className="relative z-10">Đặt hàng</span>
+              )}
             </button>
           </div>
         </div>

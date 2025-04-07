@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import type { TableProps } from 'antd';
 import { Ellipsis } from 'lucide-react';
 import { RootState, useAppDispatch } from '@/store/store';
-import { deleteUser, editStatus, getListUser } from '@/store/user.slice';
+import { deleteUser, editStatus, getListUser, searchUser } from '@/store/user.slice';
 import { useSelector } from 'react-redux';
 import { toast } from "react-toastify";
 import CreatePostNews from '@/components/createPostNews/CreatePostNews';
@@ -167,7 +167,8 @@ const ManagerUser = () => {
    }
 
    const getUserSearch = () => {
-    console.log(searchName)
+      dispatch(searchUser(searchName))
+      setSearchName('')
    }
 
    const handleShowUser = () => {
@@ -181,7 +182,7 @@ const ManagerUser = () => {
       <>
         <div id='modal' className='modal'>
             {/* <CreatePostNews element = {document.getElementById('modal')}/> */}
-            <AddUser/>
+            <AddUser element = {document.getElementById('modal')} />
         </div>
         <div
           style={{
@@ -195,17 +196,15 @@ const ManagerUser = () => {
             placeholder="Search by class name"
             enterButton="Search"
             size="middle"
+            value={searchName}
             // value={}
             onChange={e => setSearchName(e.target.value)}
-            onSearch={() => {
-              getUserSearch()
-              setSearchName(' ')
-            }}
+            onSearch={() => getUserSearch()}
           />
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            // onClick={() => handleShowUser()}
+            onClick={() => handleShowUser()}
           >
             New User
           </Button>
