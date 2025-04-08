@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 import DetailProductNews from "@/pages/detailProductNews/DetailProductNews";
-import Admin from "@/pages/admin/admin";
+import Admin from "@/pages/admin/Admin"
 import AdminRoute from "./AdminRoute";
 const NotFound = lazy(() => import( "@/components/Notfound")) ;
 

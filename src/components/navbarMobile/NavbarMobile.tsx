@@ -1,4 +1,4 @@
-import { House,Newspaper,Store,User } from 'lucide-react'
+import { House,Newspaper,ShoppingCart,Store,User } from 'lucide-react'
 import React, { useState } from 'react'
 import { useLocation } from 'react-router-dom';
 import { NavLink } from 'react-router-dom'
@@ -10,7 +10,9 @@ const NavbarMobile = () => {
     const pathToActive = {
         '/': 'home',
         '/tin-tuc': 'news',
-        '/account': 'user'
+        '/account': 'user',
+        '/product': 'product',
+        
     };
     const [active, setActive] = useState(pathToActive[location.pathname as keyof typeof pathToActive] || '' )
 
@@ -42,11 +44,21 @@ const NavbarMobile = () => {
                 </NavLink>
             </div>
             <div className='relative'  onClick={showShoppingMobile}>
+                <NavLink 
+                    to={'/product'}
+                    onClick={() => handleActive('product')}
+                    className={active === 'product' ? 'text-blue-500' : ''}
+                >
+                    <Store className='w-full'/>
+
+                </NavLink>
+            </div>
+            <div className='relative'  onClick={showShoppingMobile}>
                 <div 
                     onClick={() => handleActive('store')}
                     className={active === 'store' ? 'text-blue-500' : ''}
                 >
-                    <Store className='w-full'/>
+                    <ShoppingCart className='w-full'/>
                 </div>
                 <div className='absolute  right-[-12px] top-[-6px] flex items-center justify-center text-[#fff] bg-[red] w-[20px] h-[20px] rounded-full  '>
                     <span>0</span>
