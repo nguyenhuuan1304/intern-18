@@ -5,6 +5,7 @@ import { RootState, AppDispatch } from "@/store/store";
 import { fetchCartItems, removeCartItem, updateCartItemQuantity } from "@/store/cartSlice";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CurrencyFormatter from "@/components/CurrencyFormatter";
 
 interface CartDrawerProps {
     cartDrawerOpen: boolean;
@@ -71,21 +72,23 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ cartDrawerOpen, setCartDrawerOp
                                 <div className="flex items-center">
                                     <button
                                         onClick={() => handleDecrease(item.documentId, item.quantity)}
-                                        className="border px-2"
+                                        className="cursor-pointer border px-2"
                                     >
                                         -
                                     </button>
                                     <span className="mx-2">{item.quantity}</span>
                                     <button
                                         onClick={() => handleIncrease(item.documentId, item.quantity)}
-                                        className="border px-2"
+                                        className="cursor-pointer border px-2"
                                     >
                                         +
                                     </button>
                                 </div>
-                                <p className="text-red-500">{(item.price * item.quantity).toLocaleString()}₫</p>
+                                <p className="text-red-500">
+                                    <CurrencyFormatter amount={item.price * item.quantity}/>
+                                </p>
                             </div>
-                            <button onClick={() => handleRemove(item.documentId)} className="text-red-500 hover:text-red-700">
+                            <button onClick={() => handleRemove(item.documentId)} className="cursor-pointer text-red-500 hover:text-red-700">
                                 <Trash2 size={20} />
                             </button>
                         </div>
@@ -95,7 +98,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ cartDrawerOpen, setCartDrawerOp
             {cartItems.length > 0 && (
                 <div className="mt-4 flex justify-between">
                     <button
-                        className="relative w-1/3 bg-blue-500 text-white p-2 rounded border border-transparent overflow-hidden
+                        className="cursor-pointer relative w-1/3 bg-blue-500 text-white p-2 rounded border border-transparent overflow-hidden
                              before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
                              hover:text-blue-500 hover:border-blue-500"
                         onClick={handleGoToProduct}
@@ -104,7 +107,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ cartDrawerOpen, setCartDrawerOp
                     </button>
 
                     <button
-                        className="relative w-1/3 bg-red-500 text-white p-2 rounded border border-transparent overflow-hidden
+                        className="cursor-pointer relative w-1/3 bg-red-500 text-white p-2 rounded border border-transparent overflow-hidden
                              before:absolute before:inset-0 before:bg-white before:scale-x-0 before:origin-left before:transition-transform before:duration-300 hover:before:scale-x-100
                              hover:text-red-500 hover:border-red-500"
                         onClick={handleCheckout}

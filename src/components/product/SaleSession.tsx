@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "@/store/productSlice";
 import { RootState, AppDispatch } from "@/store/store";
+import CurrencyFormatter from "@/components/CurrencyFormatter";
 
 const fadeIn = {
     hidden: { opacity: 0, y: 50 },
@@ -37,7 +38,7 @@ const SaleSession: React.FC = () => {
     const currentProduct = saleProducts.length > 0 ? saleProducts[index] : null;
 
     return (
-        <div className="border-t p-6 mt-4">
+        <div className="border-t mt-4">
             <motion.div
                 className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-6"
                 initial="hidden"
@@ -53,50 +54,41 @@ const SaleSession: React.FC = () => {
                 ) : (
                     <div className="relative w-full max-w-lg mx-auto">
                         {currentProduct ? (
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={currentProduct.id}
-                                    initial={{ opacity: 0, x: 100 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -100 }}
-                                    transition={{ duration: 0.5 }}
-                                    className="relative w-full h-96 overflow-hidden rounded-lg"
-                                >
-                                    <img
-                                        src={currentProduct.Image[0]?.url}
-                                        alt={currentProduct.name}
-                                        className="w-full h-full object-cover"
-                                    />
+                            <>
+                                <div className="relative w-full h-96 overflow-hidden rounded-lg">
+                                    <AnimatePresence mode="wait">
+                                        <motion.img
+                                            key={currentProduct.id} 
+                                            src={currentProduct.Image[0]?.url}
+                                            alt={currentProduct.name}
+                                            className="w-full h-full object-cover"
+                                            initial={{ opacity: 0, x: 100 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -100 }}
+                                            transition={{ duration: 0.5 }}
+                                        />
+                                    </AnimatePresence>
                                     <div className="absolute top-4 left-[-40px] bg-orange-600 text-white px-10 py-1 text-sm font-bold rounded transform -rotate-45">
                                         SALE -{currentProduct.product_sale?.percent_discount}%
                                     </div>
-                                </motion.div>
-                            </AnimatePresence>
+                                </div>
+                                <div className="mt-4 text-center">
+                                    <h3 className="text-lg font-semibold text-gray-800">
+                                        {currentProduct.name}
+                                    </h3>
+                                    <p className="text-gray-500 line-through">
+                                        <CurrencyFormatter amount={currentProduct.prices}/>
+                                    </p>
+                                    <p className="text-red-500 text-base font-bold">
+                                        <CurrencyFormatter amount={currentProduct.prices - (currentProduct.prices * (currentProduct.product_sale?.percent_discount ?? 0)) / 100}/>
+                                    </p>
+                                </div>
+                            </>
                         ) : (
                             <p className="text-gray-500 text-center">
                                 Hiện chưa có sản phẩm nào đang giảm giá.
                             </p>
                         )}
-                        <div className="mt-4 text-center">
-                            {currentProduct && (
-                                <>
-                                    <h3 className="text-lg font-semibold text-gray-800">
-                                        {currentProduct.name}
-                                    </h3>
-                                    <p className="text-gray-500 line-through">
-                                        {currentProduct.prices.toLocaleString()}đ
-                                    </p>
-                                    <p className="text-red-500 text-base font-bold">
-                                        {(
-                                            currentProduct.prices -
-                                            (currentProduct.prices * (currentProduct.product_sale?.percent_discount ?? 0)) /
-                                            100
-                                        ).toLocaleString()}
-                                        đ
-                                    </p>
-                                </>
-                            )}
-                        </div>
                     </div>
                 )}
             </motion.div>

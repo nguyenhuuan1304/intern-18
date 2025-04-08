@@ -70,9 +70,12 @@ const Login: React.FC = () => {
           jwt: res.jwt,
           username: res.user.username,
           email: res.user.email,
-          id: res.user.id,
+          id : res.user.id,
           phone: res.user.phone,
+          birthday: res.user.birthday,
           address: res.user.address,
+          firstName: res.user.firstName,
+          documentId: res.user.documentId,
         };
         localStorage.setItem("user", JSON.stringify(userData));
         if (res.user.username === "admin") {
