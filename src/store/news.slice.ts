@@ -80,10 +80,14 @@ export const updateNews = createAsyncThunk('news/updateNews',
                     description: body.description, 
                     introduction: body.introduction,
                     slug: body.slug,
+                    rating_news: [108,110,112,114]
               }
             };
             const response = await api.put<TypeDataNews>(`news/${id}`, formattedPost, {
-                signal: thunkAPI.signal
+                signal: thunkAPI.signal,    
+                // params: {
+                //    populate: '*',
+                // }
             })
             if(response.status === 200) {
                 console.log('ok')

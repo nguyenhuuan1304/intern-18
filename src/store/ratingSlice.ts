@@ -32,7 +32,7 @@ export const createRating = createAsyncThunk(
     "rating/createRating",
     async ({ username, rating, description, product, images }: { username: string; rating: number; description: string; product: string; images?: File[] }) => {
         let imageIds: number[] = [];
-
+        console.log('product', product)
         if (images && images.length > 0) {
             const formData = new FormData();
             images.forEach((image) => formData.append("files", image));

@@ -9,11 +9,11 @@ import { useSelector } from 'react-redux'
 import { useAppDispatch,RootState } from '@/store/store' 
 import { getPostListNews } from '@/store/news.slice'
 import FeatureSection from '@/components/FeatureSection'
-import { CardFooter } from '@/components/ui/card'
 import Footer from '@/components/layout/Footer'
 
 const News = () => {
     const listNews  = useSelector((state: RootState) => state.news.news) ?? [];
+    console.log(listNews)
     const dispatch = useAppDispatch()
     useEffect(() => {
         const promise = dispatch(getPostListNews())

@@ -69,7 +69,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const content: BlocksContent = Array.isArray(news?.description)? news.description: [];
   const user: User= JSON.parse(localStorage.getItem("user") || "null")?.username
   const dispatch = useAppDispatch()
-
+  console.log(listNews)
   useEffect(() => {
     const promise = dispatch(getPostListNews())
       return () => {
@@ -259,7 +259,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
           </a>
         </div>
       </div>
-      <div className="max-w-[1400px] 2xl:mx-[auto]  flex max-lg:flex-wrap flex-col lg:flex-row  max-2xl:mx-[4%] my-[10px] gap-6">
+      <div className="max-w-[1400px] 2xl:mx-[auto]  flex justify-between max-lg:flex-wrap flex-col lg:flex-row  max-2xl:mx-[4%] my-[10px] gap-6">
         <div className=" my-[4%] flex flex-col basis-[80%] gap-x-[10px] gap-y-[20px]">
           <h3 className="text-[20px] font-[500]">{news.name}</h3>
           <div className="flex flex-wrap gap-1">
@@ -288,7 +288,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
               <BlocksRenderer  content={content}/>
             <div className='flex flex-wrap lg:basis-[48%]  max-md:flex-1 max-md:flex-shrink max-md:flex-basis-full gap-[10px]'>
               {listImg.map((item, id) => (
-                <div key={id} className='w-[300px] '>
+                <div key={id} className='w-[350px] max-md:w-fit'>
                   <img className='h-[466px] object-cover' src={`http://localhost:1337${item?.url}`} alt="" />
                 </div>
               ))}
@@ -325,13 +325,13 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
                </div>
              </div>
              <div className='flex text-[14px] text-[#333]  items-center'>
-               <div>
+               <div className='mr-[10px]'>
                  Lọc theo:
                </div>
                <div className='flex items-center gap-[5px] flex-wrap'>
                  <div 
                     onClick={() => handleViewRating(0)}
-                    className={` ${active === 0 ? 'bg-[#e6eef7] text-[#0d5cb6]' : ''}flex hover:cursor-pointer bg-[#e6eef7] text-[#0d5cb6] py-[6px] px-[22px] rounded-[10px] mx-[5px]`}
+                    className={` ${active === 0 ? 'bg-[#e6eef7] text-[#0d5cb6]' : ''}flex hover:cursor-pointer bg-[#e6eef7] text-[#0d5cb6] py-[6px] px-[20px] rounded-[10px]`}
                   >
                    <span>Tất cả</span>
                  </div>
@@ -412,7 +412,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
                     </div>
                   }
                   {
-                    active === 0 && viewCount >= listRating.length && listRating.length >= 3 &&
+                    active === 0 && viewCount >= listRating.length && listRating.length > 3 &&
                     <div 
                       className='flex  text-[#333] hover:cursor-pointer hover:opacity-[0.7]'
                       onClick={handleViewLess}
