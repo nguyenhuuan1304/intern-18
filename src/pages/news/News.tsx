@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Header, { User } from '@/components/header/Header'
+import Header from '@/components/header/Header'
 import Title from '@/components/product/Title'
 import ItemNews from '@/components/itemNews/ItemNews'
 import ContentSideBarNew from '@/components/contentSideBarNew/ContentSideBarNew'
@@ -11,9 +11,10 @@ import { getPostListNews } from '@/store/news.slice'
 import FeatureSection from '@/components/FeatureSection'
 import Footer from '@/components/layout/Footer'
 
+
 const News = () => {
     const listNews  = useSelector((state: RootState) => state.news.news) ?? [];
-    console.log(listNews)
+
     const dispatch = useAppDispatch()
     useEffect(() => {
         const promise = dispatch(getPostListNews())
@@ -21,7 +22,7 @@ const News = () => {
           promise.abort()
         }
     },[dispatch])
-
+    
     return (
     <div className=''>
         <Header/>
@@ -56,15 +57,20 @@ const News = () => {
              >
                 <div>
                     <ItemNews
-                        title={product?.name}
+                        name={product?.name}
                         slug = {product?.slug}
                         id = {product?.documentId}
+                        views = {product?.views}
                         img= { 
                             Array.isArray(product?.img) && typeof product?.img[0] === 'object' 
                             ? `http://localhost:1337${product?.img[0].url}` 
                             : `${null}`
                         }
-                        introduction={product.introduction}
+                        introduction={product?.introduction}
+                        rating_news = {product?.rating_news}
+                        description = {product?.description}
+                        listImg = {product?.img}
+                        is_block = {product?.is_block}
                     />
                 </div>
              </motion.div>
@@ -74,7 +80,7 @@ const News = () => {
             </div>
             <div className='basis-[20%] bg-white text-[#333] max-lg:basis-[100%]'>
                 <ContentSideBarNew title='Tin Tức Mới'/>
-                <ContentSideBarNew title='Tin Tức Nổi Bậc'/>
+                <ContentSideBarNew title='Tin Tức Nổi Bật'/>
             </div>
         </div>
         <div className="mt-3">

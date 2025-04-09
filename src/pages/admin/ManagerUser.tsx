@@ -21,7 +21,8 @@ export interface TypeUser {
     address: string,
     phone: number,
     email: string,
-    blocked: boolean
+    blocked: boolean,
+    documentId: string
 }
 
 

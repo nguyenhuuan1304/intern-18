@@ -4,7 +4,7 @@ import Header from '@/components/header/Header'
 import ServiceMenu from '@/components/ServiceMenu'
 import { CalendarMinus2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, Facebook, Instagram, Lightbulb, Newspaper, Star, Twitter } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
-import { motion ,AnimatePresence} from "framer-motion";
+import { motion ,AnimatePresence, view} from "framer-motion";
 import { api } from '@/hooks/useAxios'
 import { useSearchParams } from "react-router-dom";
 import { BlocksRenderer, type BlocksContent } from '@strapi/blocks-react-renderer';
@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 
 interface User {
   username: string
+  id: number
 }
 
 interface DetailProductNewsProps {
@@ -37,6 +38,8 @@ interface TypeNews {
   name: string;
   description: string;
   img: TypeImg[];
+  views: number,
+  users_permissions_users : []
 }
 
 interface TypeRating {
@@ -53,7 +56,7 @@ interface TypeRating {
 
 const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const listNews = useSelector((state: RootState) => state.news.news) || []
-  const [news,setNews] = useState<TypeNews>({name: '', description: '', img: []})
+  const [news,setNews] = useState<TypeNews>({name: '', description: '', img: [] , views : 0, users_permissions_users: []})
   const [navStart, setNavStart] = useState(0)
   const [data, setData] = useState<TypeDataNews[]>(listNews); // Lưu trữ bản sao của dữ liệu
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,11 +68,11 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const [avg, setAvg] = useState(0)
   const [hoverIndex, setHoverIndex] = useState(-1);
   const [savedId, setSavedId] = useState<string | null>(null);
+
   const listImg: TypeImg[] = news.img || [];
   const content: BlocksContent = Array.isArray(news?.description)? news.description: [];
-  const user: User= JSON.parse(localStorage.getItem("user") || "null")?.username
+  const user: User= JSON.parse(localStorage.getItem("user") || "null")
   const dispatch = useAppDispatch()
-  console.log(listNews)
   useEffect(() => {
     const promise = dispatch(getPostListNews())
       return () => {
@@ -123,7 +126,6 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   //   return () => clearInterval(timer);  
   // }, []);
 
-
   useEffect(() => {
     const getData = async () => {
       try {
@@ -166,24 +168,8 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
     getData()
    
   }, [savedId]);
-
-  // useEffect(() => {
-  //   const getRatingNews = async () => {
-  //     try {
-  //       const res = await api.get('http://localhost:1337/api/rating-news?filters[news][documentId][$eq]=c2hv3sfjc0phc3xzms359pzh&pagination[pageSize]=3&pagination[page]=1&sort=createdAt:desc')
-  //       if(res.status === 200) {
-  //         const data : TypeRating[]= res.data.data
-  //         setListRating(data.map((item) =>({
-  //           ...item,
-  //           description: item.rating < 2 ? "không hài lòng" : item.rating >=3 && item.rating <=4 ? "hài lòng" : "rất hài lòng"
-  //         })) )
-  //       }
-  //     } catch (error) {
-  //       console.error(error)
-  //     }
-  //   }
-  //   getRatingNews()
-  // },[])
+ 
+  
 
   useEffect(() => {
     const rai = listRating.reduce((acc,cur) => {
@@ -212,7 +198,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
     }
     const body = {
       data : {
-        "username": user,
+        "username": user.username,
         "rating": index,
         "news": savedId
       }
@@ -237,12 +223,11 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
     setViewCount(3)
   }
 
-  console.log(viewCount)
   return (
     <div className=''>
       <Header/>
       <ServiceMenu/>
-      <div className=' h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
+      <div className='max-w-[1400px] 2xl:mx-[auto] h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
         <div className='ml-[7.5%] text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
           <a href="">
             <span>Trang chủ</span>
@@ -259,7 +244,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
           </a>
         </div>
       </div>
-      <div className="max-w-[1400px] 2xl:mx-[auto]  flex justify-between max-lg:flex-wrap flex-col lg:flex-row  max-2xl:mx-[4%] my-[10px] gap-6">
+      <div className="max-w-[1400px] 2xl:mx-[auto] flex justify-between max-lg:flex-wrap flex-col lg:flex-row  max-2xl:mx-[4%] my-[10px] gap-6">
         <div className=" my-[4%] flex flex-col basis-[80%] gap-x-[10px] gap-y-[20px]">
           <h3 className="text-[20px] font-[500]">{news.name}</h3>
           <div className="flex flex-wrap gap-1">
@@ -271,7 +256,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
             </div>
             <div className="flex items-center px-[12px] mr-[10px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]">
                 <Eye className="block h-[18px] mr-[5px]" />
-                <span>Lượt xem: 360</span>
+                <span>{`Lượt xem: ${news.views}`}</span>
             </div>
             <div className="flex items-center px-[12px] mr-[10px] text-[#494949] text-[12px] h-[32px] bg-[#ececec] rounded-[20px]">
                 <Newspaper className="block h-[18px] mr-[5px]" />
@@ -279,7 +264,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
             </div>
           </div>
           <div  className='text-[#333333] text-[14px]'>
-            <span>(Có 81 người đang xem cùng bạn)</span>
+            <span>{`(Có ${news.users_permissions_users.length} người đang xem cùng bạn)`}</span>
           </div>
           <div  className='flex flex-col text-[#333333] text-[14px] leading-[25px]'>
  
@@ -289,7 +274,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
             <div className='flex flex-wrap lg:basis-[48%]  max-md:flex-1 max-md:flex-shrink max-md:flex-basis-full gap-[10px]'>
               {listImg.map((item, id) => (
                 <div key={id} className='w-[350px] max-md:w-fit'>
-                  <img className='h-[466px] object-cover' src={`http://localhost:1337${item?.url}`} alt="" />
+                  <img className='rounded-[4px] h-[466px] object-cover' src={`http://localhost:1337${item?.url}`} alt="" />
                 </div>
               ))}
               {/* <div className='w-[350px]'>
@@ -454,7 +439,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
            <ContentSideBarNew title='Sản phẩm đã xem'/>
          </div>
        </div>
-       <div className='flex mx-[5%] lg:mx-[9%] flex-col gap-4'>
+       <div className='max-w-[1400px] 2xl:mx-[auto] flex mx-[5%] lg:mx-[3%] flex-col gap-4'>
          <h3 className='font-[500]'>
            Bài viết liên quan
          </h3>

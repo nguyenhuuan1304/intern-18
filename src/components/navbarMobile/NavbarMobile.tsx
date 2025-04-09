@@ -6,12 +6,16 @@ import ShoppingCartMobile from '../shoppingCartMobile/ShoppingCartMobile'
 
 const NavbarMobile = () => {
     const [showShoppingCart , setShowShoppingCart] = useState(false)
+    const totalItems = localStorage.getItem("cartTotalItems") || "0";
+
     const location = useLocation();
     const pathToActive = {
         '/': 'home',
         '/tin-tuc': 'news',
         '/account': 'user',
         '/product': 'product',
+        '/cart': 'store',
+
         
     };
     const [active, setActive] = useState(pathToActive[location.pathname as keyof typeof pathToActive] || '' )
@@ -25,7 +29,7 @@ const NavbarMobile = () => {
     }
   return (
     <div>
-        <ShoppingCartMobile show={showShoppingCart}/>
+        {/* <ShoppingCartMobile show={showShoppingCart}/> */}
         <div id='navbar-Mobile' className='lg:hidden sm:hidden custom-navbar-mobile'>
             <div onClick={() => handleActive('home')}>
                 <NavLink 
@@ -53,15 +57,16 @@ const NavbarMobile = () => {
 
                 </NavLink>
             </div>
-            <div className='relative'  onClick={showShoppingMobile}>
-                <div 
+            <div className='relative'>
+                <NavLink 
+                    to={'/cart'}
                     onClick={() => handleActive('store')}
                     className={active === 'store' ? 'text-blue-500' : ''}
                 >
                     <ShoppingCart className='w-full'/>
-                </div>
+                </NavLink>
                 <div className='absolute  right-[-12px] top-[-6px] flex items-center justify-center text-[#fff] bg-[red] w-[20px] h-[20px] rounded-full  '>
-                    <span>0</span>
+                    <span>{totalItems}</span>
                 </div>
             </div>
             <div onClick={() => handleActive('user')}>

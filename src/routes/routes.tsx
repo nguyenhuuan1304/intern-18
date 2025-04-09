@@ -25,6 +25,7 @@ const ForgotPasswordPage = lazy(
 );
 const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
 const CartPage = lazy(() => import("../pages/cart/CartPage"));
+const Cart = lazy(() => import("../components/cart/Cart"));
 export const routes: RouteObject[] = [
   {
     path: "/",
@@ -151,7 +152,7 @@ export const routes: RouteObject[] = [
       },
       {
         path: "/cart",
-        element: <CartPage />,
+        element: <Cart />,
       },
     ],
   },
