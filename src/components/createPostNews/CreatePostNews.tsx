@@ -9,7 +9,6 @@ import {Editor}  from "@tinymce/tinymce-react";
 import { convertTinyMCEToStrapiJSON, StrapiBlock } from "./until";
 import { useSelector } from "react-redux";
 import { convertStrapiJSONToTinyMCE } from "./convertStrapiJSONToTinyMCE ";
-import { current } from "@reduxjs/toolkit";
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
 interface TypeImg  {
@@ -22,14 +21,20 @@ interface TypeElement {
   checkId: number,
 }
 
+
 const initialValue = {
   id: '',
   name: "",
   img:  [],
   description:  [],
+  rating_news: [],
   documentId: "",
   slug: "",
-  introduction : ""
+  introduction : "",
+  views: 0,
+  is_block: false,
+  users_permissions_users : []
+
 }
 
 const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
@@ -49,13 +54,11 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
   const dispatch = useAppDispatch();  
   const editorRef = useRef(null); 
 
-    console.log(post)
+  // console.log(editingPost)
   const description  = editingPost?.description
-  console.log(1234)
   useEffect(() => {
     if (Array.isArray(description) && description.every(item => typeof item === 'object')) {
       const htmlContent = convertStrapiJSONToTinyMCE(description as StrapiBlock[]);
-      console.log(123)
       setEditorContent(htmlContent);
     }
   }, [description,checkId]);
@@ -65,11 +68,14 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
 
     if (editingPost) {
       const arrImg: number[] = listImg.map((item) => item.id);
+      const rating_news : number[]= editingPost.rating_news.map(item => item.id as number)  
+      // console.log(rating_news)
+      const url : string[] = listImg.map(item => item.url) 
       setPost((prev) => ({
         ...prev,
+        // rating_news,
         img: arrImg, 
       }));
-      const url : string[] = listImg.map(item => item.url) 
       setPreviewUrls((pre) => ([
         ...pre,
         ...url

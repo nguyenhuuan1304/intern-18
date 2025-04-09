@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { api } from '@/hooks/useAxios'
 import { TypeDataNews } from '@/pages/news/typeNews'
-import { create } from 'domain';
 
 interface TypeList {
     news: TypeDataNews[],
@@ -71,7 +70,6 @@ export const deleteNews = createAsyncThunk('news/deleteNews',
 
 export const updateNews = createAsyncThunk('news/updateNews',
     async ({body, id} : {body :TypeDataNews , id: string}, thunkAPI) => {
-        console.log(id)
         try {
             const formattedPost = {
                 data: {
@@ -80,9 +78,11 @@ export const updateNews = createAsyncThunk('news/updateNews',
                     description: body.description, 
                     introduction: body.introduction,
                     slug: body.slug,
-                    rating_news: [108,110,112,114]
+                    views: body.views,
+                    rating_news: body.rating_news,
+                    users_permissions_users: body.users_permissions_users
               }
-            };
+            } ;
             const response = await api.put<TypeDataNews>(`news/${id}`, formattedPost, {
                 signal: thunkAPI.signal,    
                 // params: {
