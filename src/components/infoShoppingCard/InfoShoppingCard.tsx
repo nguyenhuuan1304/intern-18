@@ -42,59 +42,54 @@ const InfoShoppingCard: React.FC = () => {
   };
 
   return (
-    <div className="overflow-y-auto h-60">
-      <table className="min-w-full border-hidden">
-        <thead className="bg-gray-100">
+    <div className="sm:overflow-auto h-full sm:h-60 relative">
+      <table className="min-w-full border-collapse">
+        <thead className="bg-gray-100 sticky top-0 z-10">
           <tr>
-            <th className="border px-4 py-2 text-left font-semibold">
+            <th className="px-4 py-2 text-left font-semibold whitespace-nowrap">
               Mã đơn hàng
             </th>
-            <th className="border px-4 py-2 text-left font-semibold">
+            <th className="px-4 py-2 text-left font-semibold whitespace-nowrap">
               Tổng tiền
             </th>
-            <th className="border px-4 py-2 text-left font-semibold">
+            <th className="px-4 py-2 text-left font-semibold whitespace-nowrap hidden sm:table-cell">
               Ngày mua
             </th>
-            <th className="border px-4 py-2 text-left font-semibold">
+            <th className="px-4 py-2 text-left font-semibold whitespace-nowrap hidden md:table-cell">
               Trạng thái
-            </th>
-            <th className="border px-4 py-2 text-left font-semibold">
-              Chi tiết
             </th>
           </tr>
         </thead>
         <tbody>
           {orders.length > 0 ? (
             orders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50 transition">
-                <td className="border px-4 py-2">{order.orderId}</td>
-                <td className="border px-4 py-2">
+              <tr
+                key={order.id}
+                className="hover:bg-gray-50 transition cursor-pointer"
+                onClick={() => handleViewDetailOrder(order)}
+              >
+                <td className="px-4 py-2 whitespace-nowrap">{order.orderId}</td>
+                <td className="px-4 py-2 whitespace-nowrap">
                   {order.total_price.toLocaleString()} VND
                 </td>
-                <td className="border px-4 py-2">
+                <td className="px-4 py-2 whitespace-nowrap hidden sm:table-cell">
                   {moment(order.createdAt).format("HH:mm:ss, DD/MM/YYYY")}
                 </td>
-                <td className="border px-4 py-2">{order.status_order}</td>
-                <td
-                  className="border px-4 py-2 text-blue-600 cursor-pointer hover:underline"
-                  onClick={() => handleViewDetailOrder(order)}
-                >
-                  Xem chi tiết
+                <td className="px-4 py-2 whitespace-nowrap hidden md:table-cell">
+                  {order.status_order}
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td
-                colSpan={5}
-                className="border px-4 py-2 text-center text-gray-500"
-              >
+              <td colSpan={5} className="px-4 py-2 text-center text-gray-500">
                 Không có dữ liệu
               </td>
             </tr>
           )}
         </tbody>
       </table>
+
       {orderSelected && (
         <DetailOrderItem
           open={open}
