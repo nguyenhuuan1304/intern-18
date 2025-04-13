@@ -100,7 +100,7 @@ const Register: React.FC = () => {
       }
     } catch (error) {
       const errorMessage = error?.error.message;
-      console.log(errorMessage)
+      console.log(errorMessage);
       toast.error(errorMessage);
     }
   };
@@ -147,27 +147,6 @@ const Register: React.FC = () => {
                             {...field}
                             placeholder="Nhập tên đăng nhập"
                             className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
-                            // disabled={loading}
-                          />
-                        </FormControl>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />{" "}
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email liên hệ</FormLabel>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Nhập email liên hệ"
-                            className="w-full px-10 py-6 border rounded-lg  focus:outline-blue-500 focus:outline-2 transition-colors"
                             disabled={loading}
                           />
                         </FormControl>
@@ -175,7 +154,7 @@ const Register: React.FC = () => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                />{" "}
                 <div className="flex flex-col md:flex-row items-start gap-4">
                   <FormField
                     control={form.control}
@@ -241,7 +220,6 @@ const Register: React.FC = () => {
                     </FormItem>
                   )}
                 />
-
                 <div className="flex flex-col md:flex-row items-start gap-4">
                   <FormField
                     control={form.control}
