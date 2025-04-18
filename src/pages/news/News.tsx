@@ -46,7 +46,7 @@ const News = () => {
         } */}
         <div className='max-w-[1400px] mx-[auto] flex mx-[6%] layout max-lg:flex-wrap' >
             <div className=' my-[4%] grid h-[100%] grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1 max-lg:basis-[100%] basis-[80%] gap-x-[10px] gap-y-[20px] '>
-            {listNews.map((product,id) => (
+            {listNews.filter(item => item.is_block !== false).map((product,id) => (
                  <motion.div
                  key={id}
                  className="block w-[100%] h-[100%]  bg-white shadow-md rounded-lg overflow-visible p-2  space-x-5 group hover:shadow-lg transition-shadow duration-300"

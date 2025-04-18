@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 
 interface User {
   username: string
-  id: number
+  id: number  
 }
 
 interface DetailProductNewsProps {
@@ -55,7 +55,7 @@ interface TypeRating {
 }
 
 const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
-  const listNews = useSelector((state: RootState) => state.news.news) || []
+  const listNews = useSelector((state: RootState) => state.news.news) 
   const [news,setNews] = useState<TypeNews>({name: '', description: '', img: [] , views : 0, users_permissions_users: []})
   const [navStart, setNavStart] = useState(0)
   const [data, setData] = useState<TypeDataNews[]>(listNews); // Lưu trữ bản sao của dữ liệu
@@ -222,13 +222,13 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
   const handleViewLess = () => {
     setViewCount(3)
   }
-
+console.log(data)
   return (
     <div className=''>
       <Header/>
       <ServiceMenu/>
-      <div className='max-w-[1400px] 2xl:mx-[auto] h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
-        <div className='ml-[7.5%] text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
+      <div className=' 2xl:mx-[auto] h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
+        <div className='max-w-[1400px] ml-[7.5%] text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
           <a href="">
             <span>Trang chủ</span>
           </a>
@@ -436,7 +436,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
          <div className=''>
            <ContentSideBarNew title='Tin Tức Mới'/>
            <ContentSideBarNew title='Tin Tức Nổi Bậc'/>
-           <ContentSideBarNew title='Sản phẩm đã xem'/>
+           <ContentSideBarNew title='Bài Viết đã xem'/>
          </div>
        </div>
        <div className='max-w-[1400px] 2xl:mx-[auto] flex mx-[5%] lg:mx-[3%] flex-col gap-4'>
