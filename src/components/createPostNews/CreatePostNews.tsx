@@ -9,7 +9,6 @@ import {Editor}  from "@tinymce/tinymce-react";
 import { convertTinyMCEToStrapiJSON, StrapiBlock } from "./until";
 import { useSelector } from "react-redux";
 import { convertStrapiJSONToTinyMCE } from "./convertStrapiJSONToTinyMCE ";
-import { current } from "@reduxjs/toolkit";
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error';
 interface TypeImg  {
@@ -22,25 +21,28 @@ interface TypeElement {
   checkId: number,
 }
 
+
 const initialValue = {
   id: '',
   name: "",
   img:  [],
   description:  [],
+  rating_news: [],
   documentId: "",
   slug: "",
-  introduction : ""
+  introduction : "",
+  views: 0,
+  is_block: false,
+  users_permissions_users : []
+
 }
 
 const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
   const editingPost = useSelector((state : RootState) => state.news.editingPost)
   const [currentNews, setCurrenNews] = useState<TypeDataNews>(initialValue);
-  const listImg: TypeImg[] = Array.isArray(editingPost?.img)
-  ? editingPost.img.map((item) => ({
-    id: (item as TypeImg).id || 0,
-    url: (item as TypeImg).url || "",
-  }))
-  : [];
+  const [img,setImg] = useState<TypeImg[]>([])
+  
+
   const [post, setPost] = useState<TypeDataNews>(initialValue);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [image, setImage] = useState<FileList | null>(null);
@@ -48,14 +50,13 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
   const [editorContent, setEditorContent] = useState("");
   const dispatch = useAppDispatch();  
   const editorRef = useRef(null); 
-
-    console.log(post)
+  const inputImgRef = useRef<HTMLInputElement | null>(null);
+  // console.log(listImg)
+  // console.log(previewUrls)
   const description  = editingPost?.description
-  console.log(1234)
   useEffect(() => {
     if (Array.isArray(description) && description.every(item => typeof item === 'object')) {
       const htmlContent = convertStrapiJSONToTinyMCE(description as StrapiBlock[]);
-      console.log(123)
       setEditorContent(htmlContent);
     }
   }, [description,checkId]);
@@ -64,16 +65,23 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
     setPost(editingPost ? { ...editingPost } : initialValue);
 
     if (editingPost) {
+      const listImg: TypeImg[] = Array.isArray(editingPost?.img)
+      ? editingPost.img.map((item) => ({
+        id: (item as TypeImg).id || 0,
+        url: (item as TypeImg).url || "",
+      }))
+      : [];
       const arrImg: number[] = listImg.map((item) => item.id);
+      const url : string[] = listImg.map(item => item.url) 
       setPost((prev) => ({
         ...prev,
         img: arrImg, 
       }));
-      const url : string[] = listImg.map(item => item.url) 
       setPreviewUrls((pre) => ([
         ...pre,
         ...url
       ]));
+      setImg(listImg)
     }
   }, [dispatch,editingPost,checkId]);
 
@@ -113,26 +121,21 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
     })
   };
 
-  
-
 
   const updateImg = async () => {
-    if (!image) {
+    if (!image ) {
         alert("Vui lòng chọn một ảnh!");
         return;
     }
-    
     const formData = new FormData()
     for (let i = 0; i < image.length; i++) {
       formData.append("files", image[i]); 
     }
-
     const response = await api.post("upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
     });
 
     if(response) {
-      console.log(response.data)
       const arrImg :TypeImg[] = Array.from(response.data)
       const imgId : number[]  = arrImg.map((item )  => item.id)
       const listImgId: number[] = [...(post.img as number[]), ...imgId];
@@ -149,22 +152,33 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
 
   // Xử lý upload nhiều ảnh
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files;
-    setImage(file);
-    if (file) {
-      const filesArray = Array.from(file); 
-      // Tạo URL để xem trước ảnh
-      const urls = filesArray.map((file) => URL.createObjectURL(file));
-      setPreviewUrls(pre => [...pre,...urls])
+    const files = e.target.files;
+    if (files) {
+      const newFilesArray = Array.from(files);
+      
+      const updatedFiles = image ? [...Array.from(image), ...newFilesArray] : newFilesArray;
+      
+      const dataTransfer = new DataTransfer();
+      updatedFiles.forEach(file => dataTransfer.items.add(file));
+      
+      setImage(dataTransfer.files);
+  
+      const urls = newFilesArray.map((file) => URL.createObjectURL(file));
+      setPreviewUrls(pre => [...pre, ...urls]);
+  
+      // Reset input để có thể chọn lại cùng ảnh
+      if (inputImgRef.current) {
+        inputImgRef.current.value = '';
+      }
     }
   };
+  
   // Xử lý submit form
   const handleSubmit =  async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       if(editingPost) {
           if(currentNews === post) {
-            console.log('123')
             openNotificationUpdateNews('warning')
             return 
           }
@@ -204,11 +218,35 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
     }
   }
 
-  
+  const handleDeleteImage = (index: number) => {
+    const newUrls = [...previewUrls];
+    const [imgIndex] =newUrls.splice(index, 1);
+    console.log(imgIndex)
+    const a = img.findIndex(item => item.url === imgIndex)
+    console.log(a)
+    console.log('321')
+    if(a !== -1) {
+      img.splice(a,1)
+      console.log(img)
+      const arrImg: number[] = img.map((item) => item.id);
+      console.log(arrImg)
+      setPost((prev) => ({
+        ...prev,
+        img: arrImg, 
+      }));
+    }
+    setPreviewUrls(newUrls);
+    
+    if (inputImgRef.current) { //Reset input để lần sau chọn lại cùng file vẫn được
+      inputImgRef.current.value = '';
+    }
+  };
+
+  console.log(post)
 
 
   return (
-    <div className="overflow-auto  relative m-[auto]  max-w-2xl h-[770px] w-[100%] bg-white p-6 shadow-lg rounded-lg">
+    <div className="overflow-auto h-screen relative m-[auto]  max-w-2xl w-[100%] bg-white p-6 shadow-lg rounded-lg">
       {contextHolder}
       <h2 className="text-2xl font-bold mb-4">Tạo bài viết mới</h2>
       <div className="absolute top-[4px] right-[12px] ">
@@ -235,6 +273,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
         <div>
           <label className="block font-medium">Chọn ảnh</label>
           <input
+            ref={inputImgRef}
             type="file"
             accept="image/*"
             multiple // Cho phép chọn nhiều ảnh
@@ -247,12 +286,19 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
           <>
             <div className="mt-4 grid grid-cols-3 gap-4">
                 {previewUrls.map((url, index) => (
-                <div key={index} className="relative w-full h-24">
+                <div key={index} className="relative w-full h-24 group hover:cursor-pointer">
                     <img
                     src={editingPost ? `http://localhost:1337${url}` : url}
                     alt={`preview-${index}`}
                     className="object-cover w-full h-full rounded-lg border"
                     />
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteImage(index)}
+                      className="absolute top-1 right-1 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-[50%] opacity-0 group-hover:opacity-100 hover:cursor-pointer transition-opacity duration-200 z-10"
+                    >
+                      ✕
+                  </button>   
                 </div>
                 ))}
             </div>
@@ -275,7 +321,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
         <div>
           <label className="block font-medium">Mô tả</label>
           <Editor
-            apiKey="gmanld62a10sjioflew1n31uj2s53kqfjddiizzcwr7a0f7k"
+            apiKey="mdpwvf2xo8mjc5i0ei4o6glu02bwomsrc4n62dwjykxvlwf0"
             onInit={(e, editor) => editorRef.current = editor}
             onEditorChange={(e, editor) => handleEditorChange(editor.getContent())}
             initialValue={editorContent} 

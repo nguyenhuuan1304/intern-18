@@ -1,6 +1,6 @@
-import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import {
@@ -17,7 +17,7 @@ import { PaymentFail } from "./PaymentFail";
 import { toast } from "react-toastify";
 import CurrencyFormatter from "@/components/CurrencyFormatter";
 import { CartItem, checkoutOrder, OptionType } from "@/store/checkout.slice";
-
+import Header from "../header/Header";
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -36,8 +36,9 @@ const CartPage: React.FC = () => {
   const [provinces, setProvinces] = useState<OptionType[]>([]);
   const [districts, setDistricts] = useState<OptionType[]>([]);
   const [wards, setWards] = useState<OptionType[]>([]);
-  const [streetAddress, setStreetAddress] = useState<string>("");
-  const [isAddressFormOpen, setIsAddressFormOpen] = useState<boolean>(false);
+  const [streetAddress, setStreetAddress] = useState("");
+  const [isAddressFormOpen, setIsAddressFormOpen] = useState(false);
+
   const [selectedProvince, setSelectedProvince] = useState<OptionType | null>(
     null
   );
@@ -45,13 +46,15 @@ const CartPage: React.FC = () => {
     null
   );
   const [selectedWard, setSelectedWard] = useState<OptionType | null>(null);
+
   const inventories = useSelector(
     (state: RootState) => state.inventory.inventories
   );
   const [phoneNumber, setPhoneNumber] = useState<string>(user.phone || "");
   const [email, setEmail] = useState<string>(user.email || "");
   const [note, setNote] = useState<string>("");
-  const [addressShipping] = useState(user.address || "");
+  const [addressShipping] = useState<string>(user.address || "");
+
   // State lưu lỗi validate
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: string;
@@ -78,7 +81,6 @@ const CartPage: React.FC = () => {
       setSelectedWard(null);
     }
   }, [selectedDistrict]);
-
   useEffect(() => {
     dispatch(fetchCartItems());
   }, [dispatch]);
@@ -108,6 +110,7 @@ const CartPage: React.FC = () => {
     dispatch(removeCartItem(documentId));
   };
   const cart: CartItem[] = useSelector((state: RootState) => state.cart.items);
+
   const handleOrder = () => {
     if (!cart || cart.length === 0) {
       console.error("Cart is empty");
@@ -148,7 +151,6 @@ const CartPage: React.FC = () => {
           item !== null
       );
 
-
     if (updatedQuantities.length === 0) {
       return;
     }
@@ -156,7 +158,7 @@ const CartPage: React.FC = () => {
     dispatch(updateInventory(updatedQuantities));
   };
 
-  const totalPrice: number = cart.reduce(
+  const totalPrice = cart.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
     0
   );
@@ -202,41 +204,6 @@ const CartPage: React.FC = () => {
       setValidationErrors({});
     }
 
-    try {
-      const stripe = await loadStripe(
-        "pk_test_51Qylp0Ho1WzKDZx8plkpSGeYIYCnmsJiQDCqaDqZ2MyzjrO9xinFZddIoNCcRSasApne4aavMdujgT2PI8DMVXJn00pnDDhtFR"
-      );
-      const response = await axios.post(
-        "http://localhost:1337/api/orders",
-        {
-          orders: cart.map((item) => ({
-            productId: item.documentId,
-            quantity: item.quantity,
-          })),
-          email,
-          address: `${streetAddress}, ${selectedWard?.label || ""}, ${selectedDistrict?.label || ""
-            }, ${selectedProvince?.label || ""}`.trim(),
-          phoneNumber,
-          note,
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      const data = response.data;
-
-      if (data.error) throw new Error(data.error);
-      if (!data.stripeSession?.id)
-        throw new Error("Failed to create Stripe session");
-
-      // Chuyển hướng đến trang thanh toán của Stripe
-      await stripe?.redirectToCheckout({
-        sessionId: data.stripeSession.id,
-      });
-    } catch (err) {
-      console.error("Thanh toán lỗi:", err);
-    }
     dispatch(
       checkoutOrder({
         cart,
@@ -250,34 +217,18 @@ const CartPage: React.FC = () => {
       })
     );
   };
+
   if (success === "true") {
     return <PaymentSuccess />;
   }
   if (cancel === "true") {
     return <PaymentFail />;
   }
-
   return (
     <>
-      <div className="m-5 flex items-center justify-between">
-        <NavLink to={"/"}>
-          <img
-            className="w-[120px] md:w-[150px]"
-            src="https://kawin.vn/uploads/source//logo/z4795324951181-8df678a6cf3f0283a5b110357eb0c396.webp"
-            alt="Logo"
-          />
-        </NavLink>
-
-        <button
-          onClick={() => navigate("/product")}
-          className="cursor-pointer flex items-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition-all text-sm md:text-base h-10 md:h-9 w-[110px] md:w-[150px] justify-center"
-        >
-          <ArrowLeft size={18} />
-          <span className="hidden sm:inline">Quay lại</span>
-        </button>
+      <div className="fixed md:relative top-0 left-0 w-full z-50">
+        <Header />
       </div>
-      <hr />
-
       <div className="flex flex-col md:flex-row p-4">
         <div className="w-full md:w-1/2 p-4">
           <h2 className="text-xl text-cyan-800 font-bold mb-4">
@@ -395,14 +346,25 @@ const CartPage: React.FC = () => {
 
             {/* Hiển thị thông tin đã chọn */}
             <p className="text-gray-700 mt-4 mb-4">
-              {([streetAddress, selectedWard?.label, selectedDistrict?.label, selectedProvince?.label].filter(Boolean).length > 0)
-                ? [streetAddress, selectedWard?.label, selectedDistrict?.label, selectedProvince?.label].filter(Boolean).join(", ")
+              {[
+                streetAddress,
+                selectedWard?.label,
+                selectedDistrict?.label,
+                selectedProvince?.label,
+              ].filter(Boolean).length > 0
+                ? [
+                    streetAddress,
+                    selectedWard?.label,
+                    selectedDistrict?.label,
+                    selectedProvince?.label,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")
                 : addressShipping || ""}
             </p>
             {validationErrors.address && (
               <p className="text-red-500 mt-1">{validationErrors.address}</p>
             )}
-
           </div>
 
           <div className="mb-4">
@@ -478,7 +440,7 @@ const CartPage: React.FC = () => {
             <div className=" flex space-x-2 mt-4 text-lg font-bold">
               <p className="text-cyan-800">Tổng:</p>
               <p className="text-red-500">
-                <CurrencyFormatter amount={totalPrice}/>
+                <CurrencyFormatter amount={totalPrice} />
               </p>
             </div>
             <button

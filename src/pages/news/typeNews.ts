@@ -1,6 +1,7 @@
 import { StrapiBlock } from "@/components/createPostNews/until";
+import {User} from "@/components/header/Header"
 
-interface TypeDescription {
+export interface TypeDescription {
     type: "paragraph",
     children: [
     {
@@ -10,6 +11,16 @@ interface TypeDescription {
     ]
   }
 
+export interface RatingNews {
+  id: number,
+  username: string,
+  rating: number
+}
+interface TypeUserPermission {
+  id: string,
+  name:string
+}
+
 export interface TypeDataNews {
   name: string;
   img: typeImg[] | number[]  ; // Cho phép nhiều ảnh
@@ -18,10 +29,13 @@ export interface TypeDataNews {
   documentId: string,
   slug: string;
   introduction: string,
-  is_block?: boolean,
-  rating_news: []
+  is_block: boolean,
+  rating_news: RatingNews[] | number[],
+  views: number,
+  users_permissions_users :  User[]  | number[] ,
+  createdAt?: string 
 } 
 
-interface typeImg  {
+export interface typeImg  {
     url: string
 }

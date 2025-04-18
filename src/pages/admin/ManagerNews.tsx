@@ -8,6 +8,9 @@ import { deleteNews, getPostListNews, searchNews, startEditingNews } from '@/sto
 import { useSelector } from 'react-redux';
 import { RootState, useAppDispatch } from '@/store/store';
 import { TypeDataNews } from '../news/typeNews';
+import { api } from '@/hooks/useAxios';
+import { toast } from "react-toastify";
+
 const { Search } = Input;
 
 const ManagerNews = () => {
@@ -27,8 +30,25 @@ const ManagerNews = () => {
       }
     },[dispatch])
 
-    const handleStatus = () => {
-
+    const handleStatus = async (id : string) => {
+      const item = listNews.find(item => item.documentId === id)
+      const listImg = item?.img.map(item => item.id)
+      console.log(listImg)
+      const formattedPost = {
+        data: {
+          img : listImg,
+          is_block  :!item?.is_block
+        }
+      } 
+      try {
+        const res = await api.put(`news/${id}`,formattedPost)
+        if(res.status === 200) {
+          toast.success('edit status success')
+        } 
+      } catch (error) {
+        toast.error('edit status fail')
+        console.log(error)
+      }
     }
 
     const handleDelete = (selectedNews : string) => {
@@ -63,7 +83,7 @@ const ManagerNews = () => {
             label: (
               <button
                 type="button" 
-                onClick={() => handleStatus}
+                onClick={() => selectedNews && handleStatus(selectedNews)}
               >
                 status switch
               </button>
@@ -84,7 +104,9 @@ const ManagerNews = () => {
         key: 'introduction',
         ellipsis: {
           showTitle: true,
-        }
+        },
+        responsive: ['md'] 
+
       },
       {
         title: 'slug',
@@ -92,7 +114,8 @@ const ManagerNews = () => {
         key: 'slug',
         ellipsis: {
             showTitle: true,
-        }
+        },
+        responsive: ['md'] 
       },
       {
         title: 'Status',
@@ -170,7 +193,7 @@ const ManagerNews = () => {
           }}
         >
           <Search
-            style={{ width: '300px' }}
+            style={{ width: '200px',marginRight: '10px'}}
             placeholder="Search by class name"
             enterButton="Search"
             size="middle"
@@ -179,11 +202,12 @@ const ManagerNews = () => {
             onSearch={() => handleSearchNews()}
           />
           <Button
-            type="primary"
+            type="primary"  
             icon={<PlusOutlined />}
             onClick={() => handleShowAddNews('')}
+            style={{ width: '100px' }}
           >
-            Create News
+            Add News
           </Button>
         </div>
         <Table rowKey={"id"} columns={columns} dataSource={listNews} pagination={{

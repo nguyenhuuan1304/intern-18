@@ -96,7 +96,6 @@ const checkoutSlice = createSlice({
     error: null,
   },
   reducers: {
-    // Nếu cần thêm reducer cho việc reset lỗi, v.v.
     resetError(state) {
       state.error = null;
     },

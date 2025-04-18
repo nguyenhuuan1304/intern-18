@@ -1,9 +1,10 @@
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
 import DetailProductNews from "@/pages/detailProductNews/DetailProductNews";
-import Admin from "@/pages/admin/admin";
+import Admin from "@/pages/admin/Admin";
 import AdminRoute from "./AdminRoute";
-const NotFound = lazy(() => import( "@/components/Notfound")) ;
+import ShippingPage from "@/pages/shipping/ShippingPage";
+const NotFound = lazy(() => import("@/components/Notfound"));
 
 const PrivateRoute = lazy(() => import("./PrivateRoutes"));
 const PublicRoute = lazy(() => import("./PublicRoutes"));
@@ -25,6 +26,7 @@ const ForgotPasswordPage = lazy(
 );
 const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
 const CartPage = lazy(() => import("../pages/cart/CartPage"));
+const Cart = lazy(() => import("../components/cart/Cart"));
 export const routes: RouteObject[] = [
   {
     path: "/",
@@ -113,9 +115,7 @@ export const routes: RouteObject[] = [
   // },
   {
     path: "/product-detail/:documentId",
-    element: (
-      <ProductDetailPage />
-    ),
+    element: <ProductDetailPage />,
   },
   {
     path: "/lien-he",
@@ -151,11 +151,14 @@ export const routes: RouteObject[] = [
       },
       {
         path: "/cart",
-        element: <CartPage />,
+        element: <Cart />,
+      },
+      {
+        path: "/shipping",
+        element: <ShippingPage />,
       },
     ],
   },
-
   {
     path: "/notfound",
     element: <NotFound />,
