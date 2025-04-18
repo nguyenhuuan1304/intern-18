@@ -14,6 +14,7 @@ import axios from "axios";
 import { fetchOrderDetail } from "@/store/order.slice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
+
 export const PaymentFail: React.FC = () => {
   const navigate = useNavigate();
   interface OrderData {
@@ -29,6 +30,7 @@ export const PaymentFail: React.FC = () => {
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+
   useEffect(() => {
     // Lấy order_id từ query string
     const params = new URLSearchParams(location.search);
@@ -86,6 +88,7 @@ export const PaymentFail: React.FC = () => {
         sendEmailOrder();
         }
     }, [orderData]);
+
   return (
     <div className="flex min-h-[500px] w-full items-center justify-center p-4">
       <Card className="w-full max-w-md overflow-hidden border-none shadow-lg">

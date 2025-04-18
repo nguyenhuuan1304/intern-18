@@ -15,6 +15,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { removeCartItem } from "@/store/cartSlice";
 import axios from "axios";
 import { fetchOrderDetail } from "@/store/order.slice";
+
 export const PaymentSuccess: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ export const PaymentSuccess: React.FC = () => {
     total_price: number;
     emailSent?: boolean;
     }
+
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   useEffect(() => {
@@ -98,6 +100,7 @@ export const PaymentSuccess: React.FC = () => {
     sendEmailOrder();
     }
     }, [orderData]);
+
   return (
     <div className="flex min-h-[500px] w-full items-center justify-center p-4">
       <Card className="w-full max-w-md overflow-hidden border-none shadow-lg">
