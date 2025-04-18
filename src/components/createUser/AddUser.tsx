@@ -90,7 +90,7 @@ const AddUser:  React.FC<TypeElement> = ({element}) => {
         }
       };
   return (
-    <div className='relative w-[50%] bg-white text-[#000] m-[auto] mt-[50px] p-[20px]'>
+    <div className='relative md:w-[50%] max-md:h-screen bg-white text-[#000] m-[auto] md:mt-[50px] p-[20px]'>
         <div className="absolute top-[4px] right-[12px] ">
             <button 
                 className="cursor-pointer p-[10px] text-[#fff] bg-[#2b7fff] hover:bg-blue-600 rounded-[4px]"

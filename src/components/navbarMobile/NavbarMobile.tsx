@@ -15,8 +15,6 @@ const NavbarMobile = () => {
         '/account': 'user',
         '/product': 'product',
         '/cart': 'store',
-
-        
     };
     const [active, setActive] = useState(pathToActive[location.pathname as keyof typeof pathToActive] || '' )
 

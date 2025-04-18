@@ -11,7 +11,9 @@ import {
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { fetchOrderDetail } from "@/store/order.slice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
 export const PaymentFail: React.FC = () => {
   const navigate = useNavigate();
   interface OrderData {
@@ -22,17 +24,17 @@ export const PaymentFail: React.FC = () => {
     phone_number: string;
     note?: string;
     total_price: number;
+    emailSent?: boolean;
   }
-
   const [orderData, setOrderData] = useState<OrderData | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
     // Lấy order_id từ query string
     const params = new URLSearchParams(location.search);
     const orderId = params.get("order_id");
-
     const updateOrderStatus = async () => {
       if (!orderId) return;
-
       try {
         const res = await axios.get(
           `http://localhost:1337/api/orders?filters[orderId][$eq]=${orderId}`
@@ -42,7 +44,6 @@ export const PaymentFail: React.FC = () => {
           console.error("❌ Không tìm thấy đơn hàng với orderId:", orderId);
           return;
         }
-
         const orderToUpdate = matchingOrders[0];
         setOrderData(orderToUpdate);
         const realId = orderToUpdate.documentId;
@@ -51,16 +52,40 @@ export const PaymentFail: React.FC = () => {
             status_order: "Thanh toán thất bại",
           },
         });
-
         console.log("✅ Cập nhật trạng thái đơn hàng thành công");
       } catch (error) {
         console.error("❌ Lỗi khi cập nhật trạng thái đơn hàng:", error);
       }
     };
-
     // Gọi hàm cập nhật trạng thái
     updateOrderStatus();
-  }, []);
+    }, [location.search]);
+    useEffect(() => {
+        const sendEmailOrder = async () => {
+        try {
+        if (!orderData) return;
+        // Gọi dispatch để fetch orderItems nếu chưa có
+        const orderItems = await dispatch(
+        fetchOrderDetail(orderData.orderId)
+        ).unwrap();
+        console.log("order_items", orderItems);
+        const res = await axios.post(
+        `http://localhost:1337/api/order/sendEmailOrder`,
+        {
+        order_id: orderData.orderId,
+        type: "fail",
+        order_items: orderItems,
+        }
+        );
+        setEmailSent(true);
+        } catch (error) {
+        console.log("Lỗi khi gửi email :", error);
+        }
+        };
+        if (orderData && !emailSent) {
+        sendEmailOrder();
+        }
+    }, [orderData]);
   return (
     <div className="flex min-h-[500px] w-full items-center justify-center p-4">
       <Card className="w-full max-w-md overflow-hidden border-none shadow-lg">
@@ -77,7 +102,6 @@ export const PaymentFail: React.FC = () => {
             Đã xảy ra lỗi trong quá trình thanh toán
           </CardDescription>
         </CardHeader>
-
         <CardContent className="space-y-4">
           <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
             <p className="flex items-center gap-2">
@@ -85,7 +109,6 @@ export const PaymentFail: React.FC = () => {
               Thanh toán không thành công. Vui lòng thử lại.
             </p>
           </div>
-
           {orderData && (
             <div className="space-y-2 text-sm text-gray-700">
               <p>
@@ -94,7 +117,6 @@ export const PaymentFail: React.FC = () => {
               <p>
                 <strong>Email:</strong> {orderData.email}
               </p>
-
               <p>
                 <strong>Trạng thái:</strong> {orderData.status_order}
               </p>
