@@ -133,7 +133,7 @@ const Header = () => {
     <div className="layout">
       <div
         className="custom-header custom-header-mobile  z-50 relative mb-7
-          max-2xl:mr-[6.5%] lg:max-2xl:ml-[6.5%]  lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5"
+          max-xl:mr-[2%] lg:max-xl:ml-[2%] max-2xl:mr-[6%] lg:max-2xl:ml-[6%] lg:items-center lg:grid xl:grid-cols-[256px_1fr] lg:gap-x-[5px] lg:h-[125px] lg:pt-1.5 lg:pb-1.5"
       >
         <div
           className="lg:hidden text-[#fff] cursor-pointer"
@@ -141,7 +141,7 @@ const Header = () => {
         >
           <AlignJustify />
         </div>
-        <div className="row-span-2 md:w-[250px]">
+        <div className="row-span-2 md:w-[250px] ">
           <NavLink to={"/"}>
             <img
               className="md:w-[150px]"

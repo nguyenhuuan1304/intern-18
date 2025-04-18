@@ -64,19 +64,19 @@ export const deleteUser = createAsyncThunk('users/deleteUser',
     }
 )
 
-export const createUser = createAsyncThunk('users/createUser' , 
-    async ({id , body} : {id:string, body: boolean }, thunkAPI) => {
-        try {
-            const response = await api.post(
-              "http://localhost:1337/api/auth/local/register",
-              payload
-            );
-            return response.data;
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response.data);
-        }
-    }
-)
+// export const createUser = createAsyncThunk('users/createUser' , 
+//     async ({id , body} : {id:string, body: boolean }, thunkAPI) => {
+//         try {
+//             const response = await api.post(
+//               "http://localhost:1337/api/auth/local/register",
+//               payload
+//             );
+//             return response.data;
+//         } catch (error: any) {
+//             return thunkAPI.rejectWithValue(error.response.data);
+//         }
+//     }
+// )
 
 export const searchUser = createAsyncThunk('users/searchUser',
     async (value: string, thunkAPI) => {
