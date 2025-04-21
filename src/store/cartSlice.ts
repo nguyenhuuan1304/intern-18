@@ -25,7 +25,7 @@ interface Product {
 }
 
 interface User {
-    documentId: string;
+  documentId: string;
 }
 
 // Cập nhật số lượng sản phẩm theo documentId
@@ -74,113 +74,110 @@ export const removeCartItem = createAsyncThunk(
 );
 
 function getDocumentIdFromLocalStorage(): string | null {
-    const currentUserString = localStorage.getItem('user');
-    if (!currentUserString) {
-        console.warn('Không tìm thấy thông tin người dùng trong localStorage.');
-        return null;
-    }
-    try {
-        const currentUser: User = JSON.parse(currentUserString);
-        return currentUser.documentId || null;
-    } catch (error) {
-        console.error('Lỗi khi phân tích JSON:', error);
-        return null;
-    }
+  const currentUserString = localStorage.getItem('user');
+  if (!currentUserString) {
+    console.warn('Không tìm thấy thông tin người dùng trong localStorage.');
+    return null;
+  }
+  try {
+    const currentUser: User = JSON.parse(currentUserString);
+    return currentUser.documentId || null;
+  } catch (error) {
+    console.error('Lỗi khi phân tích JSON:', error);
+    return null;
+  }
 }
 
 export const fetchCartItems = createAsyncThunk<CartItem[], void, { rejectValue: string }>(
-    'cart/fetchCartItems',
-    async (_, { rejectWithValue }) => {
-        try {
-            const documentId = getDocumentIdFromLocalStorage();
-            if (!documentId) {
-                return rejectWithValue('Không tìm thấy documentId của người dùng.');
-            }
+  'cart/fetchCartItems',
+  async (_, { rejectWithValue }) => {
+    try {
+      const documentId = getDocumentIdFromLocalStorage();
+      if (!documentId) {
+        return rejectWithValue('Không tìm thấy documentId của người dùng.');
+      }
 
-            const response = await api.get('/carts?populate=*');
-            if (!response.data || !Array.isArray(response.data.data)) {
-                return rejectWithValue('Dữ liệu trả về từ API không hợp lệ.');
-            }
+      const response = await api.get('/carts?populate=*');
+      if (!response.data || !Array.isArray(response.data.data)) {
+        return rejectWithValue('Dữ liệu trả về từ API không hợp lệ.');
+      }
 
-            const filteredItems = response.data.data.filter(
-                (item: { users_permissions_user?: { documentId?: string } }) =>
-                    item.users_permissions_user?.documentId === documentId
-            );
+      const filteredItems = response.data.data.filter(
+        (item: { users_permissions_user?: { documentId?: string } }) =>
+          item.users_permissions_user?.documentId === documentId
+      );
 
-            const cartItems: CartItem[] = filteredItems.map(
-                (item: {
-                    documentId: string;
-                    name?: string;
-                    size?: string;
-                    quantity?: number;
-                    price?: number;
-                    image?: string;
-                    products?: { documentId: string; name?: string }[];
-                }) => ({
-                    documentId: item.documentId,
-                    name: item.name ?? 'N/A',
-                    size: item.size ?? 'N/A',
-                    quantity: item.quantity ?? 0,
-                    price: item.price ?? 0,
-                    image: item.image ?? '',
-                    products:
-                        item.products?.map((p) => ({
-                            documentId: p.documentId,
-                            name: p.name ?? 'N/A',
-                        })) ?? [],
-                })
-            );
+      const cartItems: CartItem[] = filteredItems.map(
+        (item: {
+          documentId: string;
+          name?: string;
+          size?: string;
+          quantity?: number;
+          price?: number;
+          image?: string;
+          products?: { documentId: string; name?: string }[];
+        }) => ({
+          documentId: item.documentId,
+          name: item.name ?? 'N/A',
+          size: item.size ?? 'N/A',
+          quantity: item.quantity ?? 0,
+          price: item.price ?? 0,
+          image: item.image ?? '',
+          products:
+            item.products?.map((p) => ({
+              documentId: p.documentId,
+              name: p.name ?? 'N/A',
+            })) ?? [],
+        })
+      );
 
-            return cartItems;
-        } catch (error) {
-            return rejectWithValue(error instanceof Error ? error.message : 'Lỗi khi lấy giỏ hàng.');
-        }
+      return cartItems;
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Lỗi khi lấy giỏ hàng.');
     }
   }
 );
 
-
 export const addToCartApi = createAsyncThunk(
-    "cart/addToCart",
-    async (cartItem: CartItem & { products: any[] }, { getState, dispatch, rejectWithValue }) => {
-        try {
-            const state = getState() as { cart: CartState };
-            const documentId = getDocumentIdFromLocalStorage();
+  "cart/addToCart",
+  async (cartItem: CartItem & { products: any[] }, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const state = getState() as { cart: CartState };
+      const documentId = getDocumentIdFromLocalStorage();
 
-            // Kiểm tra sản phẩm có cùng `name` & `size` trong giỏ hàng không
-            const existingItem = state.cart.items.find(
-                (item) => item.name === cartItem.name && item.size === cartItem.size
-            );
+      // Kiểm tra sản phẩm có cùng `name` & `size` trong giỏ hàng không
+      const existingItem = state.cart.items.find(
+        (item) => item.name === cartItem.name && item.size === cartItem.size
+      );
 
-            if (existingItem) {
-                // Nếu đã có, cập nhật số lượng
-                const newQuantity = existingItem.quantity + cartItem.quantity;
-                await dispatch(updateCartItemQuantity({ documentId: existingItem.documentId, quantity: newQuantity }));
+      if (existingItem) {
+        // Nếu đã có, cập nhật số lượng
+        const newQuantity = existingItem.quantity + cartItem.quantity;
+        await dispatch(updateCartItemQuantity({ documentId: existingItem.documentId, quantity: newQuantity }));
 
-                return { ...existingItem, quantity: newQuantity };
-            } else {
-                // Nếu chưa có, thêm sản phẩm mới
-                const response = await api.post("/carts", {
-                    data: {
-                        name: cartItem.name,
-                        size: cartItem.size,
-                        quantity: cartItem.quantity,
-                        price: cartItem.price,
-                        image: cartItem.image,
-                        users_permissions_user: documentId,
-                        products: cartItem.products.map((p) => p.documentId),
-                    },
-                });
+        return { ...existingItem, quantity: newQuantity };
+      } else {
+        // Nếu chưa có, thêm sản phẩm mới
+        const response = await api.post("/carts", {
+          data: {
+            name: cartItem.name,
+            size: cartItem.size,
+            quantity: cartItem.quantity,
+            price: cartItem.price,
+            image: cartItem.image,
+            users_permissions_user: documentId,
+            products: cartItem.products.map((p) => p.documentId),
+          },
+        });
 
-                return {
-                    documentId: response.data.data.id,
-                    ...response.data.data.attributes,
-                };
-            }
-        } catch (error: any) {
-            console.error("Lỗi khi thêm vào giỏ hàng:", error.response?.data);
-            return rejectWithValue("Lỗi khi thêm vào giỏ hàng");
-        }
+        return {
+          documentId: response.data.data.id,
+          ...response.data.data.attributes,
+        };
+      }
+    } catch (error: any) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", error.response?.data);
+      return rejectWithValue("Lỗi khi thêm vào giỏ hàng");
     }
   }
 );
