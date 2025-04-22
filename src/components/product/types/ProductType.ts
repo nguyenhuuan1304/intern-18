@@ -74,6 +74,7 @@ export interface Product {
     product_images: ProductImage[];
     product_detail?: ProductDetail | null;
     rating: number;
+    avgRating: number;
     slug: string;
     product_sale?: ProductSale | null;
     imageUrl?: string;
