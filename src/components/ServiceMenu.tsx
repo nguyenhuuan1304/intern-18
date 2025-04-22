@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
-import delivery from "@/assets/delivery-man-1.webp";
-import debit from "@/assets/debit-card-1.webp";
-import customer from "@/assets/customer-support-1.webp";
+import { Menu, Truck, CreditCard, Users, PackageCheck } from "lucide-react";
 import CategorySidebar from "@/components/sidebar/CategorySidebar";
 import { useLocation } from "react-router-dom";
 
@@ -33,7 +30,7 @@ const ServiceMenu: React.FC = () => {
             DANH MỤC SẢN PHẨM
           </Button>
           {!isHomePage && showCategory && (
-            <div className="absolute top-full left-0  z-50">
+            <div className="absolute top-full left-0 z-50">
               <div className="flex justify-center">
                 <div className="w-[250px] h-2 bg-white" />
               </div>
@@ -43,22 +40,22 @@ const ServiceMenu: React.FC = () => {
         </div>
 
         <Button className="bg-[#0590f9] hover:bg-[#0470c8] text-white flex items-center gap-2 justify-center w-full sm:w-auto sm:flex-1 lg:w-[256px] h-[45px]">
-          <img src={delivery} alt="Delivery" className="w-6 h-6" />
+          <Truck className="w-5 h-5" />
           CHẤT LƯỢNG ĐẢM BẢO
         </Button>
 
         <Button className="bg-[#0590f9] hover:bg-[#0470c8] text-white flex items-center gap-2 justify-center w-full sm:w-auto sm:flex-1 lg:w-[256px] h-[45px]">
-          <img src={debit} alt="Debit" className="w-6 h-6" />
+          <CreditCard className="w-5 h-5" />
           PHÂN PHỐI SỈ TOÀN QUỐC
         </Button>
 
         <Button className="bg-[#0590f9] hover:bg-[#0470c8] text-white flex items-center gap-2 justify-center w-full sm:w-auto sm:flex-1 lg:w-[256px] h-[45px]">
-          <img src={customer} alt="Customer" className="w-6 h-6" />
+          <Users className="w-5 h-5" />
           MẶT HÀNG ĐA DẠNG
         </Button>
 
         <Button className="bg-[#0590f9] hover:bg-[#0470c8] text-white flex items-center gap-2 justify-center w-full sm:w-auto sm:flex-1 lg:w-[256px] h-[45px]">
-          <img src={delivery} alt="Delivery" className="w-6 h-6" />
+          <PackageCheck className="w-5 h-5" />
           GIAO HÀNG NHANH CHÓNG
         </Button>
       </div>
