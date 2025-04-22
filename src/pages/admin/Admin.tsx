@@ -1,10 +1,18 @@
 import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Users, ShoppingBag, Newspaper, LogOut, Menu } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Users,
+  ShoppingBag,
+  Newspaper,
+  LogOut,
+  Package,
+  Menu,
+} from "lucide-react";
+import { Outlet, useNavigate } from "react-router-dom";
 import ManagerUser from "./ManagerUser";
 import ManagerNews from "./ManagerNews";
 import ManagerProduct from "./ManagerProduct";
+import ManagerOrder from "./ManageOrder";
 
 interface TypeAdmin {
   id: string;
@@ -19,6 +27,7 @@ const AdminDashboard = () => {
   const navbarAdmin: TypeAdmin[] = [
     { id: "User", icon: <Users /> },
     { id: "Manager Product", icon: <ShoppingBag /> },
+    { id: "Manager Order", icon: <Package /> },
     { id: "Manager News", icon: <Newspaper /> },
     { id: "Logout", icon: <LogOut /> },
   ];
@@ -29,53 +38,30 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <div
-        className={`fixed z-40 inset-y-0 left-0 w-64 bg-gray-900 text-white transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:flex`}
-      >
-        <div className="flex flex-col w-full h-full pt-6">
-          {navbarAdmin.map((item) => (
-            <Button
-              key={item.id}
-              className={`${
-                item.id === page ? "bg-[#2c3e63]" : ""
-              } cursor-pointer mt-4 text-[18px] hover:bg-[#2c3e63] flex items-center gap-2 justify-start px-4 py-2`}
-              onClick={
-                item.id === "Logout"
-                  ? handleLogout
-                  : () => {
-                      setPage(item.id);
-                      setSidebarOpen(false); // đóng sidebar khi chọn page trên mobile
-                    }
-              }
-              variant="ghost"
-            >
-              {item.icon}
-              {item.id}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col  p-4">
-        {/* Top bar (hamburger menu) */}
-        <div className="md:hidden flex justify-between items-center mb-4">
-          <Button variant="ghost" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            <Menu />
+    <div className="flex h-screen">
+      {/* <Sidebar setPage={setPage} handleLogout={handleLogout} /> */}
+      <div className="w-64 h-screen bg-gray-900 text-white flex flex-col ">
+        {navbarAdmin.map((item) => (
+          <Button
+            className={`${
+              item.id === page ? "bg-[#2c3e63]" : ""
+            } cursor-pointer mt-[10%] text-[20px] hover:bg-[#2c3e63] flex justify-start`}
+            onClick={
+              item.id === "Logout" ? handleLogout : () => setPage(item.id)
+            }
+            key={item.id}
+          >
+            {item.icon}
+            {item.id}
           </Button>
-          <span className="text-lg font-semibold">Admin Panel</span>
-        </div>
-
-        {/* Page content */}
-        <div className="flex-1 overflow-y-auto">
-          {page === "User" && <ManagerUser />}
-          {page === "Manager Product" && <ManagerProduct />}
-          {page === "Manager News" && <ManagerNews />}
-        </div>
+        ))}
+      </div>
+      <div className="flex-1 p-6">
+        {page === "User" && <ManagerUser />}
+        {page === "Manager Product" && <ManagerProduct />}
+        {page === "Manager Order" && <ManagerOrder />}
+        {page === "Manager News" && <ManagerNews />}
+        <Outlet />
       </div>
     </div>
   );

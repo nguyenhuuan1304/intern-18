@@ -8,9 +8,9 @@ import ratingReducer from "../store/ratingSlice";
 import cartReducer from "./cartSlice";
 import checkoutReducer from "./checkout.slice.ts";
 import orderReducer from "./order.slice.ts";
-import  userSlice  from "./user.slice";
+import userSlice from "./user.slice";
 import inventoryReducer from "./inventorySlice";
-
+import shippingReducer from "./shipping.slice.ts";
 
 export const store = configureStore({
   reducer: {
@@ -22,9 +22,9 @@ export const store = configureStore({
     cart: cartReducer,
     checkout: checkoutReducer,
     order: orderReducer,
+    shipping: shippingReducer,
     user: userSlice,
     inventory: inventoryReducer,
-
   },
 });
 

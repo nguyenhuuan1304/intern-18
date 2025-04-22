@@ -4,6 +4,7 @@ import DetailProductNews from "@/pages/detailProductNews/DetailProductNews";
 import Admin from "@/pages/admin/Admin";
 import AdminRoute from "./AdminRoute";
 import ShippingPage from "@/pages/shipping/ShippingPage";
+import DetailOrderItem from "@/components/infoShoppingCard/DetailOrderItem";
 const NotFound = lazy(() => import("@/components/Notfound"));
 
 const PrivateRoute = lazy(() => import("./PrivateRoutes"));
@@ -152,6 +153,10 @@ export const routes: RouteObject[] = [
       {
         path: "/cart",
         element: <Cart />,
+      },
+      {
+        path: "/order/:orderId",
+        element: <DetailOrderItem />,
       },
       {
         path: "/shipping",
