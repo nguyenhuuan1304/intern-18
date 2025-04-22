@@ -69,7 +69,7 @@ const InfoShoppingCard: React.FC = () => {
               >
                 <td className="px-4 py-2 whitespace-nowrap">{order.orderId}</td>
                 <td className="px-4 py-2 whitespace-nowrap">
-                  {order.total_price.toLocaleString()} VND
+                  {order?.total_price?.toLocaleString()} VND
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap hidden sm:table-cell">
                   {moment(order.createdAt).format("HH:mm:ss, DD/MM/YYYY")}

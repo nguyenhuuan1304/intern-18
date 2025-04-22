@@ -85,6 +85,7 @@ function getDocumentIdFromLocalStorage(): string | null {
   }
 }
 
+
 export const fetchCartItems = createAsyncThunk<
   CartItem[],
   void,
@@ -162,7 +163,6 @@ export const addToCartApi = createAsyncThunk(
             quantity: newQuantity,
           })
         );
-
         return { ...existingItem, quantity: newQuantity };
       } else {
         // Nếu chưa có, thêm sản phẩm mới

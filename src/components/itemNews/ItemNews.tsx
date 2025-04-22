@@ -24,10 +24,7 @@ interface TypeItemNews {
     is_block: boolean,
 }
 
-interface TypeUserPermission {
-  id:string,
-  name:string
-}
+
 
 const initialValue = {
   id: '',
@@ -43,16 +40,11 @@ const initialValue = {
   users_permissions_users : [],
 }
 
-const initialValueUser = {
-  id: '',
-  name: "",
-}
 
 
 const ItemNews: React.FC<TypeItemNews> = ({ is_block, listImg , img,name, introduction,slug,id,views,rating_news,description}) => {
   const listNews = useSelector((state : RootState) => state.news.news)
   // const [newsItem, setNewsItem] = useState<TypeDataNews>(initialValue)
-
   const user: TypeUser & { id: string } = {
       ...JSON.parse(localStorage.getItem("user") || "null"),
     };
@@ -62,6 +54,7 @@ const ItemNews: React.FC<TypeItemNews> = ({ is_block, listImg , img,name, introd
     const newsItem = listNews.find((item) => item.documentId === id) || initialValue
     const userPermission = newsItem.users_permissions_users.find((item) => item.id === user.id) 
     const idUser = newsItem.users_permissions_users.map(item => item.id) 
+    console.log(idUser)
     if(!userPermission) {
       const usersID = user.id
       idUser.push(usersID)
@@ -89,6 +82,7 @@ const ItemNews: React.FC<TypeItemNews> = ({ is_block, listImg , img,name, introd
           console.error("Error updating news views:", error);
         }
   };
+
   return (
     <>  
             <div 

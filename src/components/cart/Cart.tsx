@@ -1,4 +1,4 @@
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, ArrowLeft } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,6 +12,8 @@ import { fetchInventories, updateInventory } from "@/store/inventorySlice";
 import Select from "react-select";
 import { getProvinces, getDistricts, getWards } from "./service/addressService";
 import { selectTotalItems } from "@/store/cartSlice";
+import { loadStripe } from "@stripe/stripe-js";
+import axios from "axios";
 import { PaymentSuccess } from "./PaymentSuccess";
 import { PaymentFail } from "./PaymentFail";
 import { toast } from "react-toastify";
@@ -27,9 +29,6 @@ const CartPage: React.FC = () => {
     loading,
   } = useSelector((state: RootState) => state.cart);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const { loading: checkoutLoading } = useSelector(
-    (state: RootState) => state.checkout
-  );
   const searchParams = new URLSearchParams(location.search);
   const success = searchParams.get("success");
   const cancel = searchParams.get("cancel");
@@ -54,30 +53,26 @@ const CartPage: React.FC = () => {
   const [email, setEmail] = useState<string>(user.email || "");
   const [note, setNote] = useState<string>("");
   const [addressShipping] = useState<string>(user.address || "");
-
   // State lưu lỗi validate
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: string;
   }>({});
 
   useEffect(() => {
-    getProvinces().then((data: OptionType[]) => setProvinces(data));
+    getProvinces().then(setProvinces);
   }, []);
 
   useEffect(() => {
     if (selectedProvince) {
-      getDistricts(selectedProvince.value).then((data: OptionType[]) =>
-        setDistricts(data)
-      );
+      getDistricts(selectedProvince.value).then(setDistricts);
       setSelectedDistrict(null);
       setSelectedWard(null);
     }
   }, [selectedProvince]);
+
   useEffect(() => {
     if (selectedDistrict) {
-      getWards(selectedDistrict.value).then((data: OptionType[]) =>
-        setWards(data)
-      );
+      getWards(selectedDistrict.value).then(setWards);
       setSelectedWard(null);
     }
   }, [selectedDistrict]);
@@ -110,7 +105,6 @@ const CartPage: React.FC = () => {
     dispatch(removeCartItem(documentId));
   };
   const cart: CartItem[] = useSelector((state: RootState) => state.cart.items);
-
   const handleOrder = () => {
     if (!cart || cart.length === 0) {
       console.error("Cart is empty");
@@ -146,10 +140,7 @@ const CartPage: React.FC = () => {
           quantity: Math.max(inventoryItem.quantity - cartItem.quantity, 0),
         };
       })
-      .filter(
-        (item): item is { documentId: string; quantity: number } =>
-          item !== null
-      );
+      .filter((item): item is { documentId: string; quantity: number } => item !== null);
 
     if (updatedQuantities.length === 0) {
       return;
@@ -190,7 +181,7 @@ const CartPage: React.FC = () => {
     return errors;
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cart.length === 0) return;
 
     const errors = validateCheckout();
@@ -203,7 +194,6 @@ const CartPage: React.FC = () => {
     } else {
       setValidationErrors({});
     }
-
     dispatch(
       checkoutOrder({
         cart,
@@ -452,14 +442,7 @@ const CartPage: React.FC = () => {
                 handleOrder();
               }}
             >
-              {checkoutLoading ? (
-                <div className="flex items-center justify-center">
-                  <span className="relative z-10">Đang xử lý </span>
-                  <Loader2 className="h-4 w-4 animate-spin ml-2 relative z-10" />
-                </div>
-              ) : (
-                <span className="relative z-10">Đặt hàng</span>
-              )}
+              <span className="relative z-10">Đặt Hàng</span>
             </button>
           </div>
         </div>

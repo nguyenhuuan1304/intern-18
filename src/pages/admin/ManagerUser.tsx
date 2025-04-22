@@ -70,17 +70,6 @@ const ManagerUser = () => {
     const items = [
       {
         label: (
-          <a
-            type="button"
-            // onClick={() => navigate(`/course-manage-description/${selectedCourse}`)}
-          >
-            Edit
-          </a>
-        ),
-        key: '0'
-      },
-      {
-        label: (
           <a 
             type="button" 
             onClick={() => selectUser &&  handleDelete(selectUser)}
@@ -117,17 +106,19 @@ const ManagerUser = () => {
         ellipsis: {
           showTitle: true,
         },
-        
+        responsive: ['md'] 
       },
       {
         title: 'Phone',
         dataIndex: 'phone',
-        key: 'phone'
+        key: 'phone',
+        responsive: ['md'] 
       },
       {
         title: 'Email',
         key: 'email',
         dataIndex: 'email',
+        responsive: ['md'] 
       },
       {
         title: 'Status',
@@ -180,7 +171,7 @@ const ManagerUser = () => {
    }
 
     return (
-      <>
+      <div >
         <div id='modal' className='modal'>
             {/* <CreatePostNews element = {document.getElementById('modal')}/> */}
             <AddUser element = {document.getElementById('modal')} />
@@ -193,12 +184,11 @@ const ManagerUser = () => {
           }}
         >
           <Search
-            style={{ width: '300px' }}
+            style={{ width: '200px' ,marginRight: '10px'}}
             placeholder="Search by class name"
             enterButton="Search"
             size="middle"
             value={searchName}
-            // value={}
             onChange={e => setSearchName(e.target.value)}
             onSearch={() => getUserSearch()}
           />
@@ -206,6 +196,7 @@ const ManagerUser = () => {
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => handleShowUser()}
+            // style={{ width: '20%' }}
           >
             New User
           </Button>
@@ -217,7 +208,7 @@ const ManagerUser = () => {
           onChange: handlePageChange,
           showSizeChanger: false
         }}/>
-      </>
+      </div>
     );
 }
 

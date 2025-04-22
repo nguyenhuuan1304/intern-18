@@ -1,6 +1,13 @@
 import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Users, ShoppingBag, Newspaper, LogOut, Package } from "lucide-react";
+import {
+  Users,
+  ShoppingBag,
+  Newspaper,
+  LogOut,
+  Package,
+  Menu,
+} from "lucide-react";
 import { Outlet, useNavigate } from "react-router-dom";
 import ManagerUser from "./ManagerUser";
 import ManagerNews from "./ManagerNews";
@@ -14,6 +21,7 @@ interface TypeAdmin {
 
 const AdminDashboard = () => {
   const [page, setPage] = useState("User");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   const navbarAdmin: TypeAdmin[] = [
