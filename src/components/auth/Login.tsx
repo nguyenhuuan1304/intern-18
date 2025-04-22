@@ -62,7 +62,7 @@ const Login: React.FC = () => {
         password: values.password,
       };
       const res = await dispatch(loginUser(loginPayload)).unwrap();
-      console.log(res.user);
+      console.log("data", res.user);
       if (res.user) {
         toast.success("Đăng nhập thành công");
         navigate("/");
@@ -70,13 +70,14 @@ const Login: React.FC = () => {
           jwt: res.jwt,
           username: res.user.username,
           email: res.user.email,
-          id : res.user.id,
+          id: res.user.id,
           phone: res.user.phone,
           birthday: res.user.birthday,
           address: res.user.address,
           firstName: res.user.firstName,
           documentId: res.user.documentId,
         };
+        console.log("userData", userData);
         localStorage.setItem("user", JSON.stringify(userData));
         if (res.user.username === "admin") {
           navigate("/admin");

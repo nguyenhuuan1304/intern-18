@@ -15,7 +15,6 @@ import { AppDispatch, RootState } from "@/store/store";
 import { removeCartItem } from "@/store/cartSlice";
 import axios from "axios";
 import { fetchOrderDetail } from "@/store/order.slice";
- 
 export const PaymentSuccess: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -30,8 +29,8 @@ export const PaymentSuccess: React.FC = () => {
     note?: string;
     total_price: number;
     emailSent?: boolean;
+    }
   }
- 
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   useEffect(() => {
@@ -40,7 +39,6 @@ export const PaymentSuccess: React.FC = () => {
     const orderId = params.get("order_id");
     const updateOrderStatus = async () => {
       if (!orderId) return;
- 
       try {
         const res = await axios.get(
           `http://localhost:1337/api/orders?filters[orderId][$eq]=${orderId}`
@@ -50,7 +48,6 @@ export const PaymentSuccess: React.FC = () => {
           console.error("❌ Không tìm thấy đơn hàng với orderId:", orderId);
           return;
         }
- 
         const orderToUpdate = matchingOrders[0];
         setOrderData(orderToUpdate);
         const realId = orderToUpdate.documentId;
@@ -59,15 +56,12 @@ export const PaymentSuccess: React.FC = () => {
             status_order: "Đã thanh toán",
           },
         });
- 
         console.log("✅ Cập nhật trạng thái đơn hàng thành công");
       } catch (error) {
         console.error("❌ Lỗi khi cập nhật trạng thái đơn hàng:", error);
       }
     };
- 
     updateOrderStatus();
- 
     const clearCartOnServer = async () => {
       try {
         await Promise.all(
@@ -77,20 +71,43 @@ export const PaymentSuccess: React.FC = () => {
         console.error("Error clearing cart on server:", error);
       }
     };
- 
     clearCartOnServer();
+    }, [location.search]);
+    useEffect(() => {
+        const sendEmailOrder = async () => {
+        try {
+        if (!orderData) return;
+        // Gọi dispatch để fetch orderItems nếu chưa có
+        const orderItems = await dispatch(
+        fetchOrderDetail(orderData.orderId)
+        ).unwrap();
+        console.log("order_items", orderItems);
+        const res = await axios.post(
+        `http://localhost:1337/api/order/sendEmailOrder`,
+        {
+        order_id: orderData.orderId,
+        type: "success",
+        order_items: orderItems,
+        }
+        );
+        setEmailSent(true);
+        } catch (error) {
+        console.log("Lỗi khi gửi email :", error);
+        }
+    };
+    if (orderData && !emailSent) {
+    sendEmailOrder();
+    }
+    }, [orderData]);
   }, [location.search]);
- 
   useEffect(() => {
     const sendEmailOrder = async () => {
       try {
         if (!orderData) return;
- 
         // Gọi dispatch để fetch orderItems nếu chưa có
         const orderItems = await dispatch(
           fetchOrderDetail(orderData.orderId)
         ).unwrap();
- 
         console.log("order_items", orderItems);
         const res = await axios.post(
           `http://localhost:1337/api/order/sendEmailOrder`,
@@ -105,7 +122,6 @@ export const PaymentSuccess: React.FC = () => {
         console.log("Lỗi khi gửi email :", error);
       }
     };
- 
     if (orderData && !emailSent) {
       sendEmailOrder();
     }
@@ -118,14 +134,12 @@ export const PaymentSuccess: React.FC = () => {
             <Check className="h-8 w-8 text-green-500" />
           </div>
         </div>
- 
         <CardHeader className="pb-2 text-center">
           <CardTitle className="text-2xl font-bold">
             Thanh toán thành công!
           </CardTitle>
           <CardDescription>Cảm ơn bạn đã đặt hàng</CardDescription>
         </CardHeader>
- 
         <CardContent className="space-y-4">
           <div className="rounded-lg bg-green-50 p-3 text-sm text-green-600">
             <p className="flex items-center gap-2">
@@ -133,7 +147,6 @@ export const PaymentSuccess: React.FC = () => {
               Biên lai thanh toán đã được gửi đến email của bạn
             </p>
           </div>
- 
           {orderData && (
             <div className="space-y-2 text-sm text-gray-700">
               <p>
@@ -142,7 +155,6 @@ export const PaymentSuccess: React.FC = () => {
               <p>
                 <strong>Email:</strong> {orderData.email}
               </p>
- 
               <p>
                 <strong>Trạng thái:</strong> {orderData.status_order}
               </p>
@@ -159,12 +171,12 @@ export const PaymentSuccess: React.FC = () => {
               )}
               <p>
                 <strong>Tổng tiền:</strong>{" "}
-                {orderData.total_price.toLocaleString()} VND
+
+                 {orderData?.total_price?.toLocaleString()} VND
               </p>
             </div>
           )}
         </CardContent>
- 
         <CardFooter>
           <Button
             variant="ghost"

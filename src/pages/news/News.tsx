@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Header, { User } from '@/components/header/Header'
+import Header from '@/components/header/Header'
 import Title from '@/components/product/Title'
 import ItemNews from '@/components/itemNews/ItemNews'
 import ContentSideBarNew from '@/components/contentSideBarNew/ContentSideBarNew'
@@ -9,11 +9,12 @@ import { useSelector } from 'react-redux'
 import { useAppDispatch,RootState } from '@/store/store' 
 import { getPostListNews } from '@/store/news.slice'
 import FeatureSection from '@/components/FeatureSection'
-import { CardFooter } from '@/components/ui/card'
 import Footer from '@/components/layout/Footer'
+
 
 const News = () => {
     const listNews  = useSelector((state: RootState) => state.news.news) ?? [];
+
     const dispatch = useAppDispatch()
     useEffect(() => {
         const promise = dispatch(getPostListNews())
@@ -21,7 +22,7 @@ const News = () => {
           promise.abort()
         }
     },[dispatch])
-
+    
     return (
     <div className=''>
         <Header/>
@@ -45,7 +46,7 @@ const News = () => {
         } */}
         <div className='max-w-[1400px] mx-[auto] flex mx-[6%] layout max-lg:flex-wrap' >
             <div className=' my-[4%] grid h-[100%] grid-cols-3 max-lg:grid-cols-2 max-sm:grid-cols-1 max-lg:basis-[100%] basis-[80%] gap-x-[10px] gap-y-[20px] '>
-            {listNews.map((product,id) => (
+            {listNews.filter(item => item.is_block !== false).map((product,id) => (
                  <motion.div
                  key={id}
                  className="block w-[100%] h-[100%]  bg-white shadow-md rounded-lg overflow-visible p-2  space-x-5 group hover:shadow-lg transition-shadow duration-300"
@@ -56,15 +57,20 @@ const News = () => {
              >
                 <div>
                     <ItemNews
-                        title={product?.name}
+                        name={product?.name}
                         slug = {product?.slug}
                         id = {product?.documentId}
+                        views = {product?.views}
                         img= { 
                             Array.isArray(product?.img) && typeof product?.img[0] === 'object' 
                             ? `http://localhost:1337${product?.img[0].url}` 
                             : `${null}`
                         }
-                        introduction={product.introduction}
+                        introduction={product?.introduction}
+                        rating_news = {product?.rating_news}
+                        description = {product?.description}
+                        listImg = {product?.img}
+                        is_block = {product?.is_block}
                     />
                 </div>
              </motion.div>
@@ -74,7 +80,7 @@ const News = () => {
             </div>
             <div className='basis-[20%] bg-white text-[#333] max-lg:basis-[100%]'>
                 <ContentSideBarNew title='Tin Tức Mới'/>
-                <ContentSideBarNew title='Tin Tức Nổi Bậc'/>
+                <ContentSideBarNew title='Tin Tức Nổi Bật'/>
             </div>
         </div>
         <div className="mt-3">

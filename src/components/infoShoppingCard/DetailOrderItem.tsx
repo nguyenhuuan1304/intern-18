@@ -124,7 +124,7 @@ const DetailOrderItem: React.FC<DetailOrderItemProps> = ({
         {/* Footer */}
         <div className="mt-4 border-t pt-3 flex justify-end">
           <p className="text-xl font-bold text-gray-800">
-            Tổng: {orderSelected.total_price.toLocaleString()}đ
+            Tổng: {orderSelected?.total_price?.toLocaleString()}đ
           </p>
         </div>
       </DialogContent>
