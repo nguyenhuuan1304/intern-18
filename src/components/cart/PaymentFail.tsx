@@ -18,7 +18,7 @@ import {
 } from "@/store/order.slice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
-
+ 
 export const PaymentFail: React.FC = () => {
   const navigate = useNavigate();
   interface OrderData {
@@ -31,14 +31,14 @@ export const PaymentFail: React.FC = () => {
     total_price: number;
     emailSent?: boolean;
   }
-
+ 
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const dispatch = useDispatch<AppDispatch>();
-
+ 
   useEffect(() => {
     const orderId = new URLSearchParams(location.search).get("order_id");
     if (!orderId) return;
-
+ 
     const handleOrderUpdate = async () => {
       try {
         const actionResult = await dispatch(fetchOrderByOrderId(orderId));
@@ -56,25 +56,25 @@ export const PaymentFail: React.FC = () => {
             status_order: order_status,
           })
         );
-
+ 
         console.log("✅ Cập nhật trạng thái đơn hàng thành công");
       } catch (error) {
         console.error("❌ Lỗi khi cập nhật trạng thái đơn hàng:", error);
       }
     };
-
+ 
     handleOrderUpdate();
   }, [location.search, dispatch]);
-
+ 
   useEffect(() => {
     const sendEmailOrderAsync = async () => {
       try {
         if (!orderData) return;
-
+ 
         const orderItems = await dispatch(
           fetchOrderDetail(orderData.orderId)
         ).unwrap();
-
+ 
         await dispatch(
           sendEmailOrder({
             orderId: orderData.orderId,
@@ -86,12 +86,12 @@ export const PaymentFail: React.FC = () => {
         console.log("Lỗi khi gửi email :", error);
       }
     };
-
+ 
     if (orderData) {
       sendEmailOrderAsync();
     }
   }, [orderData]);
-
+ 
   return (
     <div className="flex min-h-[500px] w-full items-center justify-center p-4">
       <Card className="w-full max-w-md overflow-hidden border-none shadow-lg">
@@ -108,7 +108,7 @@ export const PaymentFail: React.FC = () => {
             Đã xảy ra lỗi trong quá trình thanh toán
           </CardDescription>
         </CardHeader>
-
+ 
         <CardContent className="space-y-4">
           <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
             <p className="flex items-center gap-2">
@@ -116,7 +116,7 @@ export const PaymentFail: React.FC = () => {
               Thanh toán không thành công. Vui lòng thử lại.
             </p>
           </div>
-
+ 
           {orderData && (
             <div className="space-y-2 text-sm text-gray-700">
               <p>
@@ -125,7 +125,7 @@ export const PaymentFail: React.FC = () => {
               <p>
                 <strong>Email:</strong> {orderData.email}
               </p>
-
+ 
               <p>
                 <strong>Trạng thái:</strong> Thanh toán thất bại
               </p>
@@ -160,3 +160,4 @@ export const PaymentFail: React.FC = () => {
     </div>
   );
 };
+ 

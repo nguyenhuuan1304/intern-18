@@ -21,7 +21,7 @@ import {
 } from "@/store/order.slice";
 import { useAppDispatch } from "@/hooks/useRedux";
 import axios from "axios";
-
+ 
 export const PaymentSuccess: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -37,18 +37,18 @@ export const PaymentSuccess: React.FC = () => {
     total_price: number;
     emailSent?: boolean;
   }
-
+ 
   const [orderData, setOrderData] = useState<OrderData | null>(null);
-
+ 
   useEffect(() => {
     const orderId = new URLSearchParams(location.search).get("order_id");
     if (!orderId) return;
-
+ 
     const handleOrderUpdate = async () => {
       try {
         const actionResult = await dispatch(fetchOrderByOrderId(orderId));
         const fetchedOrders = actionResult.payload;
-
+ 
         if (!fetchedOrders || fetchedOrders.length === 0) {
           console.error("❌ Không tìm thấy đơn hàng với orderId:", orderId);
           return;
@@ -67,10 +67,10 @@ export const PaymentSuccess: React.FC = () => {
         console.error("❌ Lỗi khi cập nhật trạng thái đơn hàng:", error);
       }
     };
-
+ 
     handleOrderUpdate();
   }, [location.search, dispatch]);
-
+ 
   useEffect(() => {
     const clearCartOnServer = async () => {
       try {
@@ -81,19 +81,19 @@ export const PaymentSuccess: React.FC = () => {
         console.error("❌ Lỗi khi xóa giỏ hàng trên server:", error);
       }
     };
-
+ 
     clearCartOnServer();
   }, [cartItems]);
-
+ 
   useEffect(() => {
     const sendEmailOrderAsync = async () => {
       try {
         if (!orderData) return;
-
+ 
         const orderItems = await dispatch(
           fetchOrderDetail(orderData.orderId)
         ).unwrap();
-
+ 
         await dispatch(
           sendEmailOrder({
             orderId: orderData.orderId,
@@ -105,16 +105,16 @@ export const PaymentSuccess: React.FC = () => {
         console.log("Lỗi khi gửi email :", error);
       }
     };
-
+ 
     if (orderData) {
       sendEmailOrderAsync();
     }
   }, [orderData]);
-
+ 
   useEffect(() => {
     const orderId = new URLSearchParams(location.search).get("order_id");
     if (!orderId) return;
-
+ 
     const createShipping = async () => {
       try {
         const payload = {
@@ -124,7 +124,7 @@ export const PaymentSuccess: React.FC = () => {
             shipping_date: new Date().toISOString(),
           },
         };
-
+ 
         const response = await axios.post(
           "http://localhost:1337/api/shippings",
           payload
@@ -134,7 +134,7 @@ export const PaymentSuccess: React.FC = () => {
         console.error("❌ Lỗi khi tạo vận chuyển:", error);
       }
     };
-
+ 
     createShipping();
   }, [location.search]);
   return (
@@ -145,14 +145,14 @@ export const PaymentSuccess: React.FC = () => {
             <Check className="h-8 w-8 text-green-500" />
           </div>
         </div>
-
+ 
         <CardHeader className="pb-2 text-center">
           <CardTitle className="text-2xl font-bold">
             Thanh toán thành công!
           </CardTitle>
           <CardDescription>Cảm ơn bạn đã đặt hàng</CardDescription>
         </CardHeader>
-
+ 
         <CardContent className="space-y-4">
           <div className="rounded-lg bg-green-50 p-3 text-sm text-green-600">
             <p className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export const PaymentSuccess: React.FC = () => {
               Biên lai thanh toán đã được gửi đến email của bạn
             </p>
           </div>
-
+ 
           {orderData && (
             <div className="space-y-2 text-sm text-gray-700">
               <p>
@@ -169,7 +169,7 @@ export const PaymentSuccess: React.FC = () => {
               <p>
                 <strong>Email:</strong> {orderData.email}
               </p>
-
+ 
               <p>
                 <strong>Trạng thái:</strong> Đã thanh toán
               </p>
@@ -191,7 +191,7 @@ export const PaymentSuccess: React.FC = () => {
             </div>
           )}
         </CardContent>
-
+ 
         <CardFooter>
           <Button
             variant="ghost"

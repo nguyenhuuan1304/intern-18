@@ -78,7 +78,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
         img: arrImg, 
       }));
       setPreviewUrls((pre) => ([
-        ...pre,
+        // ...pre,
         ...url
       ]));
       setImg(listImg)
@@ -90,7 +90,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
       setCurrenNews(post);
     }
   }, [post]);
-
+  console.log(previewUrls)
 
   const handleEditorChange = (content: string) => {
     const jsonDescription = convertTinyMCEToStrapiJSON(content);
@@ -189,6 +189,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
               })).unwrap()
               .then(() => {
                 openNotificationUpdateNews('success')
+                setPreviewUrls([])
               })
           }
 
@@ -288,7 +289,7 @@ const CreatePostNews: React.FC<TypeElement> = ({element , checkId}) => {
                 {previewUrls.map((url, index) => (
                 <div key={index} className="relative w-full h-24 group hover:cursor-pointer">
                     <img
-                    src={editingPost ? `http://localhost:1337${url}` : url}
+                    src={url.startsWith("blob:") ? url : `http://localhost:1337${url}`}
                     alt={`preview-${index}`}
                     className="object-cover w-full h-full rounded-lg border"
                     />
