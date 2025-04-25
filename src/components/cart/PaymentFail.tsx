@@ -14,10 +14,8 @@ import axios from "axios";
 import { fetchOrderDetail } from "@/store/order.slice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
-<<<<<<< HEAD
-=======
 
->>>>>>> 9282948b8da8e5fd96deddcf794545b49aa329cf
+
 export const PaymentFail: React.FC = () => {
   const navigate = useNavigate();
   interface OrderData {
@@ -33,10 +31,6 @@ export const PaymentFail: React.FC = () => {
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-<<<<<<< HEAD
-=======
-
->>>>>>> 9282948b8da8e5fd96deddcf794545b49aa329cf
   useEffect(() => {
     // Lấy order_id từ query string
     const params = new URLSearchParams(location.search);
@@ -67,7 +61,6 @@ export const PaymentFail: React.FC = () => {
     };
     // Gọi hàm cập nhật trạng thái
     updateOrderStatus();
-<<<<<<< HEAD
     }, [location.search]);
     useEffect(() => {
         const sendEmailOrder = async () => {
@@ -95,39 +88,7 @@ export const PaymentFail: React.FC = () => {
         sendEmailOrder();
         }
     }, [orderData]);
-=======
-  }, [location.search]);
 
-  useEffect(() => {
-    const sendEmailOrder = async () => {
-      try {
-        if (!orderData) return;
-
-        // Gọi dispatch để fetch orderItems nếu chưa có
-        const orderItems = await dispatch(
-          fetchOrderDetail(orderData.orderId)
-        ).unwrap();
-
-        console.log("order_items", orderItems);
-        const res = await axios.post(
-          `http://localhost:1337/api/order/sendEmailOrder`,
-          {
-            order_id: orderData.orderId,
-            type: "fail",
-            order_items: orderItems,
-          }
-        );
-        setEmailSent(true);
-      } catch (error) {
-        console.log("Lỗi khi gửi email :", error);
-      }
-    };
-
-    if (orderData && !emailSent) {
-      sendEmailOrder();
-    }
-  }, [orderData]);
->>>>>>> 9282948b8da8e5fd96deddcf794545b49aa329cf
   return (
     <div className="flex min-h-[500px] w-full items-center justify-center p-4">
       <Card className="w-full max-w-md overflow-hidden border-none shadow-lg">

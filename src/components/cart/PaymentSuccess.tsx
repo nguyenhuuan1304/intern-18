@@ -15,10 +15,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { removeCartItem } from "@/store/cartSlice";
 import axios from "axios";
 import { fetchOrderDetail } from "@/store/order.slice";
-<<<<<<< HEAD
-=======
 
->>>>>>> 9282948b8da8e5fd96deddcf794545b49aa329cf
 export const PaymentSuccess: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -33,12 +30,8 @@ export const PaymentSuccess: React.FC = () => {
     note?: string;
     total_price: number;
     emailSent?: boolean;
-<<<<<<< HEAD
     }
-=======
-  }
 
->>>>>>> 9282948b8da8e5fd96deddcf794545b49aa329cf
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   useEffect(() => {
@@ -80,7 +73,6 @@ export const PaymentSuccess: React.FC = () => {
       }
     };
     clearCartOnServer();
-<<<<<<< HEAD
     }, [location.search]);
     useEffect(() => {
         const sendEmailOrder = async () => {
@@ -108,39 +100,7 @@ export const PaymentSuccess: React.FC = () => {
     sendEmailOrder();
     }
     }, [orderData]);
-=======
-  }, [location.search]);
 
-  useEffect(() => {
-    const sendEmailOrder = async () => {
-      try {
-        if (!orderData) return;
-
-        // Gọi dispatch để fetch orderItems nếu chưa có
-        const orderItems = await dispatch(
-          fetchOrderDetail(orderData.orderId)
-        ).unwrap();
-
-        console.log("order_items", orderItems);
-        const res = await axios.post(
-          `http://localhost:1337/api/order/sendEmailOrder`,
-          {
-            order_id: orderData.orderId,
-            type: "success",
-            order_items: orderItems,
-          }
-        );
-        setEmailSent(true);
-      } catch (error) {
-        console.log("Lỗi khi gửi email :", error);
-      }
-    };
-
-    if (orderData && !emailSent) {
-      sendEmailOrder();
-    }
-  }, [orderData]);
->>>>>>> 9282948b8da8e5fd96deddcf794545b49aa329cf
   return (
     <div className="flex min-h-[500px] w-full items-center justify-center p-4">
       <Card className="w-full max-w-md overflow-hidden border-none shadow-lg">

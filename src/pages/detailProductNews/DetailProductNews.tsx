@@ -213,6 +213,7 @@ const DetailProductNews : React.FC<DetailProductNewsProps> = ({ category }) => {
       console.error(error)
     }
   }
+  
   const handleViewMore = () => {
     if(viewCount < listRating.length) {
       setViewCount(pre => pre + 3)
@@ -228,7 +229,7 @@ console.log(data)
       <Header/>
       <ServiceMenu/>
       <div className=' 2xl:mx-[auto] h-[38px] bg-[#f5f5fb] w-full flex items-center  '>
-        <div className='max-w-[1400px] ml-[7.5%] text-[14px] text-[#2e2e2e] flex flex-wrap items-center'>
+        <div className='max-w-[1400px] max-2xl:ml-[7.5%] text-[14px] text-[#2e2e2e] block w-[100%] m-auto  '>
           <a href="">
             <span>Trang chủ</span>
           </a>

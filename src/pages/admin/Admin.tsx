@@ -75,7 +75,7 @@ const AdminDashboard = () => {
           {page === "User" && <ManagerUser />}
           {page === "Manager Product" && <ManagerProduct />}
           {page === "Manager News" && <ManagerNews />}
-        </div>
+        </div> 
       </div>
     </div>
   );
