@@ -159,15 +159,24 @@ const ReviewSection: React.FC = () => {
                             ))}
 
                             {/* Nút "Xem thêm" & "Thu gọn" */}
-                            {filteredRatings.length > visibleCount ? (
-                                <button onClick={() => setVisibleCount((prev) => prev + 3)} className="cursor-pointer text-blue-500 mt-2">
-                                    Xem thêm
-                                </button>
-                            ) : (
-                                <button onClick={() => setVisibleCount(3)} className="cursor-pointer text-red-500 mt-2">
-                                    Thu gọn
-                                </button>
+                            {filteredRatings.length > 3 && (
+                                filteredRatings.length > visibleCount ? (
+                                    <button
+                                        onClick={() => setVisibleCount((prev) => prev + 3)}
+                                        className="cursor-pointer text-blue-500 mt-2"
+                                    >
+                                        Xem thêm
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setVisibleCount(3)}
+                                        className="cursor-pointer text-red-500 mt-2"
+                                    >
+                                        Thu gọn
+                                    </button>
+                                )
                             )}
+
                         </>
                     ) : (
                         <p className="text-gray-600 text-center mt-4">Chưa có đánh giá nào.</p>

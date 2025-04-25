@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import DetailOrderItem from "./DetailOrderItem";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
 import { fetchOrdersByEmail } from "@/store/order.slice";
+import { useNavigate } from "react-router";
 
 export interface Order {
   id: string;
@@ -25,9 +25,8 @@ const InfoShoppingCard: React.FC = () => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
-  const [open, setOpen] = useState<boolean>(false);
-  const [orderSelected, setOrderSelected] = useState<Order | null>(null);
   const dispatch = useAppDispatch();
+  const naviage = useNavigate();
   const { orders } = useAppSelector((state) => state.order);
   const email = user?.email || "";
 
@@ -36,10 +35,6 @@ const InfoShoppingCard: React.FC = () => {
       dispatch(fetchOrdersByEmail(email));
     }
   }, [email, dispatch]);
-  const handleViewDetailOrder = (order: Order) => {
-    setOrderSelected(order);
-    setOpen(true);
-  };
 
   return (
     <div className="sm:overflow-auto h-full sm:h-60 relative">
@@ -66,7 +61,11 @@ const InfoShoppingCard: React.FC = () => {
               <tr
                 key={order.id}
                 className="hover:bg-gray-50 transition cursor-pointer"
-                onClick={() => handleViewDetailOrder(order)}
+                onClick={() =>
+                  naviage(`/order/${order.orderId}`, {
+                    state: { order },
+                  })
+                }
               >
                 <td className="px-4 py-2 whitespace-nowrap">{order.orderId}</td>
                 <td className="px-4 py-2 whitespace-nowrap">
@@ -89,14 +88,6 @@ const InfoShoppingCard: React.FC = () => {
           )}
         </tbody>
       </table>
-
-      {orderSelected && (
-        <DetailOrderItem
-          open={open}
-          handleClose={setOpen}
-          orderSelected={orderSelected}
-        />
-      )}
     </div>
   );
 };
